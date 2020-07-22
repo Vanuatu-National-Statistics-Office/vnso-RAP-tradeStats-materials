@@ -1,28 +1,83 @@
 ---
-title: "Untitled"
-output: html_document
+title: "Trade Statistics Report"
+author: "Vanuatu National Statistics Office"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: '2'
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r load required libraries, include=FALSE}
+library(knitr) # Nice tables
+library(kableExtra) # Extra nice tables
+library(dplyr)
+library(xlsx)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r functions, include=FALSE}
+prettyTable <- function(table){
+  
+  # Use the kable function to create a nicer formatted table
+  kable(table) %>%
+  
+    # Set the format
+    kable_styling(bootstrap_options="striped", # Set the colour of rows
+                  full_width=FALSE, # Make the table not stretch to fit the page
+                  position="left") %>% # Position the table on the left
+  
+    # Make the table scrollable
+    scroll_box(height = "400px")
+}
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Setting Working Directory
+
+```{r set working directory}
+# Note the name of our working directory
+#workingDirectory <- file.path("C:\RTraining\Repositories\vnso-RAP-tradeStats-materials")
+
+# Set the working directory
+#setwd(workingDirectory)
+```
+
+## Importing data files
+
+```{r}
+
+tradestats <- read.csv(file.path("..", "data", "secure", "Trade_January_2020.csv"), header=TRUE)
+
+```
+
+
+## Trade Balance
+```{r Trade Balance}
+tbalance <- tradestats %>%
+  #group_by(Type) %>%
+  summarise(
+            "Export" = sum(Stat..Value[CP4==1000]),
+            "Re-Export" = sum(Stat..Value[CP4==3071]),
+            "Total Export" = sum(Stat..Value[CP4==1000])+sum(Stat..Value[CP4==3071]),
+            "Imports CIF" = sum(Stat..Value[CP4==4000]) + sum(Stat..Value[CP4==4071])+ sum(Stat..Value[CP4==7100]),
+            "Trade Balance" = (sum(Stat..Value[CP4==1000])+sum(Stat..Value[CP4==3071])) - (sum(Stat..Value[CP4==4000]) + sum(Stat..Value[CP4==4071])+ sum(Stat..Value[CP4==7100])
+            ))
+
+prettyTable(tbalance)
+
+```
+
+
+
+
+
+
