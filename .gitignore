@@ -39,5 +39,6 @@ vignettes/*.pdf
 .Renviron
 
 
-# Data Files used in this repository
-data/secure/*
+# Set up ignore for data folder
+data/secure/* # Ignore all files in secure folder
+!data/secure/README.md # Except the README
