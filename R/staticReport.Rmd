@@ -25,37 +25,22 @@ library(xlsx)
 
 ```
 
-```{r functions, include=FALSE}
-prettyTable <- function(table){
-  
-  # Use the kable function to create a nicer formatted table
-  kable(table) %>%
-  
-    # Set the format
-    kable_styling(bootstrap_options="striped", # Set the colour of rows
-                  full_width=FALSE, # Make the table not stretch to fit the page
-                  position="left") %>% # Position the table on the left
-  
-    # Make the table scrollable
-    scroll_box(height = "400px")
-}
-```
-
-## Setting Working Directory
-
-```{r set working directory}
-# Note the name of our working directory
-#workingDirectory <- file.path("C:\RTraining\Repositories\vnso-RAP-tradeStats-materials")
-
-# Set the working directory
-#setwd(workingDirectory)
-```
-
 ## Importing data files
 
 ```{r}
 
-tradestats <- read.csv(file.path("..", "data", "secure", "Trade_January_2020.csv"), header=TRUE)
+# Read in the raw trade data
+tradestats <- read.csv(file.path("..", "data", "secure", "Trade_January_2020.csv"), header=TRUE, stringsAsFactors=FALSE)
+
+# Remove the repeated header row from the trade statistics data
+tradestats <- tradestats[tradestats$Office != "Office", ]
+
+# Convert the CP4 to a factor
+tradestats$CP4 <- as.factor(tradestats$CP4)
+
+# Convert the Stat. Value column to a number
+# Used gsub to remove commas before changing to numeric
+tradestats$Stat..Value <- as.numeric(gsub(pattern=",", replacement="", tradestats$Stat..Value))
 
 ```
 
@@ -72,7 +57,7 @@ tbalance <- tradestats %>%
             "Trade Balance" = (sum(Stat..Value[CP4==1000])+sum(Stat..Value[CP4==3071])) - (sum(Stat..Value[CP4==4000]) + sum(Stat..Value[CP4==4071])+ sum(Stat..Value[CP4==7100])
             ))
 
-prettyTable(tbalance)
+print(tbalance)
 
 ```
 
