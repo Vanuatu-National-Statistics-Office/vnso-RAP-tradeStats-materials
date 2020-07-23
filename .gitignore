@@ -40,5 +40,5 @@ vignettes/*.pdf
 
 
 # Set up ignore for data folder
-data/secure/* # Ignore all files in secure folder
-!data/secure/README.md # Except the README
+data/secure/* 
+!data/secure/README.md 
