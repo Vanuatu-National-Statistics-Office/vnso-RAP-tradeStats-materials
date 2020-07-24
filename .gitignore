@@ -48,3 +48,6 @@ archive/*
 # Ignore any Rmarkdown html/pdf reports
 *.html
 *.pdf
+
+# Ignore files in the outputs folder for the moment
+outputs/*
