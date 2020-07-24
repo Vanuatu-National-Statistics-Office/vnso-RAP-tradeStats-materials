@@ -17,12 +17,16 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r load required libraries, include=FALSE}
+```{r preparation, include=FALSE}
+
+# Load the required libraries
 library(knitr) # Nice tables
 library(kableExtra) # Extra nice tables
 library(dplyr)
-library(xlsx)
+library(openxlsx)
 
+# Load the general R functions
+source("functions.R")
 ```
 
 ## Importing data files
@@ -57,7 +61,7 @@ tbalance <- tradestats %>%
             "Trade Balance" = (sum(Stat..Value[CP4==1000])+sum(Stat..Value[CP4==3071])) - (sum(Stat..Value[CP4==4000]) + sum(Stat..Value[CP4==4071])+ sum(Stat..Value[CP4==7100])
             ))
 
-print(tbalance)
+prettyTable(tbalance)
 
 ```
 
