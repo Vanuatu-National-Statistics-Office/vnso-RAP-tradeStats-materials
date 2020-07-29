@@ -22,8 +22,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # Load the required libraries
 library(knitr) # Nice tables
 library(kableExtra) # Extra nice tables
-library(dplyr)
-library(openxlsx)
+library(dplyr) # Manipulating data
+library(openxlsx) # Reading and editing excel formatted files
 
 # Load the general R functions
 source("functions.R")
@@ -34,7 +34,9 @@ source("functions.R")
 ```{r}
 
 # Read in the raw trade data
-tradestats <- read.csv(file.path("..", "data", "secure", "Trade_January_2020.csv"), header=TRUE, stringsAsFactors=FALSE)
+# Note that spaces in column names have been automatically replaced with "."s
+tradeStatsFile <- file.path("..", "data", "secure", "OPN_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
+tradestats <- read.xlsx(tradeStatsFile, sheet=1)
 
 # Remove the repeated header row from the trade statistics data
 tradestats <- tradestats[tradestats$Office != "Office", ]
