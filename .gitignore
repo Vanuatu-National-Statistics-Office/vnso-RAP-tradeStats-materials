@@ -37,3 +37,17 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Set up ignore for data folder
+data/secure/* 
+!data/secure/README.md 
+
+# Ignore all data in archive
+archive/*
+
+# Ignore any Rmarkdown html/pdf reports
+*.html
+*.pdf
+
+# Ignore files in the outputs folder for the moment
+outputs/*
