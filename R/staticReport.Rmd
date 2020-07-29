@@ -31,28 +31,26 @@ source("functions.R")
 
 ## Importing data files
 
-```{r}
+```{r import and process data}
 
 # Read in the raw trade data
 # Note that spaces in column names have been automatically replaced with "."s
 tradeStatsFile <- file.path("..", "data", "secure", "OPN_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
-tradeStats <- read.xlsx(tradeStatsFile, sheet=1)
+tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 
 # Remove the repeated header row from the trade statistics data
-tradeStats <- tradestats[tradeStats$Office != "Office", ]
+tradeStats <- tradeStats[tradeStats$Office != "Office", ]
 
 # Convert the CP4 to a factor
 tradeStats$CP4 <- as.factor(tradeStats$CP4)
 
-# Convert the Stat. Value column to a number
-# Used gsub to remove commas before changing to numeric
-tradeStats$Stat..Value <- as.numeric(gsub(pattern=",", replacement="", tradeStats$Stat..Value))
-
+# Convert the statistical value to numeric
+tradeStats$Stat..Value <- as.numeric(tradeStats$Stat..Value)
 ```
 
 
 ## Trade Balance
-```{r Trade Balance}
+```{r calculate balance of trade statistics}
 tradeBalance <- tradeStats %>%
   #group_by(Type) %>%
   summarise(
