@@ -65,6 +65,20 @@ prettyTable(tradeBalance)
 
 ```
 
+```{r calculate balance of trade statistics with base R, eval=FALSE, echo=FALSE}
+
+# Calculate the balance of trade statistics - note that this remove a bit of redundancy
+exports <- sum(tradeStats[tradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE) # Added na.rm in case NAs introduced at later date
+reExports <- sum(tradeStats[tradeStats$CP4 == 3071, "Stat..Value"], na.rm=TRUE)
+totalExports <- exports + reExports
+imports <- sum(tradeStats[tradeStats$CP4 %in% c(4000, 4071, 7100), "Stat..Value"], na.rm=TRUE)
+balance <- totalExports - imports
+
+# Insert values into table
+tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Export"=totalExports, "Imports CIF"=imports, "Trade Balance"=balance)
+
+prettyTable(tradeBalance)
+```
 
 
 
