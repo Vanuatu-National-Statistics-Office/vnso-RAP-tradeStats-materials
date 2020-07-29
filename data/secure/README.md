@@ -15,4 +15,4 @@
 
 Datasets currently present in secure folder:
 
-- `OPN_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx` - processed version of January's monthly statistics data. Additional sheets provide reference tables to intepret custom codes.
+- `SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx` - processed version of January's monthly statistics data. Additional sheets provide reference tables to intepret custom codes.
