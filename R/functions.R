@@ -37,7 +37,7 @@ prettyTable <- function(table, full_width=FALSE, position="left", bootstrap_opti
 extractHistoricBalanceOfTradeStatistics <- function(fileName){
   
   # Extract the full historic table
-  historic <- openxlsx::read.xlsx(fileName, sheet="1_BOT", skipEmptyRows=TRUE, startRow=5)
+  historic <- openxlsx::read.xlsx(fileName, sheet="1_BOT", skipEmptyRows=FALSE, startRow=5)
   
   # Identify when each sub-table starts
   annualStart <- 1
@@ -47,10 +47,14 @@ extractHistoricBalanceOfTradeStatistics <- function(fileName){
   # Extract the Annual statistics
   annually <- historic[1:(monthlyStart-1), ]
   colnames(annually) <- c("Year", "blank", "Export", "Re-Export", "Total Export", "Imports CIF", "Trade Balance")
+  annually$`Total Export` <- as.numeric(annually$`Total Export`)
   
   # Extract the monthly statistics
   monthly <- historic[(monthlyStart+1):end, ]
   colnames(monthly) <- c("Year", "Month", "Export", "Re-Export", "Total Export", "Imports CIF", "Trade Balance")
+  monthly$`Total Export` <- as.numeric(monthly$`Total Export`)
+  
+  
   
   # Extract the notes from the table
   notes <- historic[(end+1):nrow(historic), c(1,2)]
@@ -81,11 +85,11 @@ updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanc
     januaryRows <- which(subTables$Monthly == "January")
     lastYearsRows <- januaryRows[length(januaryRows)]:nrow(subTables$Monthly)
     currentYearsTotals <- data.frame("Year"=year, "blank"=NA,
-                                     "Export"=sum(subTables$Monthly$Export[lastYearsRows]) + newTradeBalanceStatistics$Export,
-                                     "Re-Export"=sum(subTables$Monthly$`Re-Export`[lastYearsRows]) + newTradeBalanceStatistics$`Re-Export`,
-                                     "Total Export"=sum(subTables$Monthly$`Total Export`[lastYearsRows]) + newTradeBalanceStatistics$`Total Export`,
-                                     "Imports CIF"=sum(subTables$Monthly$`Imports CIF`[lastYearsRows]) + newTradeBalanceStatistics$`Imports CIF`,
-                                     "Trade Balance"=sum(subTables$Monthly$`Trade Balance`[lastYearsRows]) + newTradeBalanceStatistics$`Trade Balance`,
+                                     "Export"=sum(subTables$Monthly$Export[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$Export,
+                                     "Re-Export"=sum(subTables$Monthly$`Re-Export`[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$`Re-Export`,
+                                     "Total Export"=sum(subTables$Monthly$`Total Export`[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$`Total Export`,
+                                     "Imports CIF"=sum(subTables$Monthly$`Imports CIF`[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$`Imports CIF`,
+                                     "Trade Balance"=sum(subTables$Monthly$`Trade Balance`[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$`Trade Balance`,
                                      stringsAsFactors=FALSE)
     
     # Add a new row to the annual table for this years data
@@ -95,7 +99,9 @@ updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanc
   # Update the monthly table
   newTradeBalanceStatistics$Year <- ifelse(month == "January", year, NA)
   newTradeBalanceStatistics$Month <- month
-  newTradeBalanceStatistics <- rbind(ifelse(month == "January", NA, NULL), newTradeBalanceStatistics)
+  if(month == "December"){
+    newTradeBalanceStatistics <- rbind(newTradeBalanceStatistics, NA)
+  }
   subTables$Monthly <- rbind(subTables$Monthly, newTradeBalanceStatistics)
   
   return(subTables)
@@ -112,13 +118,16 @@ updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsI
 
   # Load the final tables workbook for editing
   finalWorkbook <- loadWorkbook(fileName)
-  
+
   # Insert the Annual sub table
+  numericColumns <- which(sapply(subTables$Annually, class) == "numeric")
+  subTables$Annually[, numericColumns] <- round(subTables$Annually[, numericColumns], digits=0)
   writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader, x=subTables$Annually, colNames=FALSE)
   nRowsInAnnual <- nrow(subTables$Annually)
   
   # Insert the monthly sub table
   writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual+1, x="Monthly", colNames=FALSE)
+  subTables$Monthly[, numericColumns] <- round(subTables$Monthly[, numericColumns], digits=0)
   writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual+2, x=subTables$Monthly, colNames=FALSE)
   nRowsInMonthly <- nrow(subTables$Monthly)
   
@@ -128,4 +137,42 @@ updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsI
   # Save the edited workbook as a new file
   editedFinalWorkbookFileName <- gsub(pattern=".xlsx", replacement="_EDITED.xlsx", fileName)
   saveWorkbook(finalWorkbook, file=editedFinalWorkbookFileName, overwrite=TRUE)
+}
+
+#' Formats numbers to have comma every three digits
+#' 
+#' Converts number to string but inserts comma every three digits to mark thousands 
+#' @param number A number to be formatted as a string
+#' @keywords string number comma
+formatNumberWithCommas <- function(number){
+  
+  # Split the number into its characters
+  characters <- strsplit(as.character(number), split="")[[1]]
+  
+  # Remove negative sign, if present
+  negativeSign <- ""
+  if(is.na(characters) == FALSE && length(characters) > 0 && characters[1] == "-"){
+    characters <- characters[-1]
+    negativeSign <- "-"
+  }
+  
+  # Initialise a string to store formatted number
+  formatted <- ""
+  
+  # Examine each character
+  for(i in length(characters):1){
+    
+    # Add the current character to formatted number
+    formatted <- paste0(characters[i], formatted)
+    
+    # Insert a comma every three characters 
+    if((length(characters) - (i - 1)) %% 3 == 0 && i != 1){
+      formatted <- paste0(",", formatted)
+    }
+  }
+  
+  # Add negative sign back on if it was present
+  formatted <- paste0(negativeSign, formatted)
+  
+  return(formatted)
 }
