@@ -80,6 +80,30 @@ tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Expor
 prettyTable(tradeBalance)
 ```
 
+```{r insert balance of trade statistics into final formatted table}
+
+# Note the excel workbook containing the final formmatted tables
+finalWorkbookFileName <- file.path("..", "outputs", "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20.xlsx")
+
+# Extract the balance of trade data and extract relevant statistics
+balanceOfTradeFull <- read.xlsx(finalWorkbookFileName, sheet="1_BOT", skipEmptyRows=TRUE, check.names=FALSE)
+annual <- balance
+
+# Load the final tables workbook for editing
+finalWorkbook <- loadWorkbook(finalWorkbookFileName)
+
+# Extract the Annual t
+
+# Insert a new row
+
+# Add the year
+
+# Add month and balance of trade statistics
+
+# Save the edited workbook as a new file
+editedFinalWorkbook <- gsub(pattern=".xlsx", replacement="_EDITED.xlsx", finalWorkbookFileName)
+saveWorkbook(workBook, file=editedFinalWorkbook, overwrite=TRUE)
+```
 
 
 
