@@ -35,7 +35,7 @@ source("functions.R")
 
 # Read in the raw trade data
 # Note that spaces in column names have been automatically replaced with "."s
-tradeStatsFile <- file.path("..", "data", "secure", "OPN_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
+tradeStatsFile <- file.path("..", "data", "secure", "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
 tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 
 # Remove the repeated header row from the trade statistics data
