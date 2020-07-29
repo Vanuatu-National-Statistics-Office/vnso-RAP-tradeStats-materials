@@ -48,13 +48,13 @@ extractHistoricBalanceOfTradeStatistics <- function(fileName){
   annually <- historic[1:(monthlyStart-1), ]
   colnames(annually) <- c("Year", "blank", "Export", "Re-Export", "Total Export", "Imports CIF", "Trade Balance")
   annually$`Total Export` <- as.numeric(annually$`Total Export`)
+  annually$Year <- as.numeric(annually$Year)
   
   # Extract the monthly statistics
   monthly <- historic[(monthlyStart+1):end, ]
   colnames(monthly) <- c("Year", "Month", "Export", "Re-Export", "Total Export", "Imports CIF", "Trade Balance")
   monthly$`Total Export` <- as.numeric(monthly$`Total Export`)
-  
-  
+  monthly$Year <- as.numeric(monthly$Year)
   
   # Extract the notes from the table
   notes <- historic[(end+1):nrow(historic), c(1,2)]
@@ -97,7 +97,7 @@ updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanc
   }
   
   # Update the monthly table
-  newTradeBalanceStatistics$Year <- ifelse(month == "January", year, NA)
+  newTradeBalanceStatistics$Year <- ifelse(month == "January", as.numeric(year), NA)
   newTradeBalanceStatistics$Month <- month
   if(month == "December"){
     newTradeBalanceStatistics <- rbind(newTradeBalanceStatistics, NA)
@@ -116,63 +116,55 @@ updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanc
 #' @keywords BoT openxlsx
 updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsInHeader=6){
 
-  # Load the final tables workbook for editing
-  finalWorkbook <- loadWorkbook(fileName)
-
-  # Insert the Annual sub table
-  numericColumns <- which(sapply(subTables$Annually, class) == "numeric")
-  subTables$Annually[, numericColumns] <- round(subTables$Annually[, numericColumns], digits=0)
-  writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader, x=subTables$Annually, colNames=FALSE)
+  # Calculate the number of rows taken up by each sub table
   nRowsInAnnual <- nrow(subTables$Annually)
+  nRowsInMonthly <- nrow(subTables$Monthly)
+  nRows <- nRowsInAnnual + 2 + nRowsInMonthly
+  
+  # Load the final tables workbook for editing
+  finalWorkbook <- openxlsx::loadWorkbook(fileName)
+
+  # Clear the current contents of the workbook
+  openxlsx::writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader, x=matrix(NA, nrow=nRows+4, ncol=7), colNames=FALSE)
+  openxlsx::removeCellMerge(finalWorkbook, sheet="1_BOT", cols=1:7, rows=nRowsInHeader:(nRowsInHeader+nRows))
+  openxlsx::setRowHeights(finalWorkbook, sheet="1_BOT", rows=nRowsInHeader:(nRowsInHeader+nRows), heights=14.5)
+  
+  # Insert the Annual sub table
+  openxlsx::writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader, x=subTables$Annually, colNames=FALSE)
   
   # Insert the monthly sub table
-  writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual+1, x="Monthly", colNames=FALSE)
-  subTables$Monthly[, numericColumns] <- round(subTables$Monthly[, numericColumns], digits=0)
-  writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual+2, x=subTables$Monthly, colNames=FALSE)
-  nRowsInMonthly <- nrow(subTables$Monthly)
+  writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual, x="Monthly", colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual+1, x=subTables$Monthly, colNames=FALSE)
   
   # Insert the notes
-  writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual+2+nRowsInMonthly, x=rbind(NA, subTables$Notes), colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRows, x=subTables$Notes, colNames=FALSE)
+ 
+  # Apply a general formatting to the table contents
+  default <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"), fontName="Times New Roman")
+  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=default, gridExpand=TRUE, cols=1:7, rows=nRowsInHeader:(nRowsInHeader+nRows+4), stack=FALSE)
+  
+  # Format the Monthly sub table name as bold
+  bold <- openxlsx::createStyle(textDecoration="bold")
+  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=bold, rows=nRowsInHeader+nRowsInAnnual, cols=1, stack=TRUE)
+  
+  # Format the balance of trade statistics as numbers
+  number <- openxlsx::createStyle(numFmt="#,##0")
+  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=number, gridExpand=TRUE, stack=TRUE, cols=3:7,
+                     rows=nRowsInHeader:(nRowsInHeader+nRows))
+  
+  # Format the year values in table as numbers
+  number <- openxlsx::createStyle(numFmt="0")
+  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=number, stack=TRUE, cols=1, gridExpand=TRUE,
+                     rows=nRowsInHeader:(nRowsInHeader+nRowsInAnnual-2))
+  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=number, stack=TRUE, cols=1, gridExpand=TRUE,
+                     rows=(nRowsInHeader+nRowsInAnnual+1):(nRowsInHeader+nRows-2))
+
+  # Format the notes as italics
+  italics <- openxlsx::createStyle(textDecoration="italic")
+  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=italics, cols=1:2, stack=TRUE, gridExpand=TRUE,
+                     rows=(nRowsInHeader+nRows):(nRowsInHeader+nRows+4))
   
   # Save the edited workbook as a new file
   editedFinalWorkbookFileName <- gsub(pattern=".xlsx", replacement="_EDITED.xlsx", fileName)
-  saveWorkbook(finalWorkbook, file=editedFinalWorkbookFileName, overwrite=TRUE)
-}
-
-#' Formats numbers to have comma every three digits
-#' 
-#' Converts number to string but inserts comma every three digits to mark thousands 
-#' @param number A number to be formatted as a string
-#' @keywords string number comma
-formatNumberWithCommas <- function(number){
-  
-  # Split the number into its characters
-  characters <- strsplit(as.character(number), split="")[[1]]
-  
-  # Remove negative sign, if present
-  negativeSign <- ""
-  if(is.na(characters) == FALSE && length(characters) > 0 && characters[1] == "-"){
-    characters <- characters[-1]
-    negativeSign <- "-"
-  }
-  
-  # Initialise a string to store formatted number
-  formatted <- ""
-  
-  # Examine each character
-  for(i in length(characters):1){
-    
-    # Add the current character to formatted number
-    formatted <- paste0(characters[i], formatted)
-    
-    # Insert a comma every three characters 
-    if((length(characters) - (i - 1)) %% 3 == 0 && i != 1){
-      formatted <- paste0(",", formatted)
-    }
-  }
-  
-  # Add negative sign back on if it was present
-  formatted <- paste0(negativeSign, formatted)
-  
-  return(formatted)
+  openxlsx::saveWorkbook(finalWorkbook, file=editedFinalWorkbookFileName, overwrite=TRUE)
 }

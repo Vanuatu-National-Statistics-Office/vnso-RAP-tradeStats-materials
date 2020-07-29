@@ -82,6 +82,8 @@ prettyTable(tradeBalance)
 
 ```{r insert balance of trade statistics into final formatted table}
 
+# Extremely helpful resource for openxlsx here: https://rdrr.io/cran/openxlsx/
+
 # Note current year and month of data
 fileNameParts <- strsplit(tradeStatsFile, split="_")[[1]]
 date <- as.Date(strsplit(fileNameParts[length(fileNameParts)], split="\\.")[[1]][1], format="%d-%m-%y")
@@ -100,11 +102,6 @@ balanceOfTradeSubTables <- updateBalanceOfTradeSubTables(balanceOfTradeSubTables
 
 ## Editing the final formatted tables
 updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSubTables)
-
-# TO DO:
-# Add code to clear formatting of all rows after header
-# Add bold formatting to Annually and Monthly table headers
-# Add formatting to the notes section below
 ```
 
 
