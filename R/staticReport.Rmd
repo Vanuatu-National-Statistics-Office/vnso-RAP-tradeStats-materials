@@ -36,24 +36,24 @@ source("functions.R")
 # Read in the raw trade data
 # Note that spaces in column names have been automatically replaced with "."s
 tradeStatsFile <- file.path("..", "data", "secure", "OPN_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
-tradestats <- read.xlsx(tradeStatsFile, sheet=1)
+tradeStats <- read.xlsx(tradeStatsFile, sheet=1)
 
 # Remove the repeated header row from the trade statistics data
-tradestats <- tradestats[tradestats$Office != "Office", ]
+tradeStats <- tradestats[tradeStats$Office != "Office", ]
 
 # Convert the CP4 to a factor
-tradestats$CP4 <- as.factor(tradestats$CP4)
+tradeStats$CP4 <- as.factor(tradeStats$CP4)
 
 # Convert the Stat. Value column to a number
 # Used gsub to remove commas before changing to numeric
-tradestats$Stat..Value <- as.numeric(gsub(pattern=",", replacement="", tradestats$Stat..Value))
+tradeStats$Stat..Value <- as.numeric(gsub(pattern=",", replacement="", tradeStats$Stat..Value))
 
 ```
 
 
 ## Trade Balance
 ```{r Trade Balance}
-tbalance <- tradestats %>%
+tradeBalance <- tradeStats %>%
   #group_by(Type) %>%
   summarise(
             "Export" = sum(Stat..Value[CP4==1000]),
@@ -63,7 +63,7 @@ tbalance <- tradestats %>%
             "Trade Balance" = (sum(Stat..Value[CP4==1000])+sum(Stat..Value[CP4==3071])) - (sum(Stat..Value[CP4==4000]) + sum(Stat..Value[CP4==4071])+ sum(Stat..Value[CP4==7100])
             ))
 
-prettyTable(tbalance)
+prettyTable(tradeBalance)
 
 ```
 
