@@ -22,8 +22,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # Load the required libraries
 library(knitr) # Nice tables
 library(kableExtra) # Extra nice tables
-library(dplyr)
-library(openxlsx)
+library(dplyr) # Manipulating data
+library(openxlsx) # Reading and editing excel formatted files
 
 # Load the general R functions
 source("functions.R")
@@ -31,27 +31,27 @@ source("functions.R")
 
 ## Importing data files
 
-```{r}
+```{r import and process data}
 
 # Read in the raw trade data
-tradestats <- read.csv(file.path("..", "data", "secure", "Trade_January_2020.csv"), header=TRUE, stringsAsFactors=FALSE)
+# Note that spaces in column names have been automatically replaced with "."s
+tradeStatsFile <- file.path("..", "data", "secure", "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
+tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 
 # Remove the repeated header row from the trade statistics data
-tradestats <- tradestats[tradestats$Office != "Office", ]
+tradeStats <- tradeStats[tradeStats$Office != "Office", ]
 
 # Convert the CP4 to a factor
-tradestats$CP4 <- as.factor(tradestats$CP4)
+tradeStats$CP4 <- as.factor(tradeStats$CP4)
 
-# Convert the Stat. Value column to a number
-# Used gsub to remove commas before changing to numeric
-tradestats$Stat..Value <- as.numeric(gsub(pattern=",", replacement="", tradestats$Stat..Value))
-
+# Convert the statistical value to numeric
+tradeStats$Stat..Value <- as.numeric(tradeStats$Stat..Value)
 ```
 
 
 ## Trade Balance
-```{r Trade Balance}
-tbalance <- tradestats %>%
+```{r calculate balance of trade statistics}
+tradeBalance <- tradeStats %>%
   #group_by(Type) %>%
   summarise(
             "Export" = sum(Stat..Value[CP4==1000]),
@@ -61,11 +61,48 @@ tbalance <- tradestats %>%
             "Trade Balance" = (sum(Stat..Value[CP4==1000])+sum(Stat..Value[CP4==3071])) - (sum(Stat..Value[CP4==4000]) + sum(Stat..Value[CP4==4071])+ sum(Stat..Value[CP4==7100])
             ))
 
-prettyTable(tbalance)
+prettyTable(tradeBalance)
 
 ```
 
+```{r calculate balance of trade statistics with base R, eval=FALSE, echo=FALSE}
 
+# Calculate the balance of trade statistics - note that this remove a bit of redundancy
+exports <- sum(tradeStats[tradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE) # Added na.rm in case NAs introduced at later date
+reExports <- sum(tradeStats[tradeStats$CP4 == 3071, "Stat..Value"], na.rm=TRUE)
+totalExports <- exports + reExports
+imports <- sum(tradeStats[tradeStats$CP4 %in% c(4000, 4071, 7100), "Stat..Value"], na.rm=TRUE)
+balance <- totalExports - imports
+
+# Insert values into table
+tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Export"=totalExports, "Imports CIF"=imports, "Trade Balance"=balance)
+
+prettyTable(tradeBalance)
+```
+
+```{r insert balance of trade statistics into final formatted table}
+
+# Extremely helpful resource for openxlsx here: https://rdrr.io/cran/openxlsx/
+
+# Note current year and month of data
+fileNameParts <- strsplit(tradeStatsFile, split="_")[[1]]
+date <- as.Date(strsplit(fileNameParts[length(fileNameParts)], split="\\.")[[1]][1], format="%d-%m-%y")
+month <- format(date, "%B")
+year <- format(date, "%Y")
+
+# Note the excel workbook containing the final formmatted tables
+finalWorkbookFileName <- file.path("..", "outputs", "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20.xlsx")
+
+## Updating the Annual and Monthly sub tables
+# Extract the balance of trade data and extract sub tables
+balanceOfTradeSubTables <- extractHistoricBalanceOfTradeStatistics(finalWorkbookFileName)
+
+# Update the sub tables for the balance of trade data
+balanceOfTradeSubTables <- updateBalanceOfTradeSubTables(balanceOfTradeSubTables, month, year, tradeBalance/1000000)
+
+## Editing the final formatted tables
+updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSubTables)
+```
 
 
 
