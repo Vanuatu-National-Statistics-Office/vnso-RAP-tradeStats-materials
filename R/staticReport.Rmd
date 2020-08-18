@@ -24,7 +24,6 @@ library(knitr) # Nice tables
 library(kableExtra) # Extra nice tables
 library(dplyr) # Manipulating data
 library(openxlsx) # Reading and editing excel formatted files
-library(janitor) # Converting excel figures to dates
 
 # Load the general R functions
 source("functions.R")
@@ -54,8 +53,7 @@ tradeStats$CP4 <- as.factor(tradeStats$CP4)
 tradeStats$Stat..Value <- as.numeric(tradeStats$Stat..Value)
 
 # Convert excel figures to dates
-tradeStats$Reg..Date <- as.numeric(tradeStats$Reg..Date) 
-tradeStats$Reg..Date <- excel_numeric_to_date(tradeStats$Reg..Date) 
+tradeStats$Reg..Date <- as.Date(as.numeric(tradeStats$Reg..Date), origin="1899-12-30") # FOr numeric dates excel sets origin to December 30, 1899 (https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r)
 
 # Create subset for Export and Import commodities 
 tradeStatsCommodities<- tradeStats[tradeStats$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
