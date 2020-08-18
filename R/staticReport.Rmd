@@ -60,8 +60,7 @@ tradeStats$Reg..Date <- as.Date(as.numeric(tradeStats$Reg..Date), origin="1899-1
 tradeStatsCommodities<- tradeStats[tradeStats$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
 
 # Exclude banknotes from exports
-banknotes<- tradeStatsCommodities[tradeStatsCommodities$HS.Code== 49070010, ] 
-tradeStatsNoBanknotes<- tradeStatsCommodities[-banknotes, ] #something wrong with code 
+tradeStatsNoBanknotes <- tradeStatsCommodities[tradeStatsCommodities$HS.Code != "49070010", ] 
 
 # Create new columns for dates
 tradeStatsCommodities$Year<- format(tradeStatsCommodities$Reg..Date, format= "%Y")
