@@ -42,9 +42,10 @@ tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 tradeStats <- tradeStats[tradeStats$Office != "Office", ]
 
 # Remove duplicated rows from the trade statistics data
-duplicatedRows<- which(duplicated(tradeStats)) #investigate for duplicates
-duplicatedRows
-tradeStatsNoDup<- tradeStats[-duplicatedRows, ] #something wrong with this code
+duplicatedRows <- which(duplicated(tradeStats)) #investigate for duplicates
+if(length(duplicatedRows) > 0){
+  tradeStatsNoDup <- tradeStats[-duplicatedRows, ]
+}
 
 # Convert the CP4 to a factor
 tradeStats$CP4 <- as.factor(tradeStats$CP4)
