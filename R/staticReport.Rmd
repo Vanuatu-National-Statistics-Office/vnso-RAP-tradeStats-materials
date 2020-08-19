@@ -42,10 +42,8 @@ tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 tradeStats <- tradeStats[tradeStats$Office != "Office", ]
 
 # Remove duplicated rows from the trade statistics data
-duplicatedRows <- which(duplicated(tradeStats)) #investigate for duplicates
-if(length(duplicatedRows) > 0){
-  tradeStatsNoDup <- tradeStats[-duplicatedRows, ]
-}
+duplicatedRows <- duplicated(tradeStats) #investigate for duplicates
+tradeStatsNoDup <- tradeStats[duplicatedRows == FALSE, ]
 
 # Convert the CP4 to a factor
 tradeStats$CP4 <- as.factor(tradeStats$CP4)
@@ -54,23 +52,27 @@ tradeStats$CP4 <- as.factor(tradeStats$CP4)
 tradeStats$Stat..Value <- as.numeric(tradeStats$Stat..Value)
 
 # Convert excel figures to dates
-tradeStats$Reg..Date <- as.Date(as.numeric(tradeStats$Reg..Date), origin="1899-12-30") # FOr numeric dates excel sets origin to December 30, 1899 (https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r)
+tradeStats$Reg..Date <- as.Date(as.numeric(tradeStats$Reg..Date), origin="1899-12-30") # For numeric dates excel sets origin to December 30, 1899 (https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r)
 
 # Create subset for Export and Import commodities 
-tradeStatsCommodities<- tradeStats[tradeStats$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
+tradeStatsCommodities <- tradeStats[tradeStats$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
 
 # Exclude banknotes from exports
-tradeStatsNoBanknotes <- tradeStatsCommodities[tradeStatsCommodities$HS.Code != "49070010", ] 
+tradeStatsNoBanknotes <- tradeStatsCommodities[tradeStatsCommodities$HS.Code != "49070010", ]
+
+# Extract the 6, 4, and 2 digit HS codes into separate columns
+tradeStatsNoBanknotes$HS.Code_6 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=6)
+tradeStatsNoBanknotes$HS.Code_4 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=4)
+tradeStatsNoBanknotes$HS.Code_2 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=2)
+
+# Extract the 3 and 1 digit SITC codes into separate columns
+tradeStatsNoBanknotes$SITC_3 <- extractCodeSubset(tradeStatsNoBanknotes$SITC, nDigits=3)
+tradeStatsNoBanknotes$SITC_1 <- extractCodeSubset(tradeStatsNoBanknotes$SITC, nDigits=1)
 
 # Create new columns for dates
 tradeStatsCommodities$Year<- format(tradeStatsCommodities$Reg..Date, format= "%Y")
 tradeStatsCommodities$Month<- format(tradeStatsCommodities$Reg..Date, format= "%B")
 tradeStatsCommodities$Day<- format(tradeStatsCommodities$Reg..Date, format= "%d")
-
-# Create new columns for HS codes
-tradeStatsCommodities$HS2<- substr(tradeStatsCommodities$HS.Code, start=1, stop=2)
-tradeStatsCommodities$HS4<- substr(tradeStatsCommodities$HS.Code, start=1, stop=4)
-tradeStatsCommodities$HS6<- substr(tradeStatsCommodities$HS.Code, start=1, stop=6)
 
 # Create new columns for SITC codes
 tradeStatsCommodities$SITC1<- substr(tradeStatsCommodities$SITC, start=1, stop=1)
