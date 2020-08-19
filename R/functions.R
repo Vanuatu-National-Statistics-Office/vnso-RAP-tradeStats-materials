@@ -170,11 +170,11 @@ updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsI
 }
 
 
-#' Extract the 6, 4, and 2 digit codes from the original 8 digit HS code
+#' Extract the subset codes from the original 8 digit HS codes or 6 digit SITC codes
 #' 
-#' A function that given a length of code to extract, it will subset that code from the large original 8 digit HS code
-#' @param hsCode_8 A character vector representing an 8 digit HS code
-#' @param digits A integer defining the length of the output HS code. Expecting values 6, 4, or 2
+#' A function that given a length of subset to extract, it will subset each code in a vector from the large original codes. Designed to work with 8 digit HS codes or 6 digit SITC codes.
+#' @param codes A vector of character vectors (strings) representing an 8 digit HS code or 6 digit SITC code
+#' @param nDigits A integer defining the length of the output HS code. Expecting values 6, 4, or 2nD
 #' @return Returns a character vector representing a subset of the digits within the 8 digit HS code provided. Length defined by \code{digits} parameter.
 #' @keywords substr HSCode
 #' @examples
@@ -182,34 +182,29 @@ updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsI
 #' hsCodes <- c("08099912", "08099912", "08099912", "08099912")
 #' 
 #' # Apply the function to the vector of HS codes
-#' sapply(hsCodes, FUN=extractHSCodeSubset, digits=9)
-extractHSCodeSubset <- function(hsCode_8, digits){
-  
-  # Check that the hsCode provided is 8 digits long
-  if(nchar(hsCode_8) != 8){
-    stop("The HS Code provided was not 8 characters long")
-  }
-  
-  # Check if letters present in HS Code
-  if(grepl(pattern="\\D", hsCode_8)){ # "D" means non-digit
-    stop("The HS Code provided contains letters, the code should contain numbers")
-  }
-  
-  # Check if the number of digits we want to select is less than or equal 8
-  if(digits > nchar(hsCode_8)){
-    stop("The number of digits to extract was more than the length of the HS Code provided")
-  }
-  
+#' hsCodes_6 <- extractCodeSubset(hsCodes, nDigits=6)
+extractCodeSubset <- function(codes, nDigits){
+
   # Check if the number of digits is negative
-  if(digits <= 0){
+  if(nDigits <= 0){
     stop("The number of digits to extract must be more than 0")
   }
   
-  # Define the start digit for the substring function
-  start <- (nchar(hsCode_8)-digits)+1
-  
   # Extracting the subset of the 8 digit HS code
-  hsCode_subset <- substr(hsCode_8, start=start, stop=nchar(hsCode_8))
+  subsettedCodes <- sapply(codes, 
+                           FUN=function(code, nDigits){
+                             
+                             # Check if the number of digits we want to select is less than or equal 8
+                             if(nDigits > nchar(code)){
+                               warning(paste0("The number of digits (", nDigits, ") to extract was more than the length of the code (", code, ") provided"))
+                               return(NA)
+                             }
+                             
+                             # Extract the subset of the current code
+                             subset <- substr(code, start=1, stop=nDigits)
+                             
+                             return(subset)
+                           }, nDigits)
   
-  return(hsCode_subset)
+  return(as.vector(subsettedCodes))
 }
