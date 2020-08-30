@@ -168,3 +168,43 @@ updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsI
   editedFinalWorkbookFileName <- gsub(pattern=".xlsx", replacement="_EDITED.xlsx", fileName)
   openxlsx::saveWorkbook(finalWorkbook, file=editedFinalWorkbookFileName, overwrite=TRUE)
 }
+
+
+#' Extract the subset codes from the original 8 digit HS codes or 6 digit SITC codes
+#' 
+#' A function that given a length of subset to extract, it will subset each code in a vector from the large original codes. Designed to work with 8 digit HS codes or 6 digit SITC codes.
+#' @param codes A vector of character vectors (strings) representing an 8 digit HS code or 6 digit SITC code
+#' @param nDigits A integer defining the length of the output HS code. Expecting values 6, 4, or 2nD
+#' @return Returns a character vector representing a subset of the digits within the 8 digit HS code provided. Length defined by \code{digits} parameter.
+#' @keywords substr HSCode
+#' @examples
+#' # Define a vector of HS code
+#' hsCodes <- c("08099912", "08099912", "08099912", "08099912")
+#' 
+#' # Apply the function to the vector of HS codes
+#' hsCodes_6 <- extractCodeSubset(hsCodes, nDigits=6)
+extractCodeSubset <- function(codes, nDigits){
+
+  # Check if the number of digits is negative
+  if(nDigits <= 0){
+    stop("The number of digits to extract must be more than 0")
+  }
+  
+  # Extracting the subset of the 8 digit HS code
+  subsettedCodes <- sapply(codes, 
+                           FUN=function(code, nDigits){
+                             
+                             # Check if the number of digits we want to select is less than or equal 8
+                             if(nDigits > nchar(code)){
+                               warning(paste0("The number of digits (", nDigits, ") to extract was more than the length of the code (", code, ") provided"))
+                               return(NA)
+                             }
+                             
+                             # Extract the subset of the current code
+                             subset <- substr(code, start=1, stop=nDigits)
+                             
+                             return(subset)
+                           }, nDigits)
+  
+  return(as.vector(subsettedCodes))
+}

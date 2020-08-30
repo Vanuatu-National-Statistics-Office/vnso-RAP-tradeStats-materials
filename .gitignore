@@ -51,3 +51,7 @@ archive/*
 
 # Ignore files in the outputs folder for the moment
 outputs/*
+
+# Ignore temporal files produced by excel
+data/open/$*
+outputs/$*
