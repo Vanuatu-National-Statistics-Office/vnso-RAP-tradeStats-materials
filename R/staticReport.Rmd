@@ -41,37 +41,100 @@ tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 # Remove the repeated header row from the trade statistics data
 tradeStats <- tradeStats[tradeStats$Office != "Office", ]
 
+# Remove duplicated rows from the trade statistics data
+duplicatedRows <- duplicated(tradeStats) #investigate for duplicates
+tradeStatsNoDup <- tradeStats[duplicatedRows == FALSE, ]
+
 # Convert the CP4 to a factor
 tradeStats$CP4 <- as.factor(tradeStats$CP4)
 
 # Convert the statistical value to numeric
 tradeStats$Stat..Value <- as.numeric(tradeStats$Stat..Value)
+
+# Convert excel figures to dates
+tradeStats$Reg..Date <- as.Date(as.numeric(tradeStats$Reg..Date), origin="1899-12-30") # For numeric dates excel sets origin to December 30, 1899 (https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r)
+
+# Create subset for Export and Import commodities 
+tradeStatsCommodities <- tradeStats[tradeStats$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
+
+# Exclude banknotes from exports
+tradeStatsNoBanknotes <- tradeStatsCommodities[tradeStatsCommodities$HS.Code != "49070010", ]
+
+# Extract the 6, 4, and 2 digit HS codes into separate columns
+tradeStatsNoBanknotes$HS.Code_6 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=6)
+tradeStatsNoBanknotes$HS.Code_4 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=4)
+tradeStatsNoBanknotes$HS.Code_2 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=2)
+
+# Extract the 3 and 1 digit SITC codes into separate columns
+tradeStatsNoBanknotes$SITC_3 <- extractCodeSubset(tradeStatsNoBanknotes$SITC, nDigits=3)
+tradeStatsNoBanknotes$SITC_1 <- extractCodeSubset(tradeStatsNoBanknotes$SITC, nDigits=1)
+
+# Create new columns for dates
+tradeStatsCommodities$Year<- format(tradeStatsCommodities$Reg..Date, format= "%Y")
+tradeStatsCommodities$Month<- format(tradeStatsCommodities$Reg..Date, format= "%B")
+tradeStatsCommodities$Day<- format(tradeStatsCommodities$Reg..Date, format= "%d")
+
+# Create new columns for SITC codes
+tradeStatsCommodities$SITC1<- substr(tradeStatsCommodities$SITC, start=1, stop=1)
+tradeStatsCommodities$SITC3<- substr(tradeStatsCommodities$SITC, start=1, stop=3)
+
+# Quality check indicators (Wgt..Net and Stat..Value) 
+tradeStatsCommodities$Wgt..Net <- as.numeric(tradeStatsCommodities$Wgt..Net) # Convert the net weight to numeric
+tradeStatsCommodities$PricePerUnit<- tradeStatsCommodities$Stat..Value/tradeStatsCommodities$Wgt..Net # Create new column 
+tradeStatsCommoditiesSorted<- tradeStatsCommodities[order(-tradeStatsCommodities$Stat..Value), ] # Sort the stats value in descending order
+
+# Store principle exports and imports 
+
+
+# Merge classifications 
+tradeStatsFileMergeTransport <- file.path("..", "data", "open", "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.xlsx") # Mode of Transport
+modeOfTransport <- read.xlsx(tradeStatsFileMergeTransport, sheet=1, skipEmptyRows=TRUE)
+mergedModeOfTransport<- merge(modeOfTransport, tradeStatsCommodities, by= "Office")
+
+tradeStatsFileMergeHSCode <- file.path("..", "data", "open", "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.xlsx") # HS codes
+hsDescription <- read.xlsx(tradeStatsFileMergeHSCode, sheet=1, skipEmptyRows=TRUE)
+mergedHSCode<- merge(hsDescription, mergedModeOfTransport, by= "HS2")
+
+tradeStatsFileMergeCountryDes <- file.path("..", "data", "open", "OPN_FINAL_ASY_CountryDescriptionClassifications_31-01-20.xlsx") # Country of origin
+countryDescritpion <- read.xlsx(tradeStatsFileMergeCountryDes, sheet=1, skipEmptyRows=TRUE)
+mergedCountryOrigin<- merge(countryDescritpion, mergedHSCode, by= "CO")
+
+tradeStatsFileMergeSITCCode <- file.path("..", "data", "open", "OPN_FINAL_ASY_SITCCodeClassifications_31-01-20.xlsx") # Country of origin
+sitcDescription <- read.xlsx(tradeStatsFileMergeSITCCode, sheet=1, skipEmptyRows=TRUE)
+mergedSITCDescription<- merge(sitcDescription, mergedCountryOrigin, by= "SITC1")
+
+tradeStatsFileMergePrincipleCommodities <- file.path("..", "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx") # Country of origin
+principleCommodties <- read.xlsx(tradeStatsFileMergePrincipleCommodities, sheet=1, skipEmptyRows=TRUE)
+mergedPrincipleCommodties<- merge(principleCommodties, mergedSITCDescription, by= "HS.Code")
+
+tradeStatsFileMergeBECDescriptions <- file.path("..", "data", "open", "OPN_FINAL_ASY_BECClassifications_31-01-20.xlsx") # Broad economic categories
+becDescriptions <- read.xlsx(tradeStatsFileMergeBECDescriptions, sheet=1, skipEmptyRows=TRUE)
+mergedBECDescriptions<- merge(becDescriptions, mergedPrincipleCommodties, by= "HS6")
+
+
+# New HS codes and SITC codes stored and we are notified
+
+
+# Create new column header names
+newColumnNames<- c("OfficeOfDecleration", "RegistrationReference", "RegistrationDate", "TypeOfDecleration", "CustomsExtendedProcedure", "CustomsNationalProcedure", "BrokerCode", "ItemNumber", "HSCode", "SITCCode", "TradeAgreement", "CommodityDescription", "CommodityMetaData", "CountryOfOrigin", "CountryOfExport/CountryOfDestination", "GrossWeight", "NetWeight", "NumberOfPackages", "PackageType", "SupplementaryQuantity", "SupplementaryUnit", "TermsOfDelivery", "MonetaryValue", "ImportDuty", "ValueAddedTax", "ImportExcise", "DomesticExcise", "ExportDuty", "OtherExportDuty")
+colnames(tradeStats)<- newColumnNames
+head(tradeStats)
+
+# Processed data set stored
+processedTradeStats<- transportMerged
+
 ```
+
 
 
 ## Trade Balance
-```{r calculate balance of trade statistics}
-tradeBalance <- tradeStats %>%
-  #group_by(Type) %>%
-  summarise(
-            "Export" = sum(Stat..Value[CP4==1000]),
-            "Re-Export" = sum(Stat..Value[CP4==3071]),
-            "Total Export" = sum(Stat..Value[CP4==1000])+sum(Stat..Value[CP4==3071]),
-            "Imports CIF" = sum(Stat..Value[CP4==4000]) + sum(Stat..Value[CP4==4071])+ sum(Stat..Value[CP4==7100]),
-            "Trade Balance" = (sum(Stat..Value[CP4==1000])+sum(Stat..Value[CP4==3071])) - (sum(Stat..Value[CP4==4000]) + sum(Stat..Value[CP4==4071])+ sum(Stat..Value[CP4==7100])
-            ))
-
-prettyTable(tradeBalance)
-
-```
-
 ```{r calculate balance of trade statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate the balance of trade statistics - note that this remove a bit of redundancy
-exports <- sum(tradeStats[tradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE) # Added na.rm in case NAs introduced at later date
-reExports <- sum(tradeStats[tradeStats$CP4 == 3071, "Stat..Value"], na.rm=TRUE)
+exports <- sum(tradeStats[tradeStats$CustomsExtendedProcedure == 1000, "MonetaryValue"], na.rm=TRUE) # Added na.rm in case NAs introduced at later date
+reExports <- sum(tradeStats[tradeStats$CustomsExtendedProcedure == 3071, "MonetaryValue"], na.rm=TRUE)
 totalExports <- exports + reExports
-imports <- sum(tradeStats[tradeStats$CP4 %in% c(4000, 4071, 7100), "Stat..Value"], na.rm=TRUE)
+imports <- sum(tradeStats[tradeStats$CustomsExtendedProcedure %in% c(4000, 4071, 7100), "MonetaryValue"], na.rm=TRUE)
 balance <- totalExports - imports
 
 # Insert values into table
