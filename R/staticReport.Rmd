@@ -172,7 +172,10 @@ updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSu
 ```{r calculate import by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate the Import by HS Code 
-animalProducts <- sum(processedTradeStats[processedTradeStats$CP4 %in% c(4000, 4071, 7100) & processedTradeStats$HS.Code_2 %in% c(01, 02, 03, 04, 05), "Stat..Value"], na.rm=TRUE)
+animalProducts <- sum(processedTradeStats[processedTradeStats$CP4 %in% c(4000, 4071, 7100) & 
+                                            processedTradeStats$HS.Code_2 %in% c("01", "02", "03", "04", "05"),
+                                          "Stat..Value"], 
+                      na.rm=TRUE)
 
   
   
