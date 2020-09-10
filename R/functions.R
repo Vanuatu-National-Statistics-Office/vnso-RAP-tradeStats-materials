@@ -208,3 +208,23 @@ extractCodeSubset <- function(codes, nDigits){
   
   return(as.vector(subsettedCodes))
 }
+
+#' Calculate the statistical value of exports and imports according to their category 
+#' 
+#' A function that will match according to export or import and given a category to extraction, will calculate its statistical value. 
+#' @param processedTradeStats A dataframe containing the cleaned Customs data, including all classifications 
+#' @param codes_CP4 Customs extended procedure codes that are representative of exports (1000), re-exports (3071) and imports (4000, 4071, 7100)
+#' @param categoryCol A column header used to define the subset of data that needs to be summed  
+#' @param categoryValues A variable use to define the statistical value 
+#' @return Returns an integer vector representing a subset of the dataframe processedTradeStats
+
+#' Calculate the statistical value
+calculateStatValueSum<- function(processedTradeStats, codes_CP4, categoryCol, categoryValues){
+  
+  # Calculate sum of products matching CP4 code and category 
+  statValueSum<- sum(processedTradeStats[processedTradeStats$CP4 %in% codes_CP4 &
+                                           processedTradeStats[, categoryCol] %in% categoryValues, 
+                                         "Stat..Value"], na.rm= TRUE)
+  # Return the sum
+  return(statValueSum)
+}
