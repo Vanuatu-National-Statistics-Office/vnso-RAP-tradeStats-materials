@@ -174,58 +174,32 @@ codesCP4 <- c(4000, 4071, 7100)
 # Define the categories used for each column
 categoryColumn <- "HS.Code_2"
 columnCategories <- list(
-  animalProductsImports=c("01", "02", "03", "04", "05"),
-  vegetableProductsImports=c("06", "07", "08", "09", "10", "11", "12", "13", "14"),
-  animalOrVegtableProductsImports=c("15"),
-  preparedFoodstuffsImports=c("16", "17", "18", "19", "20", "21", "22", "23", "24"),
-  mineralProductsImports=c("25", "26", "27"),
-  chemicalProductsImports=c("28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"),
-  platsicThereofImports=c("39", "40"),
-  rawHidesImports=c("41", "42", "43"),
-  woodMaterialImports=c("44", "45", "46"),
-  woodThereofImports=c("47", "48", "49"),
-  textileArticlesImports=c("50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"),
-  footwearThereofImports=c("64", "65", "66", "67"),
-  articlesStoneImports=c("68", "69", "70"),
-  pearlsStoneImports=c("71"),
-  baseMetalsImports=c("72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83"),
-  machineryThereofImports=c("84", "85"),
-  vehiclesEquipmentImports=c("86", "87", "88", "89"),
-  photographicGoodsImports=c("90", "91", "92"),
-  armsThereofImports=c("93"),
-  miscellaneousArticlesImports=c("94", "95", "96"),
-  worksArtImports=c("97"),
-  othersImports=c("98", "99")
+  "Live animals: animal products"=c("01", "02", "03", "04", "05"),
+  "Vegetable products"=c("06", "07", "08", "09", "10", "11", "12", "13", "14"),
+  "Animal or vegetable oils & fats"=c("15"),
+  "Prepared foodstuffs, beverages, spirits & tobacco"=c("16", "17", "18", "19", "20", "21", "22", "23", "24"),
+  "Mineral products"=c("25", "26", "27"),
+  "Chemicals and allied products"=c("28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"),
+  "Plastic, rubber & articles thereof"=c("39", "40"),
+  "Raw hides, skins, leather articles & travel goods"=c("41", "42", "43"),
+  "Wood, cork & articles thereof & plaiting material"=c("44", "45", "46"),
+  "Wood pulp, paper & paperboard & articles thereof"=c("47", "48", "49"),
+  "Textiles & textile articles"=c("50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"),
+  "Footwear, headgear, umbrellas & parts thereof"=c("64", "65", "66", "67"),
+  "Articles of stone, plaster, cement, glass & ceremic products"=c("68", "69", "70"),
+  "Pearls, precious & semi-precious stones & metals"=c("71"),
+  "Base metals & articles thereof"=c("72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83"),
+  "Machinery & mechanical & electrical appliances & parts thereof"=c("84", "85"),
+  "Vehicles, aircraft & associated transport equipment"=c("86", "87", "88", "89"),
+  "Photographic & optical, medical & surgical goods & clocks/watches & musical instruments"=c("90", "91", "92"),
+  "Arms and ammunition, parts & accessories thereof"=c("93"),
+  "Miscellaneous manufactured articles"=c("94", "95", "96"),
+  "Works of art, collectors pieces & antiques"=c("97"),
+  "Others"=c("98", "99")
 )
 
 # Build the table
 importsByHS <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
-
-# Add full names into columns
-colnames(importsByHS) <- c(
-  "Live animals: animal products", 
-  "Vegetable products", 
-  "Animal or vegetable oils & fats", 
-  "Prepared foodstuffs, beverages, spirits & tobacco", 
-  "Mineral products", 
-  "Chemicals and allied products", 
-  "Plastic, rubber & articles thereof", 
-  "Raw hides, skins, leather articles & travel goods", 
-  "Wood, cork & articles thereof & plaiting material", 
-  "Wood pulp, paper & paperboard & articles thereof", 
-  "Textiles & textile articles", 
-  "Footwear, headgear, umbrellas & parts thereof", 
-  "Articles of stone, plaster, cement, glass & ceremic products", 
-  "Pearls, precious & semi-precious stones & metals", 
-  "Base metals & articles thereof", 
-  "Machinery & mechanical & electrical appliances & parts thereof", 
-  "Vehicles, aircraft & associated transport equipment", 
-  "Photographic & optical, medical & surgical goods & clocks/watches & musical instruments", 
-  "Arms and ammunition, parts & accessories thereof", 
-  "Miscellaneous manufactured articles", 
-  "Works of art, collectors pieces & antiques", 
-  "Others", 
-  "Total")
 
 # View the table
 prettyTable(importsByHS)
