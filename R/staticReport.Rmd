@@ -168,81 +168,70 @@ updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSu
 ## Import by HS Code
 ```{r calculate import by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
-# Calculate the Import by HS Code 
-animalProductsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("01", "02", "03", "04", "05"))
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
 
-vegtableProductsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("06", "07", "08", "09", "10", "11", "12", "13", "14"))
+# Define the categories used for each column
+categoryColumn <- "HS.Code_2"
+columnCategories <- list(
+  animalProductsImports=c("01", "02", "03", "04", "05"),
+  vegetableProductsImports=c("06", "07", "08", "09", "10", "11", "12", "13", "14"),
+  animalOrVegtableProductsImports=c("15"),
+  preparedFoodstuffsImports=c("16", "17", "18", "19", "20", "21", "22", "23", "24"),
+  mineralProductsImports=c("25", "26", "27"),
+  chemicalProductsImports=c("28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"),
+  platsicThereofImports=c("39", "40"),
+  rawHidesImports=c("41", "42", "43"),
+  woodMaterialImports=c("44", "45", "46"),
+  woodThereofImports=c("47", "48", "49"),
+  textileArticlesImports=c("50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"),
+  footwearThereofImports=c("64", "65", "66", "67"),
+  articlesStoneImports=c("68", "69", "70"),
+  pearlsStoneImports=c("71"),
+  baseMetalsImports=c("72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83"),
+  machineryThereofImports=c("84", "85"),
+  vehiclesEquipmentImports=c("86", "87", "88", "89"),
+  photographicGoodsImports=c("90", "91", "92"),
+  armsThereofImports=c("93"),
+  miscellaneousArticlesImports=c("94", "95", "96"),
+  worksArtImports=c("97"),
+  othersImports=c("98", "99")
+)
 
-animalOrVegtableProductsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("15"))
+# Build the table
+importsByHS <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
 
-preparedFoodstuffsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("16", "17", "18", "19", "20", "21", "22", "23", "24"))
+# Add full names into columns
+colnames(importsByHS) <- c(
+  "Live animals: animal products", 
+  "Vegetable products", 
+  "Animal or vegetable oils & fats", 
+  "Prepared foodstuffs, beverages, spirits & tobacco", 
+  "Mineral products", 
+  "Chemicals and allied products", 
+  "Plastic, rubber & articles thereof", 
+  "Raw hides, skins, leather articles & travel goods", 
+  "Wood, cork & articles thereof & plaiting material", 
+  "Wood pulp, paper & paperboard & articles thereof", 
+  "Textiles & textile articles", 
+  "Footwear, headgear, umbrellas & parts thereof", 
+  "Articles of stone, plaster, cement, glass & ceremic products", 
+  "Pearls, precious & semi-precious stones & metals", 
+  "Base metals & articles thereof", 
+  "Machinery & mechanical & electrical appliances & parts thereof", 
+  "Vehicles, aircraft & associated transport equipment", 
+  "Photographic & optical, medical & surgical goods & clocks/watches & musical instruments", 
+  "Arms and ammunition, parts & accessories thereof", 
+  "Miscellaneous manufactured articles", 
+  "Works of art, collectors pieces & antiques", 
+  "Others", 
+  "Total")
 
-mineralProductsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("25", "26", "27"))
-
-chemicalProductsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"))
-
-platsicThereofImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("39", "40"))
-
-rawHidesImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("41", "42", "43"))
-
-woodMaterialImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("44", "45", "46"))
-
-woodThereofImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("47", "48", "49"))
-
-textileArticlesImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"))
-
-footwearThereofImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("64", "65", "66", "67"))
-
-articlesStoneImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("68", "69", "70"))
-
-pearlsStoneImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("71"))
-
-baseMetalsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83"))
-
-machineryThereofImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("84", "85"))
-
-vehiclesEquipmentImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("86", "87", "88", "89"))
-
-photographicGoodsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("90", "91", "92"))
-
-armsThereofImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("93"))
-
-miscellaneousArticlesImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("94", "95", "96"))
-
-worksArtImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("97"))
-
-othersImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "HS.Code_2", categoryValues = c("98", "99"))
-
-totalImportsByHSCode<- animalProductsImports + vegtableProductsImports + animalOrVegtableProductsImports + preparedFoodstuffsImports + mineralProductsImports + chemicalProductsImports + platsicThereofImports + rawHidesImports + woodMaterialImports + woodThereofImports + textileArticlesImports + footwearThereofImports + articlesStoneImports + pearlsStoneImports + baseMetalsImports + machineryThereofImports + vehiclesEquipmentImports + photographicGoodsImports + armsThereofImports + miscellaneousArticlesImports + worksArtImports + othersImports
-
-# Insert values into table
-importsByHS <- data.frame("Live animals: animal products"=animalProductsImports, 
-"Vegetable products"=vegtableProductsImports, 
-"Animal or vegetable oils & fats"=animalOrVegtableProductsImports, 
-"Prepared foodstuffs, beverages, spirits & tobacco"=preparedFoodstuffsImports, 
-"Mineral products"=mineralProductsImports, 
-"Chemicals and allied products"= chemicalProductsImports, 
-"Plastic, rubber & articles thereof"= platsicThereofImports, 
-"Raw hides, skins, leather articles & travel goods"= rawHidesImports, 
-"Wood, cork & articles thereof & plaiting material"= woodMaterialImports, 
-"Wood pulp, paper & paperboard & articles thereof"= woodThereofImports, 
-"Textiles & textile articles"= textileArticlesImports, 
-"Footwear, headgear, umbrellas & parts thereof"= footwearThereofImports, 
-"Articles of stone, plaster, cement, glass & ceremic products"= articlesStoneImports, 
-"Pearls, precious & semi-precious stones & metals"= pearlsStoneImports, 
-"Base metals & articles thereof"= baseMetalsImports, 
-"Machinery & mechanical & electrical appliances & parts thereof"= machineryThereofImports, 
-"Vehicles, aircraft & associated transport equipment"= vehiclesEquipmentImports, 
-"Photographic & optical, medical & surgical goods & clocks/watches & musical instruments"= photographicGoodsImports, 
-"Arms and ammunition, parts & accessories thereof"= armsThereofImports, 
-"Miscellaneous manufactured articles"= miscellaneousArticlesImports, 
-"Works of art, collectors pieces & antiques"= worksArtImports, 
-"Others"= othersImports, 
-"Total"= totalImportsByHSCode)
-
+# View the table
 prettyTable(importsByHS)
 
 ```
+
 
 ```{r insert Import by HS Code into final formatted table}
 
