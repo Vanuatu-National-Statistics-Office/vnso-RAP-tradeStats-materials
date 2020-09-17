@@ -1,0 +1,110 @@
+---
+title: "Exploring historic data"
+author: "Vanuatu National Statistics Office"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: '2'
+    toc_float: yes
+params: 
+  password: "ThisIsNotMyPassword"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r preparation, include=FALSE}
+
+# Load the required libraries
+library(RMySQL) # Interactiing with MySQL from R
+library(knitr) # Nice tables
+library(kableExtra) # Extra nice tables
+
+# Load the general R functions
+source("functions.R")
+```
+
+# Introduction
+
+Here we document the exploration of the historic trade statistics data for Vanuatu. Our aim is to understand how the value of different imported and exported commodities has changed through time. Due to the large nature of the historic data, these data are stored on a [MySQL](https://www.mysql.com/) server. We will use the [RMySQL](https://cran.r-project.org/web/packages/RMySQL/RMySQL.pdf) R package to interact with the local MySQL server from R.
+
+To set up the local MySQL server, a dump of the VNSO server was shared and imported via the [MySQL Workbench](https://www.mysql.com/products/workbench/) on my computer. I had previously install MySQL by following these instructions:
+- Installing on linux systems ([link](https://dev.mysql.com/doc/refman/8.0/en/linux-installation.html)), with extra help [here](https://itsfoss.com/install-mysql-ubuntu/).
+- Installing on mac: ([link](https://dev.mysql.com/doc/mysql-osx-excerpt/5.7/en/osx-installation.html)), also, I think it comes ready installed! See [here](https://www.thoughtco.com/installing-mysql-on-mac-2693866))
+- Installing on Windows ([link](https://dev.mysql.com/downloads/installer/)), with extra help [here](https://www.wikihow.com/Install-the-MySQL-Database-Server-on-Your-Windows-PC)
+
+# Connecting to the database
+
+The MySQL server is running locally and we can connect to it from R with the following code:
+
+```{r connection, eval=FALSE}
+# Open a connection to a MySQL database
+connection <- dbConnect(MySQL(), 
+                            user='root', 
+                            password=readline(prompt="Enter password: "), # Doing this as password never stored in easily accessible format now
+                            dbname='vnso',
+                            host='localhost')
+```
+
+
+```{r echo=FALSE}
+# Open a connection to a MySQL database
+connection <- dbConnect(MySQL(), 
+                        user='JosephCrispell', 
+                        password=params$password, # Doing this as password never stored in easily accessible format now
+                        dbname='vnso',
+                        host='localhost')
+```
+
+```{r store local csv, eval=FALSE, echo=FALSE}
+# Get the historic data
+historic <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19")
+
+# Save the data as a standard csv
+write.table(historic, file=file.path("..", "data", "secure", "tradeStats_historic_14-09-20.csv"),
+            sep=",", row.names=FALSE, quote=TRUE)
+```
+ 
+On our local MySQL database there is a single table `historical_export_99_19`, which looks like this:
+
+```{r quick look at historic data, echo=FALSE}
+
+# Extract a small subset of historic data
+historic <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19 LIMIT 25")
+
+# View the table
+prettyTable(historic)
+```
+
+# Summarise the `Value` distribution for each HS code
+
+Each commodity in the historic data is identified by an 8 digit **HS** (Harmonized System) code. We are aiming to define the expected `Value` distribution for each unique **HS** code through time. We can start with some simple summary statistics:
+
+```{r summarise value column}
+# Summarise the value column for each commodity for each year
+commoditySummary <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(HS) AS count, SUM(HS) AS sum FROM historical_export_99_19 GROUP BY HS, YEAR")
+
+# View the table
+prettyTable(commoditySummary[1:25, ])
+```
+
+With the above data we can see that there are `R length(unique(commoditySummary$HS))` *HS* codes. There's one code that dates back to 1900!
+
+```{r 1900, echo=FALSE}
+# Get the information for the HS code with information dating back to 1900
+old <- commoditySummary[is.na(commoditySummary$HS) == FALSE & commoditySummary$HS == "84715000", ]
+
+# View the data
+prettyTable(old[order(old$YEAR), ])
+```
+
+ADD PLOT HERE VISUALISING HOW THE VALUE DISTRIBUTION IS CHANGING THROUGH TIME
+
+# Extract the `Value` distribution for each HS code
+
+The methods to summarise distributions in MySQL are more limited than in R. Ideally then we'd like to extract the `Value` distribution for each *HS* code for each year it has data available and use methods from R to summarise the distribution.
+
+
