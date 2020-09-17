@@ -23,6 +23,7 @@ library(RMySQL) # Interactiing with MySQL from R
 library(knitr) # Nice tables
 library(kableExtra) # Extra nice tables
 library(basicPlotteR) # Progress bar
+library(plotly) # Interactive graphs
 
 # Load the general R functions
 source("functions.R")
@@ -89,13 +90,18 @@ Each commodity in the historic data is identified by an 8 digit **HS** (Harmoniz
 commoditySummary <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(HS) AS count, SUM(HS) AS sum FROM historical_export_99_19 GROUP BY HS, YEAR")
 
 # Remove NA values
-cocommoditySummary <- commoditySummary[is.na(commoditySummary$HS) == FALSE, ]
+commoditySummary <- commoditySummary[is.na(commoditySummary$HS) == FALSE, ]
+
+# Sort the commodity by HS code and year
+commoditySummary <- commoditySummary[order(commoditySummary$HS, commoditySummary$YEAR), ]
 
 # View the table
 prettyTable(commoditySummary[1:25, ])
 ```
 
+<br>
 With the above data we can see that there are `R length(unique(commoditySummary$HS))` *HS* codes. There's one code that dates back to 1900!
+<br>
 
 ```{r 1900, echo=FALSE}
 # Get the information for the HS code with information dating back to 1900
@@ -103,39 +109,6 @@ old <- commoditySummary[commoditySummary$HS == "84715000", ]
 
 # View the data
 prettyTable(old[order(old$YEAR), ])
-```
-
-ADD PLOT HERE VISUALISING HOW THE VALUE DISTRIBUTION IS CHANGING THROUGH TIME
-
-# Extract the `Value` distribution for each HS code
-
-The methods to summarise distributions in MySQL are more limited than in R. Ideally then we'd like to extract the `Value` distribution for each *HS* code for each year it has data available and use methods from R to summarise the distribution.
-
-```{r testing extracting values for each hs code, eval=FALSE, echo=FALSE}
-# Note the number of rows in commodity summary
-totalRows <- nrow(commoditySummary)
-
-# Examine each row in the commodity summary table
-test <- sapply(1:nrow(commoditySummary), 
-               FUN=function(row, commoditySummary){
-                 
-                      # Extract the current HS code and year
-                      hsCode <- commoditySummary[row, "HS"]
-                      year <- commoditySummary[row, "YEAR"]
-  
-                      # Extract the values from the historic data from MySQL
-                      values <- dbGetQuery(conn=connection, 
-                                           statement=paste0("SELECT Value FROM historical_export_99_19 WHERE HS = ", hsCode, " AND YEAR = ", year))[, 1]
-  
-                      # Update progress bar
-                      progress(row, totalRows)
-                  
-                  return(1)
-                 
-               }, commoditySummary)
-
-
-# COULD TRY PULLING IN SUBSET FOR EACH HS CODE AND AGGREGATING ON THE R SIDE???
 ```
 
 # Closing a connection to the `MySQL` server
