@@ -87,7 +87,7 @@ Each commodity in the historic data is identified by an 8 digit **HS** (Harmoniz
 
 ```{r summarise value column}
 # Summarise the value column for each commodity for each year
-commoditySummary <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(HS) AS count, SUM(HS) AS sum FROM historical_export_99_19 GROUP BY HS, YEAR")
+commoditySummary <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(Value) AS count, SUM(Value) AS sum, STDDEV_SAMP(Value) AS sd, VAR_SAMP(Value) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
 
 # Remove NA values
 commoditySummary <- commoditySummary[is.na(commoditySummary$HS) == FALSE, ]
@@ -108,7 +108,7 @@ With the above data we can see that there are `R length(unique(commoditySummary$
 old <- commoditySummary[commoditySummary$HS == "84715000", ]
 
 # View the data
-prettyTable(old[order(old$YEAR), ])
+old[order(old$YEAR), ]
 ```
 
 # Closing a connection to the `MySQL` server
