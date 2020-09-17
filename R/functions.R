@@ -208,3 +208,33 @@ extractCodeSubset <- function(codes, nDigits){
   
   return(as.vector(subsettedCodes))
 }
+
+#' Build summary table that sums statistical value of exports or imports according to their category 
+#' 
+#' A function that will match according to export or import and given a category to extraction, will calculate its statistical value for each column in summary table. 
+#' @param processedTradeStats A dataframe containing the cleaned Customs data, including all classifications 
+#' @param codesCP4 Customs extended procedure codes that are representative of exports (1000), re-exports (3071) and imports (4000, 4071, 7100)
+#' @param categoryColumn A column header used to define the subset of data that needs to be summed  
+#' @param columnCategories A list providing a vector of categories to be used to select data in \code{categoryColumn} for each column 
+#' @return Returns an integer vector representing a subset of the dataframe processedTradeStats
+buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, columnCategories){
+  
+  # Initialise a dataframe to store the calculated statistics
+  summaryTable <- data.frame(matrix(NA, nrow=1, ncol=length(columnCategories)), check.names=FALSE, stringsAsFactors=FALSE)
+  colnames(summaryTable) <- names(columnCategories)
+  
+  # Calculate the sum of products matching CP4 code and category for each column
+  for(column in names(columnCategories)){
+    
+    # Calculate sum of products matching CP4 code and category for the current column
+    summaryTable[1, column] <- sum(processedTradeStats[processedTradeStats$CP4 %in% codesCP4 &
+                                                          processedTradeStats[, categoryColumn] %in% columnCategories[[column]], 
+                                                       "Stat..Value"],
+                                   na.rm= TRUE)
+  }
+  
+  # Calculate the total
+  summaryTable$Total <- sum(summaryTable[, ], na.rm=TRUE)
+  
+  return(summaryTable)
+}
