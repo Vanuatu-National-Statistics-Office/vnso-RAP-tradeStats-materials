@@ -4,7 +4,6 @@ author: "Vanuatu National Statistics Office"
 date: "`r format(Sys.Date(), '%d %b %Y')`"
 output:
   html_document:
-    number_sections: yes
     toc: yes
     toc_depth: '2'
     toc_float: yes
@@ -70,24 +69,48 @@ write.table(historic, file=file.path("..", "data", "secure", "tradeStats_histori
             sep=",", row.names=FALSE, quote=TRUE)
 ```
  
-On our local MySQL database there is a single table `historical_export_99_19`, which looks like this:
+On our local MySQL database there are two tables:
 
-```{r quick look at historic data, echo=FALSE}
+- `historical_export_99_19` - the historic data for all exports
+- `historical_import_99_19` - the historic data for all imports
+
+The imports data looks like this:
+
+```{r quick look at historic imports data, echo=FALSE}
 
 # Extract a small subset of historic data
-historic <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19 LIMIT 25")
+historic_imports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_import_99_19 LIMIT 25")
 
 # View the table
-prettyTable(historic)
+prettyTable(historic_imports)
+```
+
+<br>
+Ad the exports data like this:
+<br>
+
+```{r quick look at historic exportsdata, echo=FALSE}
+
+# Extract a small subset of historic data
+historic_exports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19 LIMIT 25")
+
+# View the table
+prettyTable(historic_exports)
 ```
 
 # Summarise the `Value` distribution for each HS code
 
-Each commodity in the historic data is identified by an 8 digit **HS** (Harmonized System) code. We are aiming to define the expected `Value` distribution for each unique **HS** code through time. We can start with some simple summary statistics:
+Each commodity in the historic data is identified by an 8 digit **HS** (Harmonized System) code. We are aiming to define the expected `Value` distribution for each unique **HS** code through tim for imports and exports. We can start with some simple summary statistics:
 
 ```{r summarise value column}
 # Summarise the value column for each commodity for each year
-commoditySummary <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(Value) AS count, SUM(Value) AS sum, STDDEV_SAMP(Value) AS sd, VAR_SAMP(Value) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
+commoditySummary_exports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Dest AS CTY, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(Value) AS count, SUM(Value) AS sum, STDDEV_SAMP(Value) AS sd, VAR_SAMP(Value) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
+commoditySummary_imports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Origin AS CTY, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(Value) AS count, SUM(Value) AS sum, STDDEV_SAMP(Value) AS sd, VAR_SAMP(Value) as variance FROM historical_import_99_19 GROUP BY HS, YEAR")
+
+# Combine the summaries into a single table
+commoditySummary_exports$Type <- "EXPORT"
+commoditySummary_imports$Type <- "IMPORT"
+commoditySummary <- rbind(commoditySummary_exports, commoditySummary_imports)
 
 # Remove NA values
 commoditySummary <- commoditySummary[is.na(commoditySummary$HS) == FALSE, ]
@@ -100,7 +123,7 @@ prettyTable(commoditySummary[1:25, ])
 ```
 
 <br>
-With the above data we can see that there are `R length(unique(commoditySummary$HS))` *HS* codes. There's one code that dates back to 1900!
+With the above data we can see that there are `R length(unique(commoditySummary$HS))` *HS* codes. There's one code that dates back to 1900, which seems like a typo!
 <br>
 
 ```{r 1900, echo=FALSE}
@@ -108,7 +131,7 @@ With the above data we can see that there are `R length(unique(commoditySummary$
 old <- commoditySummary[commoditySummary$HS == "84715000", ]
 
 # View the data
-old[order(old$YEAR), ]
+prettyTable(old[order(old$YEAR), ])
 ```
 
 # Closing a connection to the `MySQL` server
