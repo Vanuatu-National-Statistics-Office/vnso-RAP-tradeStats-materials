@@ -23,12 +23,16 @@ library(knitr) # Nice tables
 library(kableExtra) # Extra nice tables
 library(basicPlotteR) # Progress bar
 library(plotly) # Interactive graphs
+library(openxlsx) # REad and write excel formatted files
 
 # Set the number of digits to use before using exp notation
 options("scipen"=50)
 
 # Load the general R functions
 source("functions.R")
+
+# Get the repository directory - for building relative paths
+repository <- dirname(getwd())
 ```
 
 # Introduction
@@ -163,7 +167,12 @@ old <- commoditySummary[commoditySummary$HS == "84715000", ]
 prettyTable(old[order(old$YEAR), ])
 ```
 
-# Look at trends in the principle exports and imports
+# Identify the top imports and exports
+
+```{r read in the principle commodities table}
+principle <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx"))
+```
+
 
 # Closing a connection to the `MySQL` server
 
