@@ -44,7 +44,7 @@ The MySQL server is running locally and we can connect to it from R with the fol
 ```{r connection, eval=FALSE}
 # Open a connection to a MySQL database
 connection <- dbConnect(MySQL(), 
-                            user='root', 
+                            user='JosephCrispell', 
                             password=readline(prompt="Enter password: "), # Doing this as password never stored in easily accessible format now
                             dbname='vnso',
                             host='localhost')
