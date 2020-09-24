@@ -16,3 +16,5 @@
 Datasets currently present in secure folder:
 
 - `SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx` - processed version of January's monthly statistics data. Additional sheets provide reference tables to intepret custom codes.
+- `tradeStats_historic_IMPORTS_14-09-20.csv` - trade statistics data for all **IMPORTS** into Vanuatu from 1999 to 2019
+- `tradeStats_historic_EXPORTS_14-09-20.csv` - trade statistics data for all **EXPORTS** into Vanuatu from 1999 to 2019
