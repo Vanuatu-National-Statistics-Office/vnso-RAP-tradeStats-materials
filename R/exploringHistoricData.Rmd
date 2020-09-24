@@ -24,6 +24,9 @@ library(kableExtra) # Extra nice tables
 library(basicPlotteR) # Progress bar
 library(plotly) # Interactive graphs
 
+# Set the number of digits to use before using exp notation
+options("scipen"=50)
+
 # Load the general R functions
 source("functions.R")
 ```
@@ -62,17 +65,26 @@ connection <- dbConnect(MySQL(),
 
 ```{r store local csv, eval=FALSE, echo=FALSE}
 # Get the historic data
-historic <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19")
+exports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19")
+imports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_import_99_19")
 
 # Save the data as a standard csv
-write.table(historic, file=file.path("..", "data", "secure", "tradeStats_historic_14-09-20.csv"),
+write.table(exports, file=file.path("..", "data", "secure", "tradeStats_historic_EXPORTS_14-09-20.csv"),
+            sep=",", row.names=FALSE, quote=TRUE)
+write.table(imports, file=file.path("..", "data", "secure", "tradeStats_historic_IMPORTS_14-09-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
 ```
- 
+
+```{r get size of tables, echo=FALSE}
+nImportRecords <- dbGetQuery(conn=connection, statement="SELECT TABLE_ROWS FROM information_schema.TABLES WHERE table_name = 'historical_import_99_19'") # Slower more accurate query: SELECT COUNT(*) FROM historical_import_99_19
+nExportRecords <- dbGetQuery(conn=connection, statement="SELECT TABLE_ROWS FROM information_schema.TABLES WHERE table_name = 'historical_export_99_19'") # Slower more accurate query: SELECT COUNT(*) FROM historical_export_99_19
+```
+
+
 On our local MySQL database there are two tables:
 
-- `historical_export_99_19` - the historic data for all exports
-- `historical_import_99_19` - the historic data for all imports
+- `historical_export_99_19` - the historic data for all exports (~`r nExportRecords` rows)
+- `historical_import_99_19` - the historic data for all imports (~`r nImportRecords` rows)
 
 The imports data looks like this:
 
@@ -86,7 +98,7 @@ prettyTable(historic_imports)
 ```
 
 <br>
-Ad the exports data like this:
+And the exports data like this:
 <br>
 
 ```{r quick look at historic exportsdata, echo=FALSE}
@@ -100,12 +112,29 @@ prettyTable(historic_exports)
 
 # Summarise the `Value` distribution for each HS code
 
-Each commodity in the historic data is identified by an 8 digit **HS** (Harmonized System) code. We are aiming to define the expected `Value` distribution for each unique **HS** code through tim for imports and exports. We can start with some simple summary statistics:
+Each commodity in the historic data is identified by an 8 digit **HS** (Harmonized System) code. We are aiming to define the expected value distribution for each unique **HS** code through time for imports and exports. 
 
-```{r summarise value column}
-# Summarise the value column for each commodity for each year
-commoditySummary_exports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Dest AS CTY, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(Value) AS count, SUM(Value) AS sum, STDDEV_SAMP(Value) AS sd, VAR_SAMP(Value) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
-commoditySummary_imports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Origin AS CTY, AVG(Value) AS average, MAX(Value) AS maximum, MIN(Value) AS minimum, COUNT(Value) AS count, SUM(Value) AS sum, STDDEV_SAMP(Value) AS sd, VAR_SAMP(Value) as variance FROM historical_import_99_19 GROUP BY HS, YEAR")
+Firstly we need to create a column to store the correct `Value` column by the `Weight` column for both the imports and exports:
+```{r create column to store value divded by weight}
+# Add column to correct Value column by Weight into IMPORTS table
+colNames_imports <- dbGetQuery(connection, statement="SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='vnso' AND TABLE_NAME='historical_import_99_19'")
+if("Value_corrected" %in% colNames_imports[, 1] == FALSE){
+  dbSendQuery(connection, statement="ALTER TABLE historical_import_99_19 ADD Value_corrected DOUBLE AS (Value / Weight)")
+}
+
+# Add column to correct Value column by Weight into EXPORTS table
+colNames_exports <- dbGetQuery(connection, statement="SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='vnso' AND TABLE_NAME='historical_export_99_19'")
+if("Value_corrected" %in% colNames_exports[, 1] == FALSE){
+  dbSendQuery(connection, statement="ALTER TABLE historical_export_99_19 ADD Value_corrected DOUBLE AS (Value / Weight)")
+}
+```
+
+With the `Value_corrected` column created, we can create some simple statistics:
+
+```{r summarise corrected value column}
+# Summarise the corrected value column for each commodity for each year
+commoditySummary_exports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Dest AS CTY, AVG(Value_corrected) AS average, MAX(Value_corrected) AS maximum, MIN(Value_corrected) AS minimum, COUNT(Value_corrected) AS count, SUM(Value_corrected) AS sum, STDDEV_SAMP(Value_corrected) AS sd, VAR_SAMP(Value_corrected) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
+commoditySummary_imports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Origin AS CTY, AVG(Value_corrected) AS average, MAX(Value_corrected) AS maximum, MIN(Value_corrected) AS minimum, COUNT(Value_corrected) AS count, SUM(Value_corrected) AS sum, STDDEV_SAMP(Value_corrected) AS sd, VAR_SAMP(Value_corrected) as variance FROM historical_import_99_19 GROUP BY HS, YEAR")
 
 # Combine the summaries into a single table
 commoditySummary_exports$Type <- "EXPORT"
@@ -123,7 +152,7 @@ prettyTable(commoditySummary[1:25, ])
 ```
 
 <br>
-With the above data we can see that there are `R length(unique(commoditySummary$HS))` *HS* codes. There's one code that dates back to 1900, which seems like a typo!
+With the above data we can see that there are `r length(unique(commoditySummary$HS))` **HS** codes. There's one code that dates back to 1900, which seems like a typo!
 <br>
 
 ```{r 1900, echo=FALSE}
@@ -133,6 +162,8 @@ old <- commoditySummary[commoditySummary$HS == "84715000", ]
 # View the data
 prettyTable(old[order(old$YEAR), ])
 ```
+
+# Look at trends in the principle exports and imports
 
 # Closing a connection to the `MySQL` server
 
