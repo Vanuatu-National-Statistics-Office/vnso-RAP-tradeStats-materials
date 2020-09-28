@@ -148,29 +148,63 @@ commoditySummary <- rbind(commoditySummary_exports, commoditySummary_imports)
 # Remove NA values
 commoditySummary <- commoditySummary[is.na(commoditySummary$HS) == FALSE, ]
 
+# Convert the year column to numeric
+commoditySummary$YEAR <- as.numeric(commoditySummary$YEAR)
+
 # Sort the commodity by HS code and year
 commoditySummary <- commoditySummary[order(commoditySummary$HS, commoditySummary$YEAR), ]
+
+# Remove any records before 1999
+commoditySummary <- commoditySummary[commoditySummary$YEAR >= 1999, ]
 
 # View the table
 prettyTable(commoditySummary[1:25, ])
 ```
 
-<br>
-With the above data we can see that there are `r length(unique(commoditySummary$HS))` **HS** codes. There's one code that dates back to 1900, which seems like a typo!
-<br>
-
-```{r 1900, echo=FALSE}
-# Get the information for the HS code with information dating back to 1900
-old <- commoditySummary[commoditySummary$HS == "84715000", ]
-
-# View the data
-prettyTable(old[order(old$YEAR), ])
-```
-
-# Identify the top imports and exports
+# Track trends in the principle imports and exports
 
 ```{r read in the principle commodities table}
+
+# Read in the principle commodities table
 principle <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx"))
+
+# Merge the principle definitions into the commodity summary tables
+commoditySummary <- merge(commoditySummary, principle, by.x="HS", by.y="HS.Code")
+```
+
+```{r quick visual, echo=FALSE, eval=FALSE}
+# Make a quick visual
+exportRows <- is.na(commoditySummary$PRINCIPAL.EXPORTS) == FALSE & commoditySummary$PRINCIPAL.EXPORTS != "OTHER PRODUCTS"
+yLim <- range(commoditySummary[exportRows, "average"], na.rm=TRUE)
+yLimLogged <- log(yLim)
+xLim <- range(commoditySummary[exportRows, "YEAR"], na.rm=TRUE)
+plot(x=NULL, y=NULL, xlim=xLim, ylim=yLimLogged, 
+     bty="n", las=1, yaxt="n", ylab="Value", xlab="Year",
+     main="Trends in principle exports through time")
+at <- c(0.1, 10^(0:10))
+at <- at[at < yLim[2]]
+labels <- ifelse(at > 10000, paste0(at/1000000, "M"), at)
+atLogged <- log(at)
+axis(side=2, at=atLogged, labels=labels, las=1)
+
+types <- unique(commoditySummary[commoditySummary$PRINCIPAL.EXPORTS != "OTHER PRODUCTS", "PRINCIPAL.EXPORTS"])
+colours <- colorRampPalette(brewer.pal(8, "Dark2"))(length(types))
+colours <- setAlpha(colours, 0.5)
+for(i in seq_along(types)){
+  
+  subset <- commoditySummary[commoditySummary$PRINCIPAL.EXPORTS == types[i], ]
+  subset <- subset[order(subset$YEAR), ]
+  
+  
+  for(code in unique(subset$HS)){
+    
+    lines(x=subset[subset$HS == code, "YEAR"],
+          y=log(subset[subset$HS == code, "average"]), 
+          col=colours[i], lwd=2)
+  }
+}
+
+legend(x=2019, y=16, legend=types, text.col=colours, bty="n", cex=0.75, pch=NA, xpd=TRUE)
 ```
 
 
