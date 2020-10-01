@@ -238,3 +238,31 @@ buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, co
   
   return(summaryTable)
 }
+
+#' Calculate combined summary statistics 
+#' 
+#' A function that calculates combined mean, variance and standard deviations calculated on multiple samples. 
+#' @param means A numeric vector containing the mean value calculated for multiple samples.
+#' @param sizes A numeric vector containing the size of multiple samples
+#' @param variances A numeric vector containing the variance value calculated for multiple samples
+#' @return Returns a labeled numeric vector containing the calculated combined mean, variance and standard deviation statistics
+calculateCombineSummaryStatistics <- function(means, sizes, variances){
+  
+  # Answer taken from: https://stackoverflow.com/questions/7753002/adding-combining-standard-deviations
+  
+  # Calculate combined mean
+  combinedMean <- sum(means * sizes) / sum(sizes)
+  
+  # Calculate combined variance
+  sum1 <- sum((sizes-1) * variances)
+  sum2 <- sum(sizes * (means - combinedMean)^2)
+  combinedVar <- (sum1 + sum2)/(sum(sizes)-1)
+  
+  # Calculate the combined standard deviation
+  combinedSD <- sqrt(combinedVar)
+  
+  # Combine results into output
+  output <- c("Mean"=combinedMean, "Var"=combinedVar, "SD"=combinedSD)
+  
+  return(output)
+}
