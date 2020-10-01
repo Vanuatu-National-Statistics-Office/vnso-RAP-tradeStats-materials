@@ -159,13 +159,22 @@ commoditySummary <- commoditySummary[order(commoditySummary$HS, commoditySummary
 # Remove any records before 1999
 commoditySummary <- commoditySummary[commoditySummary$YEAR >= 1999, ]
 
+# Add estimated dupper and lower bounds using standard deviation
+commoditySummary$Lower <- commoditySummary$average - (3 * commoditySummary$sd)
+commoditySummary$Lower[commoditySummary$Lower < 0] <- 0
+commoditySummary$Upper <- commoditySummary$average + (3 * commoditySummary$sd)
+
 # View the table
 prettyTable(commoditySummary[1:25, ])
 ```
 
-# Track trends in the principle imports and exports
+# Track trends in the principle imports and exports {.tabset}
 
-```{r read in the principle commodities table}
+The principle imports and exports are defined within the [`data/open/OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx`](https://github.com/Vanuatu-National-Statistics-Office/vnso-RAP-tradeStats-materials/blob/master/data/open/OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx) excel file. These define groups of **HS** codes that together represent the top imports and exports for Vanuatu. 
+
+We can summarise the trends for these commodities and visualise their trends:
+
+```{r read in the principle commodities table, echo=FALSE}
 
 # Read in the principle commodities table
 principle <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx"))
@@ -174,7 +183,7 @@ principle <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_Prin
 commoditySummary <- merge(commoditySummary, principle, by.x="HS", by.y="HS.Code")
 ```
 
-```{r calculate summary statistics for principle commodities}
+```{r calculate summary statistics for principle commodities, echo=FALSE}
 
 # Note the exports of interest
 exports <- unique(commoditySummary$PRINCIPAL.EXPORTS)
@@ -244,31 +253,32 @@ for(year in years){
 }
 ```
 
+## Trends in principle exports
 
-```{r visualise principle commodity exports trends, echo=FALSE, eval=FALSE}
+```{r visualise principle commodity exports trends, echo=FALSE}
 # Extract the export and import datasets
 principleExportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "EXPORT", ]
+#principleImportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "IMPORT", ]
 
 # Products to highlight
-highlight_exports <- c("BEEF", "COPRA", "COWHIDES")
+exportsToHighlight <- c("BEEF", "COPRA", "COWHIDES")
 
 # Start a plotly figure
 fig <- plot_ly()
 
 # Get the descriptions of principle commodities
-exports <- unique(principleExportSummary$Description)
+descriptionsExports <- unique(principleExportSummary$Description)
+descriptionsExportsShort <- substr(descriptionsExports, 1, 15)
 
 # Define a colour for each principle commodity
 palette <- colorRampPalette(brewer.pal(8, "Dark2"))
-colours_export <- palette(length(exports)) 
+coloursExports <- palette(length(descriptionsExports)) 
 
 # Add a trace for each principle commodity
-for(index in seq_along(exports)){
+for(index in seq_along(descriptionsExports)){
   
-#index <- 1
-
   # Get the data for current commodity
-  summaryStats <- principleExportSummary[principleExportSummary$Description == exports[index], ]
+  summaryStats <- principleExportSummary[principleExportSummary$Description == descriptionsExports[index], ]
   
   # Remove rows with NAs
   summaryStates <- summaryStats[is.na(summaryStats$Mean) == FALSE, ]
@@ -278,26 +288,21 @@ for(index in seq_along(exports)){
                   "<br>Mean: ", round(summaryStats$Mean, digits=0),
                   "<br>SD: ", round(summaryStats$StandardDeviation, digits=0),
                   "<br>Variance: ", round(summaryStats$Variance, digits=0))
-  #fig <- add_lines(fig, 
-  #                  x=summaryStats$Year, 
-  #                  y=summaryStats$Mean,
-  #                  name=exports[index], 
-  #                  hovertemplate=labels,
-  #                  line=list(color=colours_export[index]))
+
   fig <- add_ribbons(fig, 
                      x=summaryStats$Year,
                      y=summaryStats$Mean,
                      ymin=summaryStats$Mean-summaryStats$StandardDeviation,
                      ymax=summaryStats$Mean+summaryStats$StandardDeviation,
-                     name=exports[index], 
+                     name=descriptionsExportsShort[index], 
                      hovertemplate=labels,
-                     line=list(color=colours_export[index]),
-                     fillcolor=setAlpha(colours_export[index], 0.5),
-                     visible=exports[index] %in% highlight_exports)
+                     line=list(color="transparent"),
+                     fillcolor=setAlpha(coloursExports[index], 0.5),
+                     visible=ifelse(descriptionsExports[index] %in% exportsToHighlight, TRUE, "legendonly"))
 }
 
 # Set initial plot title
-fig <- layout(fig, title="Trends in unit value of principle commodities")
+fig <- layout(fig, title="Trends in unit value of principle commodities (<b>EXPORTS</b>)")
 
 # Add initial X axis label
 fig <- layout(fig, xaxis=list(title="Date"))
@@ -309,21 +314,65 @@ fig
 
 ```
 
-```{r}
-x <- c(1, 2, 1, 2)
-g <- c('a','a','b','b')
-y <- c(1, 2, 3, 4)
-lo <- y - .1
-hi <- y + .1
+## Trends in principle imports
+```{r plot trends for pinciple imports, echo=FALSE}
+# Extract the export and import datasets
+principleImportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "IMPORT", ]
+#principleImportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "IMPORT", ]
 
-a <- plot_ly(x=x, y=y, group=g)
-a <- add_trace(a, x = x[g=="a"], y = hi[g=="a"], group = g[g=="a"], fill = 'tonexty')
-a <- add_trace(a, x = x[g=="a"], y = lo[g=="a"], group = g[g=="a"])
-a <- add_trace(a, x = x[g=="b"], y = hi[g=="b"], group = g[g=="b"], fill = 'tonexty')
-a <- add_trace(a, x = x[g=="b"], y = lo[g=="b"], group = g[g=="b"])
+# Products to highlight
+importsToHighlight <- c("RICE", "Meat and edible offal of poultry")
 
+# Start a plotly figure
+fig <- plot_ly()
 
-a
+# Get the descriptions of principle commodities
+descriptionsImports <- unique(principleImportSummary$Description)
+descriptionsImportsShort <- substr(descriptionsImports, 1, 15)
+
+# Define a colour for each principle commodity
+palette <- colorRampPalette(brewer.pal(8, "Dark2"))
+coloursImports <- palette(length(descriptionsImports)) 
+
+# Add a trace for each principle commodity
+for(index in seq_along(descriptionsImports)){
+  
+#index <- 1
+
+  # Get the data for current commodity
+  summaryStats <- principleImportSummary[principleImportSummary$Description == descriptionsImports[index], ]
+  
+  # Remove rows with NAs
+  summaryStates <- summaryStats[is.na(summaryStats$Mean) == FALSE, ]
+  
+  # Add a trace for current commodity
+  labels <- paste("<b>Year</b>:", summaryStats$Year,
+                  "<br>Mean: ", round(summaryStats$Mean, digits=0),
+                  "<br>SD: ", round(summaryStats$StandardDeviation, digits=0),
+                  "<br>Variance: ", round(summaryStats$Variance, digits=0))
+  fig <- add_ribbons(fig, 
+                     x=summaryStats$Year,
+                     y=summaryStats$Mean,
+                     ymin=summaryStats$Mean-summaryStats$StandardDeviation,
+                     ymax=summaryStats$Mean+summaryStats$StandardDeviation,
+                     name=descriptionsImportsShort[index], 
+                     hovertemplate=labels,
+                     line=list(color="transparent"),
+                     fillcolor=setAlpha(coloursImports[index], 0.5),
+                     visible=ifelse(descriptionsImports[index] %in% importsToHighlight, TRUE, "legendonly"))
+}
+
+# Set initial plot title
+fig <- layout(fig, title="Trends in unit value of principle commodities (<b>IMPORTS</b>)")
+
+# Add initial X axis label
+fig <- layout(fig, xaxis=list(title="Date"))
+
+# Set Y axis to logged and label
+fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Average unit value"))
+
+fig
+
 ```
 
 # Closing a connection to the `MySQL` server
