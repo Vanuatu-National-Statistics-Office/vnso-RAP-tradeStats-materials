@@ -245,24 +245,47 @@ buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, co
 #' @param means A numeric vector containing the mean value calculated for multiple samples.
 #' @param sizes A numeric vector containing the size of multiple samples
 #' @param variances A numeric vector containing the variance value calculated for multiple samples
+#' @param returnStat A string identifying which summary statistic to return. Defaults to all
 #' @return Returns a labeled numeric vector containing the calculated combined mean, variance and standard deviation statistics
-calculateCombineSummaryStatistics <- function(means, sizes, variances){
+calculateCombineSummaryStatistics <- function(means, sizes, variances, returnStat=NULL){
   
   # Answer taken from: https://stackoverflow.com/questions/7753002/adding-combining-standard-deviations
   
-  # Calculate combined mean
-  combinedMean <- sum(means * sizes) / sum(sizes)
+  # Identify NA values
+  naIndices <- which(is.na(means) | is.na(sizes) | is.na(variances))
+
+  # Check still have values left
+  if(length(naIndices) < length(means)){
+    
+    # Remove NA values
+    if(length(naIndices) > 0){
+      means <- means[-naIndices]
+      sizes <- sizes[-naIndices]
+      variances <- variances[-naIndices]
+    }
+    
+    # Calculate combined mean
+    combinedMean <- sum(means * sizes) / sum(sizes)
+    
+    # Calculate combined variance
+    sum1 <- sum((sizes-1) * variances)
+    sum2 <- sum(sizes * (means - combinedMean)^2)
+    combinedVar <- (sum1 + sum2)/(sum(sizes)-1)
+    
+    # Calculate the combined standard deviation
+    combinedSD <- sqrt(combinedVar)
+    
+    # Combine results into output
+    output <- c("Mean"=combinedMean, "Var"=combinedVar, "SD"=combinedSD)
   
-  # Calculate combined variance
-  sum1 <- sum((sizes-1) * variances)
-  sum2 <- sum(sizes * (means - combinedMean)^2)
-  combinedVar <- (sum1 + sum2)/(sum(sizes)-1)
+  }else{
+    output <- c("Mean"=NA, "Var"=NA, "SD"=NA)
+  }
   
-  # Calculate the combined standard deviation
-  combinedSD <- sqrt(combinedVar)
-  
-  # Combine results into output
-  output <- c("Mean"=combinedMean, "Var"=combinedVar, "SD"=combinedSD)
+  # Check if only want one stat
+  if(is.null(returnStat) == FALSE){
+    output <- output[returnStat]
+  }
   
   return(output)
 }

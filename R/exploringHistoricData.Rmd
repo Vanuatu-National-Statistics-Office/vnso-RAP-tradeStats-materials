@@ -24,6 +24,8 @@ library(kableExtra) # Extra nice tables
 library(basicPlotteR) # Progress bar
 library(plotly) # Interactive graphs
 library(openxlsx) # REad and write excel formatted files
+library(RColorBrewer) # Creating colour pallettes
+library(basicPlotteR) # Set transparency of colours
 
 # Set the number of digits to use before using exp notation
 options("scipen"=50)
@@ -174,46 +176,155 @@ commoditySummary <- merge(commoditySummary, principle, by.x="HS", by.y="HS.Code"
 
 ```{r calculate summary statistics for principle commodities}
 
-```
+# Note the exports of interest
+exports <- unique(commoditySummary$PRINCIPAL.EXPORTS)
+exports <- exports[exports != "OTHER PRODUCTS"]
 
+# Note the imports of interest
+imports <- unique(commoditySummary$PRINCIPAL.IMPORTS)
+imports <- imports[is.na(imports) == FALSE]
 
-```{r quick visual, echo=FALSE, eval=FALSE}
-library(basicPlotteR)
-library(RColorBrewer)
-# Make a quick visual
-exportRows <- is.na(commoditySummary$PRINCIPAL.EXPORTS) == FALSE & commoditySummary$PRINCIPAL.EXPORTS != "OTHER PRODUCTS"
-yLim <- range(commoditySummary[exportRows, "average"], na.rm=TRUE)
-yLimLogged <- log(yLim)
-xLim <- range(commoditySummary[exportRows, "YEAR"], na.rm=TRUE)
-plot(x=NULL, y=NULL, xlim=xLim, ylim=yLimLogged, 
-     bty="n", las=1, yaxt="n", ylab="Value", xlab="Year",
-     main="Trends in principle exports through time")
-at <- c(0.1, 10^(0:10))
-at <- at[at < yLim[2]]
-labels <- ifelse(at > 10000, paste0(at/1000000, "M"), at)
-atLogged <- log(at)
-axis(side=2, at=atLogged, labels=labels, las=1)
+# Get the range of years
+years <- min(commoditySummary$YEAR):max(commoditySummary$YEAR)
 
-types <- unique(commoditySummary[commoditySummary$PRINCIPAL.EXPORTS != "OTHER PRODUCTS", "PRINCIPAL.EXPORTS"])
-colours <- colorRampPalette(brewer.pal(8, "Dark2"))(length(types))
-colours <- setAlpha(colours, 0.5)
-for(i in seq_along(types)){
-  
-  subset <- commoditySummary[commoditySummary$PRINCIPAL.EXPORTS == types[i], ]
-  subset <- subset[order(subset$YEAR), ]
-  
-  
-  for(code in unique(subset$HS)){
+# Build an initial table to store the summary statistics
+principleCommoditySummary <- data.frame("Description"=NA, "Type"=NA, "Year"=NA,
+                                        "Mean"=NA, "Variance"=NA, "StandardDeviation"=NA,
+                                        stringsAsFactors=FALSE)
+row <- 0
+
+# Examine each year
+for(year in years){
+
+  # Examine each export
+  for(description in exports){
+
+    # Subset the summary statistics for commodities in current group
+    groupStats <- commoditySummary[commoditySummary$PRINCIPAL.EXPORTS == description &
+                                     commoditySummary$Type == "EXPORT" &
+                                     commoditySummary$YEAR == year, ]
     
-    lines(x=subset[subset$HS == code, "YEAR"],
-          y=log(subset[subset$HS == code, "average"]), 
-          col=colours[i], lwd=2)
+    # Calculate the combined summary statistics for current group
+    combinedStats <- calculateCombineSummaryStatistics(means=groupStats$average,
+                                                       sizes=groupStats$count,
+                                                       variances=groupStats$variance)
+    
+    # Store the information
+    row <- row + 1
+    principleCommoditySummary[row, "Description"] <- description
+    principleCommoditySummary[row, "Type"] <- "EXPORT"
+    principleCommoditySummary[row, "Year"] <- year
+    principleCommoditySummary[row, "Mean"] <- combinedStats["Mean"]
+    principleCommoditySummary[row, "Variance"] <- combinedStats["Var"]
+    principleCommoditySummary[row, "StandardDeviation"] <- combinedStats["SD"]
+  }
+  
+    # Examine each imports
+  for(description in imports){
+
+    # Subset the summary statistics for commodities in current group
+    groupStats <- commoditySummary[commoditySummary$PRINCIPAL.IMPORTS == description &
+                                     commoditySummary$Type == "IMPORT" &
+                                     commoditySummary$YEAR == year, ]
+    
+    # Calculate the combined summary statistics for current group
+    combinedStats <- calculateCombineSummaryStatistics(means=groupStats$average,
+                                                       sizes=groupStats$count,
+                                                       variances=groupStats$variance)
+    
+    # Store the information
+    row <- row + 1
+    principleCommoditySummary[row, "Description"] <- description
+    principleCommoditySummary[row, "Type"] <- "IMPORT"
+    principleCommoditySummary[row, "Year"] <- year
+    principleCommoditySummary[row, "Mean"] <- combinedStats["Mean"]
+    principleCommoditySummary[row, "Variance"] <- combinedStats["Var"]
+    principleCommoditySummary[row, "StandardDeviation"] <- combinedStats["SD"]
   }
 }
-
-legend(x=2019, y=16, legend=types, text.col=colours, bty="n", cex=0.75, pch=NA, xpd=TRUE)
 ```
 
+
+```{r visualise principle commodity exports trends, echo=FALSE, eval=FALSE}
+# Extract the export and import datasets
+principleExportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "EXPORT", ]
+
+# Products to highlight
+highlight_exports <- c("BEEF", "COPRA", "COWHIDES")
+
+# Start a plotly figure
+fig <- plot_ly()
+
+# Get the descriptions of principle commodities
+exports <- unique(principleExportSummary$Description)
+
+# Define a colour for each principle commodity
+palette <- colorRampPalette(brewer.pal(8, "Dark2"))
+colours_export <- palette(length(exports)) 
+
+# Add a trace for each principle commodity
+for(index in seq_along(exports)){
+  
+#index <- 1
+
+  # Get the data for current commodity
+  summaryStats <- principleExportSummary[principleExportSummary$Description == exports[index], ]
+  
+  # Remove rows with NAs
+  summaryStates <- summaryStats[is.na(summaryStats$Mean) == FALSE, ]
+  
+  # Add a trace for current commodity
+  labels <- paste("<b>Year</b>:", summaryStats$Year,
+                  "<br>Mean: ", round(summaryStats$Mean, digits=0),
+                  "<br>SD: ", round(summaryStats$StandardDeviation, digits=0),
+                  "<br>Variance: ", round(summaryStats$Variance, digits=0))
+  #fig <- add_lines(fig, 
+  #                  x=summaryStats$Year, 
+  #                  y=summaryStats$Mean,
+  #                  name=exports[index], 
+  #                  hovertemplate=labels,
+  #                  line=list(color=colours_export[index]))
+  fig <- add_ribbons(fig, 
+                     x=summaryStats$Year,
+                     y=summaryStats$Mean,
+                     ymin=summaryStats$Mean-summaryStats$StandardDeviation,
+                     ymax=summaryStats$Mean+summaryStats$StandardDeviation,
+                     name=exports[index], 
+                     hovertemplate=labels,
+                     line=list(color=colours_export[index]),
+                     fillcolor=setAlpha(colours_export[index], 0.5),
+                     visible=exports[index] %in% highlight_exports)
+}
+
+# Set initial plot title
+fig <- layout(fig, title="Trends in unit value of principle commodities")
+
+# Add initial X axis label
+fig <- layout(fig, xaxis=list(title="Date"))
+
+# Set Y axis to logged and label
+fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Average unit value"))
+
+fig
+
+```
+
+```{r}
+x <- c(1, 2, 1, 2)
+g <- c('a','a','b','b')
+y <- c(1, 2, 3, 4)
+lo <- y - .1
+hi <- y + .1
+
+a <- plot_ly(x=x, y=y, group=g)
+a <- add_trace(a, x = x[g=="a"], y = hi[g=="a"], group = g[g=="a"], fill = 'tonexty')
+a <- add_trace(a, x = x[g=="a"], y = lo[g=="a"], group = g[g=="a"])
+a <- add_trace(a, x = x[g=="b"], y = hi[g=="b"], group = g[g=="b"], fill = 'tonexty')
+a <- add_trace(a, x = x[g=="b"], y = lo[g=="b"], group = g[g=="b"])
+
+
+a
+```
 
 # Closing a connection to the `MySQL` server
 
