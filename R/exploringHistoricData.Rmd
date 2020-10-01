@@ -172,7 +172,14 @@ principle <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_Prin
 commoditySummary <- merge(commoditySummary, principle, by.x="HS", by.y="HS.Code")
 ```
 
+```{r calculate summary statistics for principle commodities}
+
+```
+
+
 ```{r quick visual, echo=FALSE, eval=FALSE}
+library(basicPlotteR)
+library(RColorBrewer)
 # Make a quick visual
 exportRows <- is.na(commoditySummary$PRINCIPAL.EXPORTS) == FALSE & commoditySummary$PRINCIPAL.EXPORTS != "OTHER PRODUCTS"
 yLim <- range(commoditySummary[exportRows, "average"], na.rm=TRUE)
