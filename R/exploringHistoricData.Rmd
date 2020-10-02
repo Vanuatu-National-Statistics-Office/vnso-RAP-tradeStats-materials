@@ -69,18 +69,6 @@ connection <- dbConnect(MySQL(),
                         host='localhost')
 ```
 
-```{r store local csv, eval=FALSE, echo=FALSE}
-# Get the historic data
-exports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19")
-imports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_import_99_19")
-
-# Save the data as a standard csv
-write.table(exports, file=file.path("..", "data", "secure", "tradeStats_historic_EXPORTS_14-09-20.csv"),
-            sep=",", row.names=FALSE, quote=TRUE)
-write.table(imports, file=file.path("..", "data", "secure", "tradeStats_historic_IMPORTS_14-09-20.csv"),
-            sep=",", row.names=FALSE, quote=TRUE)
-```
-
 ```{r get size of tables, echo=FALSE}
 nImportRecords <- dbGetQuery(conn=connection, statement="SELECT TABLE_ROWS FROM information_schema.TABLES WHERE table_name = 'historical_import_99_19'") # Slower more accurate query: SELECT COUNT(*) FROM historical_import_99_19
 nExportRecords <- dbGetQuery(conn=connection, statement="SELECT TABLE_ROWS FROM information_schema.TABLES WHERE table_name = 'historical_export_99_19'") # Slower more accurate query: SELECT COUNT(*) FROM historical_export_99_19
@@ -120,7 +108,7 @@ prettyTable(historic_exports)
 
 Each commodity in the historic data is identified by an 8 digit **HS** (Harmonized System) code. We are aiming to define the expected value distribution for each unique **HS** code through time for imports and exports. 
 
-Firstly we need to create a column to store the correct `Value` column by the `Weight` column for both the imports and exports:
+Firstly we need to calculate the unit value by dividing `Value` column by the `Weight` column for both the imports and exports:
 ```{r create column to store value divded by weight}
 # Add column to correct Value column by Weight into IMPORTS table
 colNames_imports <- dbGetQuery(connection, statement="SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='vnso' AND TABLE_NAME='historical_import_99_19'")
@@ -135,38 +123,87 @@ if("Value_corrected" %in% colNames_exports[, 1] == FALSE){
 }
 ```
 
-With the `Value_corrected` column created, we can create some simple statistics:
+Using `MySQL` commands we can generate simple summary statistics of the `Value_corrected` column by HS code and year. For the exports, for example:
 
 ```{r summarise corrected value column}
 # Summarise the corrected value column for each commodity for each year
-commoditySummary_exports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Dest AS CTY, AVG(Value_corrected) AS average, MAX(Value_corrected) AS maximum, MIN(Value_corrected) AS minimum, COUNT(Value_corrected) AS count, SUM(Value_corrected) AS sum, STDDEV_SAMP(Value_corrected) AS sd, VAR_SAMP(Value_corrected) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
-commoditySummary_imports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Origin AS CTY, AVG(Value_corrected) AS average, MAX(Value_corrected) AS maximum, MIN(Value_corrected) AS minimum, COUNT(Value_corrected) AS count, SUM(Value_corrected) AS sum, STDDEV_SAMP(Value_corrected) AS sd, VAR_SAMP(Value_corrected) as variance FROM historical_import_99_19 GROUP BY HS, YEAR")
-
-# Combine the summaries into a single table
-commoditySummary_exports$Type <- "EXPORT"
-commoditySummary_imports$Type <- "IMPORT"
-commoditySummary <- rbind(commoditySummary_exports, commoditySummary_imports)
-
-# Remove NA values
-commoditySummary <- commoditySummary[is.na(commoditySummary$HS) == FALSE, ]
-
-# Convert the year column to numeric
-commoditySummary$YEAR <- as.numeric(commoditySummary$YEAR)
-
-# Sort the commodity by HS code and year
-commoditySummary <- commoditySummary[order(commoditySummary$HS, commoditySummary$YEAR), ]
-
-# Remove any records before 1999
-commoditySummary <- commoditySummary[commoditySummary$YEAR >= 1999, ]
-
-# Add estimated dupper and lower bounds using standard deviation
-commoditySummary$Lower <- commoditySummary$average - (3 * commoditySummary$sd)
-commoditySummary$Lower[commoditySummary$Lower < 0] <- 0
-commoditySummary$Upper <- commoditySummary$average + (3 * commoditySummary$sd)
+commoditySummaryExports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Dest AS CTY, AVG(Value_corrected) AS average, MAX(Value_corrected) AS maximum, MIN(Value_corrected) AS minimum, COUNT(Value_corrected) AS count, SUM(Value_corrected) AS sum, STDDEV_SAMP(Value_corrected) AS sd, VAR_SAMP(Value_corrected) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
 
 # View the table
-prettyTable(commoditySummary[1:25, ])
+prettyTable(commoditySummaryExports[1:25, ])
 ```
+
+Ideally though, we'd like to generate some additional summary statistics (like percentiles and median), particularly since the value of commodities is often highly skewed (with some rara items costing a huge amount). We can pull the import and export data into R to work with it directly:
+
+```{r load all imports and exports}
+# Get the historic data
+exports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19")
+imports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_import_99_19")
+```
+
+```{r store local copy, echo=FALSE, eval=FALSE}
+# Save the data as a standard csv
+write.table(exports, file=file.path("..", "data", "secure", "tradeStats_historic_EXPORTS_14-09-20.csv"),
+            sep=",", row.names=FALSE, quote=TRUE)
+write.table(imports, file=file.path("..", "data", "secure", "tradeStats_historic_IMPORTS_14-09-20.csv"),
+            sep=",", row.names=FALSE, quote=TRUE)
+```
+
+With these data loaded we'll use the following function:
+```{r summary statistics function, eval=FALSE}
+calculateSummaryStatistics <- function(values){
+  
+  # Create an output vector to store the summary statistics
+  output <- c("Mean"=NA, "SD"=NA, "Median"=NA, "Lower-2.5"=NA, "Upper-97.5"=NA,
+              "Min"=NA, "Max"=NA, "Count"=NA, "CountMissing"=NA)
+  
+  # Count number of values and any missing data
+  output["Count"] <- length(values)
+  output["CountMissing"] <- sum(is.na(values) | is.infinite(values) | is.nan(values))
+  
+  # Check if only missing available - if so stop and return empty summary statistics
+  if(output["CountMissing"] == output["Count"]){
+    return(output)
+  }
+  
+  # Calculate mean
+  output["Mean"] <- mean(values, na.rm=TRUE)
+  
+  # Calculate standard deviation
+  output["SD"] <- sd(values, na.rm=TRUE)
+  
+  # Calculate median
+  output["Median"] <- median(values, na.rm=TRUE)
+  
+  # Calculate upper and lower 95% percentile bounds
+  quantiles <- quantile(values, probs=c(0.975, 0.025), na.rm=TRUE)
+  output["Upper-97.5"] <- quantiles[1]
+  output["Lower-2.5"] <- quantiles[2]
+  
+  # Calculate the range of the data
+  minMax <- range(values, na.rm=TRUE)
+  output["Min"] <- minMax[1]
+  output["Max"] <- minMax[2]
+  
+  return(output)
+}
+```
+
+With the function above we can use vector operations in R to quickly calculate summary statistics for both the import and export data:
+```{r calculate summary statistics for imports and exports}
+# Generate summary statistics for EXPORTS by HS code and year
+exportsByHSCodeAndYear <- do.call(data.frame,
+                                  aggregate(exports[, c("Value", "Value_corrected")], by=list(exports$HS, exports$Year),
+                                            FUN=calculateSummaryStatistics))
+colnames(exportsByHSCodeAndYear)[1:2] <- c("HS", "Year")
+
+# Generate summary statistics for IMPORTS by HS code and year
+importsByHSCodeAndYear <- do.call(data.frame,
+                                  aggregate(imports[, c("Value", "Value_corrected")], by=list(imports$HS, imports$Year),
+                                            FUN=calculateSummaryStatistics))
+colnames(importsByHSCodeAndYear)[1:2] <- c("HS", "Year")
+```
+
 
 # Track trends in the principle imports and exports {.tabset}
 
