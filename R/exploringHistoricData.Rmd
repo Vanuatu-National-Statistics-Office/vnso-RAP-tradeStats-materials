@@ -110,24 +110,24 @@ Each commodity in the historic data is identified by an 8 digit **HS** (Harmoniz
 
 Firstly we need to calculate the unit value by dividing `Value` column by the `Weight` column for both the imports and exports:
 ```{r create column to store value divded by weight}
-# Add column to correct Value column by Weight into IMPORTS table
+# Add column to unit value - Value column by Weight into IMPORTS table
 colNames_imports <- dbGetQuery(connection, statement="SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='vnso' AND TABLE_NAME='historical_import_99_19'")
-if("Value_corrected" %in% colNames_imports[, 1] == FALSE){
-  dbSendQuery(connection, statement="ALTER TABLE historical_import_99_19 ADD Value_corrected DOUBLE AS (Value / Weight)")
+if("UnitValue" %in% colNames_imports[, 1] == FALSE){
+  dbSendQuery(connection, statement="ALTER TABLE historical_import_99_19 ADD UnitValue DOUBLE AS (Value / Weight)")
 }
 
-# Add column to correct Value column by Weight into EXPORTS table
+# Add column for unit value - Value column by Weight into EXPORTS table
 colNames_exports <- dbGetQuery(connection, statement="SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='vnso' AND TABLE_NAME='historical_export_99_19'")
-if("Value_corrected" %in% colNames_exports[, 1] == FALSE){
-  dbSendQuery(connection, statement="ALTER TABLE historical_export_99_19 ADD Value_corrected DOUBLE AS (Value / Weight)")
+if("UnitValue" %in% colNames_exports[, 1] == FALSE){
+  dbSendQuery(connection, statement="ALTER TABLE historical_export_99_19 ADD UnitValue DOUBLE AS (Value / Weight)")
 }
 ```
 
-Using `MySQL` commands we can generate simple summary statistics of the `Value_corrected` column by HS code and year. For the exports, for example:
+Using `MySQL` commands we can generate simple summary statistics of the `UnitValue` column by HS code and year. For the exports, for example:
 
-```{r summarise corrected value column}
-# Summarise the corrected value column for each commodity for each year
-commoditySummaryExports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Dest AS CTY, AVG(Value_corrected) AS average, MAX(Value_corrected) AS maximum, MIN(Value_corrected) AS minimum, COUNT(Value_corrected) AS count, SUM(Value_corrected) AS sum, STDDEV_SAMP(Value_corrected) AS sd, VAR_SAMP(Value_corrected) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
+```{r summarise unit value column}
+# Summarise the unit value column for each commodity for each year
+commoditySummaryExports <- dbGetQuery(conn=connection, statement="SELECT HS, YEAR, Description, CTY_Dest AS CTY, AVG(UnitValue) AS average, MAX(UnitValue) AS maximum, MIN(UnitValue) AS minimum, COUNT(UnitValue) AS count, SUM(UnitValue) AS sum, STDDEV_SAMP(UnitValue) AS sd, VAR_SAMP(UnitValue) as variance FROM historical_export_99_19 GROUP BY HS, YEAR")
 
 # View the table
 prettyTable(commoditySummaryExports[1:25, ])
@@ -139,6 +139,10 @@ Ideally though, we'd like to generate some additional summary statistics (like p
 # Get the historic data
 exports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19")
 imports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_import_99_19")
+
+# Remove data outside of 1999-2019
+imports <- imports[imports$Year >= 1999 & imports$Year <= 2019, ]
+exports <- exports[exports$Year >= 1999 & exports$Year <= 2019, ]
 ```
 
 ```{r store local copy, echo=FALSE, eval=FALSE}
@@ -189,123 +193,162 @@ calculateSummaryStatistics <- function(values){
 }
 ```
 
-With the function above we can use vector operations in R to quickly calculate summary statistics for both the import and export data:
-```{r calculate summary statistics for imports and exports}
+With the function above we can use vector operations in R to quickly calculate summary statistics for both the import and export data. We are doing the calculates by HS code alone, by HS code and Year, and for both we calculate summary of `Value` and `UnitValue` columns:
+
+```{r calculate summary statistics for imports and exports, eval=FALSE}
 # Generate summary statistics for EXPORTS by HS code and year
 exportsByHSCodeAndYear <- do.call(data.frame,
-                                  aggregate(exports[, c("Value", "Value_corrected")], by=list(exports$HS, exports$Year),
+                                  aggregate(exports[, c("Value", "UnitValue")], by=list(exports$HS, exports$Year),
                                             FUN=calculateSummaryStatistics))
 colnames(exportsByHSCodeAndYear)[1:2] <- c("HS", "Year")
 
+# Generate summary statistics for EXPORTS by HS code
+exportsByHSCode <- do.call(data.frame,
+                                  aggregate(exports[, c("Value", "UnitValue")], by=list(exports$HS),
+                                            FUN=calculateSummaryStatistics))
+colnames(exportsByHSCode)[1:2] <- c("HS")
+
 # Generate summary statistics for IMPORTS by HS code and year
 importsByHSCodeAndYear <- do.call(data.frame,
-                                  aggregate(imports[, c("Value", "Value_corrected")], by=list(imports$HS, imports$Year),
+                                  aggregate(imports[, c("Value", "UnitValue")], by=list(imports$HS, imports$Year),
                                             FUN=calculateSummaryStatistics))
 colnames(importsByHSCodeAndYear)[1:2] <- c("HS", "Year")
+
+# Generate summary statistics for IMPORTS by HS code
+importsByHSCode <- do.call(data.frame,
+                                  aggregate(imports[, c("Value", "UnitValue")], by=list(imports$HS),
+                                            FUN=calculateSummaryStatistics))
+colnames(importsByHSCode)[1:2] <- c("HS")
 ```
 
+```{r store local copy of summary statistics, echo=FALSE, eval=FALSE}
+write.table(exportsByHSCodeAndYear, file=file.path("..", "data", "secure", "exports_HS-Year_summaryStats_02-10-20.csv"),
+            sep=",", row.names=FALSE, quote=TRUE)
+write.table(exportsByHSCode, file=file.path("..", "data", "secure", "exports_HS_summaryStats_02-10-20.csv"),
+            sep=",", row.names=FALSE, quote=TRUE)
+
+write.table(importsByHSCodeAndYear, file=file.path("..", "data", "secure", "imports_HS-Year_summaryStats_02-10-20.csv"),
+            sep=",", row.names=FALSE, quote=TRUE)
+write.table(importsByHSCode, file=file.path("..", "data", "secure", "imports_HS_summaryStats_02-10-20.csv"),
+            sep=",", row.names=FALSE, quote=TRUE)
+```
+
+```{r read in locally stored summary statistics, echo=FALSE}
+exportsByHSCodeAndYear <- read.csv(file.path("..", "data", "secure", "exports_HS-Year_summaryStats_02-10-20.csv"))
+exportsByHSCode <- read.csv(file.path("..", "data", "secure", "exports_HS_summaryStats_02-10-20.csv"))
+
+importsByHSCodeAndYear <- read.csv(file.path("..", "data", "secure", "imports_HS-Year_summaryStats_02-10-20.csv"))
+importsByHSCode <- read.csv(file.path("..", "data", "secure", "imports_HS_summaryStats_02-10-20.csv"))
+```
+
+Now we have a range of summary statistics for the imports:
+```{r view import summary, echo=FALSE}
+prettyTable(importsByHSCode[1:25, ])
+```
+
+and exports:
+```{r view export summary, echo=FALSE}
+prettyTable(importsByHSCode[1:25, ])
+```
+
+# Considering summary statistics
+
+When generating summary statistics, we must carefully consider their appropriateness. For example, let's look at the value distribution for imported Wine (HS code: `22042100`):
+
+```{r visualise value distribution for wine, echo=FALSE}
+# Prepare for subplot
+par(fig=c(0,1,0,1), bg="white")
+
+# Get distribution of values for wine
+wineValues <- imports[imports$HS == "22042100", "UnitValue"]
+
+# Generate summary statistics
+summaryStatistics <- calculateSummaryStatistics(wineValues)
+
+# Plot a subset of the distribution
+histogram <- hist(wineValues[wineValues < 5000], las=1, main="Unit value of imported wine", xlab="Unit value", breaks=50)
+
+# Overlay mean and median
+maxCount <- max(histogram$counts)
+lines(x=rep(summaryStatistics["Mean"], 2),
+      y=c(0, 0.2*maxCount),
+      col="red")
+text(x=summaryStatistics["Mean"], y=0.2*maxCount, labels="Mean", col="red", pos=4, cex=0.75, offset=0.2)
+lines(x=rep(summaryStatistics["Median"], 2),
+      y=c(0, maxCount),
+      col="blue")
+text(x=summaryStatistics["Median"], y=maxCount, labels="Median", col="blue", pos=4, cex=0.75, offset=0.2)
+
+# Overlay percentiles
+text(x=summaryStatistics["Upper-97.5"], y=1450, labels="95% boundaries", col="blue", pos=2, cex=0.75, offset=0.2)
+rect(xleft=summaryStatistics["Lower-2.5"], xright=summaryStatistics["Upper-97.5"],
+     ybottom=1000, ytop=1250, col=rgb(0,0,1, 0.5), xpd=TRUE, border=NA)
+text(x=3750, y=950, labels="Mean +/- Standard Deviation", col="red", cex=0.75, offset=0.2)
+rect(xleft=max(0, (summaryStatistics["Mean"] - summaryStatistics["SD"])), 
+     xright=min(max(histogram$breaks), (summaryStatistics["Mean"] + summaryStatistics["SD"])),
+     ybottom=500, ytop=750, col=rgb(1,0,0, 0.55), xpd=TRUE, border=NA)
+
+# Set the inset figure position
+par(fig=c(0.7, 0.95, 0.4, 0.9), new=TRUE) # Axis limits: x1, x2, y1, y3
+
+# Set up sub plot plotting
+par(mar=c(4, 0, 0, 0), mgp=c(0,0.5,0))
+
+# Plot the distribution
+hist(wineValues, las=1, yaxt="n", xaxt="n", ylab="", xlab="", main="")
+axis(side=1, at=c(100, 1000000, 5000000), labels=c("100", "1M", "5M"), cex.axis=0.7)
+```
+
+The distribution for the unit value of wine is highly skewed, with values ranging up to 5 million! The above plot illustrates how summary statistics such as `mean` and `standard deviation` are strongly influenced by the rarer values of a skewed distribution. In contrast, the `median` and `percentiles` provide a more representative summary of our skewed distribution distribution.
+
+When we are defining our expected boundaries for the value of a commodity, we should use percentiles. Here we have calculated the 95% bounds of the distribution, we expect the value of a commodity to fall within these bounds 95% of the time.
 
 # Track trends in the principle imports and exports {.tabset}
 
 The principle imports and exports are defined within the [`data/open/OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx`](https://github.com/Vanuatu-National-Statistics-Office/vnso-RAP-tradeStats-materials/blob/master/data/open/OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx) excel file. These define groups of **HS** codes that together represent the top imports and exports for Vanuatu. 
 
-We can summarise the trends for these commodities and visualise their trends:
-
+The first thing to note is that each principle commodity, defined by a description, can represent multiple HS codes. We'll read in the classifications and merge them with the historic trades data:
 ```{r read in the principle commodities table, echo=FALSE}
-
 # Read in the principle commodities table
-principle <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx"))
+principleCommodityClassifications <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx"))
 
-# Merge the principle definitions into the commodity summary tables
-commoditySummary <- merge(commoditySummary, principle, by.x="HS", by.y="HS.Code")
+# Merge the descriptions with the imports and exports
+imports <- merge(imports, principleCommodityClassifications, by.x="HS", by.y="HS.Code")
+exports <- merge(exports, principleCommodityClassifications, by.x="HS", by.y="HS.Code")
+
+# Subset the information for the principle commodities only
+principleImports <- imports[is.na(imports$PRINCIPAL.IMPORTS) == FALSE, ]
+principleExports <- exports[exports$PRINCIPAL.EXPORTS != "OTHER PRODUCTS", ]
 ```
 
-```{r calculate summary statistics for principle commodities, echo=FALSE}
+```{r generate summary statistics for principle imports and exports}
+# Summarise the value of the principle imports
+principleImportsSummaryStats <- do.call(data.frame,
+                                        aggregate(principleImports[, c("Value", "UnitValue")], by=list(principleImports$PRINCIPAL.IMPORTS, principleImports$Year),
+                                                  FUN=calculateSummaryStatistics))
+colnames(principleImportsSummaryStats)[1:2] <- c("Description", "Year")
 
-# Note the exports of interest
-exports <- unique(commoditySummary$PRINCIPAL.EXPORTS)
-exports <- exports[exports != "OTHER PRODUCTS"]
-
-# Note the imports of interest
-imports <- unique(commoditySummary$PRINCIPAL.IMPORTS)
-imports <- imports[is.na(imports) == FALSE]
-
-# Get the range of years
-years <- min(commoditySummary$YEAR):max(commoditySummary$YEAR)
-
-# Build an initial table to store the summary statistics
-principleCommoditySummary <- data.frame("Description"=NA, "Type"=NA, "Year"=NA,
-                                        "Mean"=NA, "Variance"=NA, "StandardDeviation"=NA,
-                                        stringsAsFactors=FALSE)
-row <- 0
-
-# Examine each year
-for(year in years){
-
-  # Examine each export
-  for(description in exports){
-
-    # Subset the summary statistics for commodities in current group
-    groupStats <- commoditySummary[commoditySummary$PRINCIPAL.EXPORTS == description &
-                                     commoditySummary$Type == "EXPORT" &
-                                     commoditySummary$YEAR == year, ]
-    
-    # Calculate the combined summary statistics for current group
-    combinedStats <- calculateCombineSummaryStatistics(means=groupStats$average,
-                                                       sizes=groupStats$count,
-                                                       variances=groupStats$variance)
-    
-    # Store the information
-    row <- row + 1
-    principleCommoditySummary[row, "Description"] <- description
-    principleCommoditySummary[row, "Type"] <- "EXPORT"
-    principleCommoditySummary[row, "Year"] <- year
-    principleCommoditySummary[row, "Mean"] <- combinedStats["Mean"]
-    principleCommoditySummary[row, "Variance"] <- combinedStats["Var"]
-    principleCommoditySummary[row, "StandardDeviation"] <- combinedStats["SD"]
-  }
-  
-    # Examine each imports
-  for(description in imports){
-
-    # Subset the summary statistics for commodities in current group
-    groupStats <- commoditySummary[commoditySummary$PRINCIPAL.IMPORTS == description &
-                                     commoditySummary$Type == "IMPORT" &
-                                     commoditySummary$YEAR == year, ]
-    
-    # Calculate the combined summary statistics for current group
-    combinedStats <- calculateCombineSummaryStatistics(means=groupStats$average,
-                                                       sizes=groupStats$count,
-                                                       variances=groupStats$variance)
-    
-    # Store the information
-    row <- row + 1
-    principleCommoditySummary[row, "Description"] <- description
-    principleCommoditySummary[row, "Type"] <- "IMPORT"
-    principleCommoditySummary[row, "Year"] <- year
-    principleCommoditySummary[row, "Mean"] <- combinedStats["Mean"]
-    principleCommoditySummary[row, "Variance"] <- combinedStats["Var"]
-    principleCommoditySummary[row, "StandardDeviation"] <- combinedStats["SD"]
-  }
-}
+# Summarise the value of the principle exports
+principleExportsSummaryStats <- do.call(data.frame,
+                                        aggregate(principleExports[, c("Value", "UnitValue")], by=list(principleExports$PRINCIPAL.EXPORTS, principleExports$Year),
+                                                  FUN=calculateSummaryStatistics))
+colnames(principleExportsSummaryStats)[1:2] <- c("Description", "Year")
 ```
 
-## Trends in principle exports
+We can now explore how the value of each principle commodity has changed through time:
+
+## Trends in the value of exports
 
 ```{r visualise principle commodity exports trends, echo=FALSE}
-# Extract the export and import datasets
-principleExportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "EXPORT", ]
-#principleImportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "IMPORT", ]
-
 # Products to highlight
-exportsToHighlight <- c("BEEF", "COPRA", "COWHIDES")
+exportsToHighlight <- c("BEEF", "COPRA", "KAVA")
 
 # Start a plotly figure
 fig <- plot_ly()
 
 # Get the descriptions of principle commodities
-descriptionsExports <- unique(principleExportSummary$Description)
-descriptionsExportsShort <- substr(descriptionsExports, 1, 15)
+descriptionsExports <- unique(principleExportsSummaryStats$Description)
+descriptionsExportsShort <- substr(descriptionsExports, 1, 25)
 
 # Define a colour for each principle commodity
 palette <- colorRampPalette(brewer.pal(8, "Dark2"))
@@ -315,22 +358,24 @@ coloursExports <- palette(length(descriptionsExports))
 for(index in seq_along(descriptionsExports)){
   
   # Get the data for current commodity
-  summaryStats <- principleExportSummary[principleExportSummary$Description == descriptionsExports[index], ]
-  
-  # Remove rows with NAs
-  summaryStates <- summaryStats[is.na(summaryStats$Mean) == FALSE, ]
+  summaryStats <- principleExportsSummaryStats[principleExportsSummaryStats$Description == descriptionsExports[index], ]
   
   # Add a trace for current commodity
   labels <- paste("<b>Year</b>:", summaryStats$Year,
-                  "<br>Mean: ", round(summaryStats$Mean, digits=0),
-                  "<br>SD: ", round(summaryStats$StandardDeviation, digits=0),
-                  "<br>Variance: ", round(summaryStats$Variance, digits=0))
-
+                  "<br>Median: ", round(summaryStats$UnitValue.Median, digits=0),
+                  "<br>Upper 97.5%: ", round(summaryStats$UnitValue.Upper.97.5, digits=0),
+                  "<br>Lower 2.5%: ", round(summaryStats$UnitValue.Lower.2.5, digits=0))
+  fig <- add_lines(fig, 
+                     x=summaryStats$Year,
+                     y=summaryStats$UnitValue.Median,
+                     name=descriptionsExportsShort[index], 
+                     hovertemplate=labels,
+                     line=list(color=coloursExports[index]),
+                     visible=ifelse(descriptionsExports[index] %in% exportsToHighlight, TRUE, "legendonly"))
   fig <- add_ribbons(fig, 
                      x=summaryStats$Year,
-                     y=summaryStats$Mean,
-                     ymin=summaryStats$Mean-summaryStats$StandardDeviation,
-                     ymax=summaryStats$Mean+summaryStats$StandardDeviation,
+                     ymin=summaryStats$UnitValue.Upper.97.5,
+                     ymax=summaryStats$UnitValue.Lower.2.5,
                      name=descriptionsExportsShort[index], 
                      hovertemplate=labels,
                      line=list(color="transparent"),
@@ -345,27 +390,24 @@ fig <- layout(fig, title="Trends in unit value of principle commodities (<b>EXPO
 fig <- layout(fig, xaxis=list(title="Date"))
 
 # Set Y axis to logged and label
-fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Average unit value"))
+fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Median unit value"))
 
 fig
-
 ```
 
-## Trends in principle imports
-```{r plot trends for pinciple imports, echo=FALSE}
-# Extract the export and import datasets
-principleImportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "IMPORT", ]
-#principleImportSummary <- principleCommoditySummary[principleCommoditySummary$Type == "IMPORT", ]
+## Trends in the value of imports
 
+```{r visualise principle commodity imports trends, echo=FALSE}
 # Products to highlight
-importsToHighlight <- c("RICE", "Meat and edible offal of poultry")
+importsToHighlight <- c("Wood sawn or chipped lengthwise, sliced or peeled, whether or not planed, sanded or end-jointed",
+                        "Cigars, cheroots, cigarillos and cigarettes, of tobacco or of tobacco substitutes")
 
 # Start a plotly figure
 fig <- plot_ly()
 
 # Get the descriptions of principle commodities
-descriptionsImports <- unique(principleImportSummary$Description)
-descriptionsImportsShort <- substr(descriptionsImports, 1, 15)
+descriptionsImports <- unique(principleImportsSummaryStats$Description)
+descriptionsImportsShort <- substr(descriptionsImports, 1, 25)
 
 # Define a colour for each principle commodity
 palette <- colorRampPalette(brewer.pal(8, "Dark2"))
@@ -374,24 +416,25 @@ coloursImports <- palette(length(descriptionsImports))
 # Add a trace for each principle commodity
 for(index in seq_along(descriptionsImports)){
   
-#index <- 1
-
   # Get the data for current commodity
-  summaryStats <- principleImportSummary[principleImportSummary$Description == descriptionsImports[index], ]
-  
-  # Remove rows with NAs
-  summaryStates <- summaryStats[is.na(summaryStats$Mean) == FALSE, ]
+  summaryStats <- principleImportsSummaryStats[principleImportsSummaryStats$Description == descriptionsImports[index], ]
   
   # Add a trace for current commodity
   labels <- paste("<b>Year</b>:", summaryStats$Year,
-                  "<br>Mean: ", round(summaryStats$Mean, digits=0),
-                  "<br>SD: ", round(summaryStats$StandardDeviation, digits=0),
-                  "<br>Variance: ", round(summaryStats$Variance, digits=0))
+                  "<br>Median: ", round(summaryStats$UnitValue.Median, digits=0),
+                  "<br>Upper 97.5%: ", round(summaryStats$UnitValue.Upper.97.5, digits=0),
+                  "<br>Lower 2.5%: ", round(summaryStats$UnitValue.Lower.2.5, digits=0))
+  fig <- add_lines(fig, 
+                     x=summaryStats$Year,
+                     y=summaryStats$UnitValue.Median,
+                     name=descriptionsImportsShort[index], 
+                     hovertemplate=labels,
+                     line=list(color=coloursImports[index]),
+                     visible=ifelse(descriptionsImports[index] %in% importsToHighlight, TRUE, "legendonly"))
   fig <- add_ribbons(fig, 
                      x=summaryStats$Year,
-                     y=summaryStats$Mean,
-                     ymin=summaryStats$Mean-summaryStats$StandardDeviation,
-                     ymax=summaryStats$Mean+summaryStats$StandardDeviation,
+                     ymin=summaryStats$UnitValue.Upper.97.5,
+                     ymax=summaryStats$UnitValue.Lower.2.5,
                      name=descriptionsImportsShort[index], 
                      hovertemplate=labels,
                      line=list(color="transparent"),
@@ -406,10 +449,9 @@ fig <- layout(fig, title="Trends in unit value of principle commodities (<b>IMPO
 fig <- layout(fig, xaxis=list(title="Date"))
 
 # Set Y axis to logged and label
-fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Average unit value"))
+fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Median unit value"))
 
 fig
-
 ```
 
 # Closing a connection to the `MySQL` server
