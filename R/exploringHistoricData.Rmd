@@ -23,7 +23,7 @@ library(knitr) # Nice tables
 library(kableExtra) # Extra nice tables
 library(basicPlotteR) # Progress bar
 library(plotly) # Interactive graphs
-library(openxlsx) # REad and write excel formatted files
+library(openxlsx) # Read and write excel formatted files
 library(RColorBrewer) # Creating colour pallettes
 library(basicPlotteR) # Set transparency of colours
 
@@ -54,7 +54,7 @@ The MySQL server is running locally and we can connect to it from R with the fol
 # Open a connection to a MySQL database
 connection <- dbConnect(MySQL(), 
                             user='JosephCrispell', 
-                            password=readline(prompt="Enter password: "), # Doing this as password never stored in easily accessible format now
+                            password=readline(prompt="Enter password: "), # Doing this as password never stored in easily accessible format
                             dbname='vnso',
                             host='localhost')
 ```
@@ -64,7 +64,7 @@ connection <- dbConnect(MySQL(),
 # Open a connection to a MySQL database
 connection <- dbConnect(MySQL(), 
                         user='JosephCrispell', 
-                        password=params$password, # Doing this as password never stored in easily accessible format now
+                        password=params$password, # Doing this as password never stored in easily accessible format
                         dbname='vnso',
                         host='localhost')
 ```
@@ -133,7 +133,7 @@ commoditySummaryExports <- dbGetQuery(conn=connection, statement="SELECT HS, YEA
 prettyTable(commoditySummaryExports[1:25, ])
 ```
 
-Ideally though, we'd like to generate some additional summary statistics (like percentiles and median), particularly since the value of commodities is often highly skewed (with some rara items costing a huge amount). We can pull the import and export data into R to work with it directly:
+Ideally though, we'd like to generate some additional summary statistics (like percentiles and median), particularly since the value of commodities is often highly skewed (with some rare items costing a huge amount). We can pull the import and export data into R to work with it directly:
 
 ```{r load all imports and exports}
 # Get the historic data
@@ -153,7 +153,7 @@ write.table(imports, file=file.path("..", "data", "secure", "tradeStats_historic
             sep=",", row.names=FALSE, quote=TRUE)
 ```
 
-With these data loaded we'll use the following function:
+With these data loaded we'll use the following function to calculate a range of summary statistics:
 ```{r summary statistics function, eval=FALSE}
 calculateSummaryStatistics <- function(values){
   
@@ -193,7 +193,7 @@ calculateSummaryStatistics <- function(values){
 }
 ```
 
-With the function above we can use vector operations in R to quickly calculate summary statistics for both the import and export data. We are doing the calculates by HS code alone, by HS code and Year, and for both we calculate summary of `Value` and `UnitValue` columns:
+With the function above we can use *vector operations* in R to quickly calculate summary statistics for both the import and export data. We are doing the calculations by HS code alone, by HS code and Year, and for both we calculate summary of `Value` and `UnitValue` columns:
 
 ```{r calculate summary statistics for imports and exports, eval=FALSE}
 # Generate summary statistics for EXPORTS by HS code and year
@@ -296,7 +296,7 @@ par(mar=c(4, 0, 0, 0), mgp=c(0,0.5,0))
 
 # Plot the distribution
 hist(wineValues, las=1, yaxt="n", xaxt="n", ylab="", xlab="", main="")
-axis(side=1, at=c(100, 1000000, 5000000), labels=c("100", "1M", "5M"), cex.axis=0.7)
+axis(side=1, at=c(5000, 1000000, 5000000), labels=c("5000", "1M", "5M"), cex.axis=0.6)
 ```
 
 The distribution for the unit value of wine is highly skewed, with values ranging up to 5 million! The above plot illustrates how summary statistics such as `mean` and `standard deviation` are strongly influenced by the rarer values of a skewed distribution. In contrast, the `median` and `percentiles` provide a more representative summary of our skewed distribution distribution.
@@ -453,6 +453,12 @@ fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Median unit val
 
 fig
 ```
+
+# Concluding remarks
+
+The histroci trades data provides a wealth of information that we can use to inform how we create the monthly trade statistics reports. We can see that the value of each commodity is highly skewed, making summary statistics like `median` and `percentiles` more appropriate. The value of each commodity is quite variable through time, it is potentially best to use last years data when defining the expected boundaries for each commodity.
+
+We can quickly process the historic data, which has over a million rows using R and MySQL. We can use R to generate interactive visualisations that will help raise the value of these amazing data by make them more accessible.
 
 # Closing a connection to the `MySQL` server
 
