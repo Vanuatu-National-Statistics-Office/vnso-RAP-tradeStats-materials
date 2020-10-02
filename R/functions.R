@@ -239,53 +239,45 @@ buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, co
   return(summaryTable)
 }
 
-#' Calculate combined summary statistics 
-#' 
-#' A function that calculates combined mean, variance and standard deviations calculated on multiple samples. 
-#' @param means A numeric vector containing the mean value calculated for multiple samples.
-#' @param sizes A numeric vector containing the size of multiple samples
-#' @param variances A numeric vector containing the variance value calculated for multiple samples
-#' @param returnStat A string identifying which summary statistic to return. Defaults to all
-#' @return Returns a labeled numeric vector containing the calculated combined mean, variance and standard deviation statistics
-calculateCombineSummaryStatistics <- function(means, sizes, variances, returnStat=NULL){
-  
-  # Answer taken from: https://stackoverflow.com/questions/7753002/adding-combining-standard-deviations
-  
-  # Identify NA values
-  naIndices <- which(is.na(means) | is.na(sizes) | is.na(variances))
 
-  # Check still have values left
-  if(length(naIndices) < length(means)){
-    
-    # Remove NA values
-    if(length(naIndices) > 0){
-      means <- means[-naIndices]
-      sizes <- sizes[-naIndices]
-      variances <- variances[-naIndices]
-    }
-    
-    # Calculate combined mean
-    combinedMean <- sum(means * sizes) / sum(sizes)
-    
-    # Calculate combined variance
-    sum1 <- sum((sizes-1) * variances)
-    sum2 <- sum(sizes * (means - combinedMean)^2)
-    combinedVar <- (sum1 + sum2)/(sum(sizes)-1)
-    
-    # Calculate the combined standard deviation
-    combinedSD <- sqrt(combinedVar)
-    
-    # Combine results into output
-    output <- c("Mean"=combinedMean, "Var"=combinedVar, "SD"=combinedSD)
+#' Calculate range of summary statistics for distribution 
+#' 
+#' For values provided, calculates mean, median, standard deviation, 95\\% percentiles, count, range and number of NA values 
+#' @param values A numeric vector of values 
+#' @return Returns an numeric labeled vector containing the summary statistics
+calculateSummaryStatistics <- function(values){
   
-  }else{
-    output <- c("Mean"=NA, "Var"=NA, "SD"=NA)
+  # Create an output vector to store the summary statistics
+  output <- c("Mean"=NA, "SD"=NA, "Median"=NA, "Lower-2.5"=NA, "Upper-97.5"=NA,
+              "Min"=NA, "Max"=NA, "Count"=NA, "CountMissing"=NA)
+  
+  # Count number of values and any missing data
+  output["Count"] <- length(values)
+  output["CountMissing"] <- sum(is.na(values) | is.infinite(values) | is.nan(values))
+  
+  # Check if only missing available - if so stop and return empty summary statistics
+  if(output["CountMissing"] == output["Count"]){
+    return(output)
   }
   
-  # Check if only want one stat
-  if(is.null(returnStat) == FALSE){
-    output <- output[returnStat]
-  }
+  # Calculate mean
+  output["Mean"] <- mean(values, na.rm=TRUE)
+  
+  # Calculate standard deviation
+  output["SD"] <- sd(values, na.rm=TRUE)
+  
+  # Calculate median
+  output["Median"] <- median(values, na.rm=TRUE)
+  
+  # Calculate upper and lower 95% percentile bounds
+  quantiles <- quantile(values, probs=c(0.975, 0.025), na.rm=TRUE)
+  output["Upper-97.5"] <- quantiles[1]
+  output["Lower-2.5"] <- quantiles[2]
+  
+  # Calculate the range of the data
+  minMax <- range(values, na.rm=TRUE)
+  output["Min"] <- minMax[1]
+  output["Max"] <- minMax[2]
   
   return(output)
 }
