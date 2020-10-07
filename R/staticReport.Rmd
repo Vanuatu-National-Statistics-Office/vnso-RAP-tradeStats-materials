@@ -484,13 +484,11 @@ columnCategories <- list(
   "Articles of apparel and clothing accessories"=c("Articles of apparel and clothing accessories"),
   "Other made up textile articles; sets; worn clothing and worn textile articles; rags"=c("Other made up textile articles; sets; worn clothing and worn textile articles; rags"),
   "Footwear, gaiters and the like; parts of such articles"=c("Footwear, gaiters and the like; parts of such articles"),
-  "Footwear, gaiters and the like; parts of such articles"=c("Footwear, gaiters and the like; parts of such articles"),
   "Iron and steel"=c("Iron and steel"),
   "Articles of iron or steel"=c("Articles of iron or steel"),
   "Aluminium and articles thereof"=c("Aluminium and articles thereof"),
   "Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)"=c("Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)"),
   "Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines"=c("Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines"),
-  "Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"=c("Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"),
   "Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"=c("Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"),
   "Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers"=c("Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers"),
   "Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data"=c("Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data"),
@@ -691,9 +689,9 @@ codesCP4 <- c(1000, 3071)
 categoryColumn <- "Mode.of.Transport"
 columnCategories <- list(
   "Air: Exports"=c("AIR"),
-  "Water: Exports"=c("WATER"),
+  "Water: Exports"=c("SEA"),
   "Land: Exports"=c("LAND"),
-  "Postal: Exports"=c("POSTAL"),
+  "Postal: Exports"=c("POSTAGE"),
   "Other: Exports"=c("OTHER")
 )
 
@@ -713,9 +711,9 @@ codesCP4 <- c(4000, 4071, 7100)
 categoryColumn <- "Mode.of.Transport"
 columnCategories <- list(
   "Air: Imports"=c("AIR"),
-  "Water: Imports"=c("WATER"),
+  "Water: Imports"=c("SEA"),
   "Land: Imports"=c("LAND"),
-  "Postal: Imports"=c("POSTAL"),
+  "Postal: Imports"=c("POSTAGE"),
   "Other: Imports"=c("OTHER")
 )
 
@@ -762,7 +760,7 @@ msgDataFrame<- processedTradeStats[processedTradeStats$PRF == "MSG", ]
 codesCP4 <- c(1000, 3071)
 
 # Define the categories used for each column
-categoryColumn <- "SITC Description"
+categoryColumn <- "SITC_1"
 columnCategories <- list(
   "Food and live animals"=c("0"),
   "Beverages and tobacco"=c("1"),
@@ -798,7 +796,7 @@ prettyTable(totalExportsbySITC)
 codesCP4 <- c(4000, 4071, 7100)
 
 # Define the categories used for each column
-categoryColumn <- "SITC Description"
+categoryColumn <- "SITC_1"
 columnCategories <- list(
   "Food and live animals"=c("0"),
   "Beverages and tobacco"=c("1"),
