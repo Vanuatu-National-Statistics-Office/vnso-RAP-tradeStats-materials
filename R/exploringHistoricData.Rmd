@@ -299,7 +299,7 @@ hist(wineValues, las=1, yaxt="n", xaxt="n", ylab="", xlab="", main="")
 axis(side=1, at=c(5000, 1000000, 5000000), labels=c("5000", "1M", "5M"), cex.axis=0.6)
 ```
 
-The distribution for the unit value of wine is highly skewed, with values ranging up to 5 million! The above plot illustrates how summary statistics such as `mean` and `standard deviation` are strongly influenced by the rarer values of a skewed distribution. In contrast, the `median` and `percentiles` provide a more representative summary of our skewed distribution distribution.
+The distribution for the unit value of wine is highly skewed, with values ranging up to 5 million! The above plot illustrates how summary statistics such as `mean` and `standard deviation` are strongly influenced by the rarer values of a skewed distribution. In contrast, the `median` and `percentiles` provide a more representative summary of our skewed distribution.
 
 When we are defining our expected boundaries for the value of a commodity, we should use percentiles. Here we have calculated the 95% bounds of the distribution, we expect the value of a commodity to fall within these bounds 95% of the time.
 
