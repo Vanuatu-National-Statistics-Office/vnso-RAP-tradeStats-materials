@@ -97,8 +97,10 @@ tradeStatsCommodities$Day<- format(tradeStatsCommodities$Reg..Date, format= "%d"
 # Merge Mode of Transport classifications with cleaned data
 tradeStatsFileMergeTransport <- file.path("..", "data", "open", "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.xlsx") 
 modeOfTransport <- read.xlsx(tradeStatsFileMergeTransport, sheet=1, skipEmptyRows=TRUE)
-mergedModeOfTransport<- merge(modeOfTransport, tradeStatsCommodities, by= "Office")
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, modeOfTransport, by="Office", all.x=TRUE)
 
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="Office", column="Mode.of.Transport")
 ```
 
 ## Merge Harmonised System (HS) classifcations with cleaned data
