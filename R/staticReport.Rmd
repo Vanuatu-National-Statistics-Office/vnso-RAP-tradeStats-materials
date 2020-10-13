@@ -640,7 +640,7 @@ prettyTable(balanceOfTradeByMajorPartnerCountries)
 ```
 
 
-## Balance of Trade by Region
+## Table 9: Balance of Trade by Region
 ```{r calculate balance of trade by region statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate the Exports by Region
@@ -662,9 +662,6 @@ columnCategories <- list(
 # Build the table
 totalPartnerRegionExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-# View the table
-prettyTable(totalPartnerRegionExports)
-
 
 # Calculate the Imports by Region
 
@@ -685,12 +682,13 @@ columnCategories <- list(
 # Build the table
 totalPartnerRegionImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-# View the table
-prettyTable(totalPartnerRegionImports)
-
 # Calculate the Balance of Trade by Region
 
-balanceOfTradeByRegion<- totalPartnerRegionExports - totalPartnerRegionImports
+balanceOfTradeByRegion <- totalPartnerRegionExports - totalPartnerRegionImports
+colnames(balanceOfTradeByRegion) <- sapply(colnames(balanceOfTradeByRegion),
+                                           FUN=function(colName){
+                                             return(strsplit(colName, split=":")[[1]][1])
+                                           })
 prettyTable(balanceOfTradeByRegion)
 
 # Calculate the Balance of Trade for the Pacific Islands 
