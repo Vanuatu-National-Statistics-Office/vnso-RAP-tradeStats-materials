@@ -477,7 +477,7 @@ prettyTable(totalPrincipleExportsandReExports)
 ```
 
 
-## Principle Imports
+## Table 7: Principle Imports
 
 ```{r calculate principle imports statistics with base R, eval=FALSE, echo=FALSE}
 
@@ -487,7 +487,7 @@ prettyTable(totalPrincipleExportsandReExports)
 codesCP4 <- c(4000, 4071, 7100)
 
 # Define the categories used for each column
-categoryColumn <- "Principle Imports"
+categoryColumn <- "Principle.Imports"
 columnCategories <- list(
   "Meat and edible offal of poultry"=c("Meat and edible offal of poultry"),
   "Fish and crustaceans, molluscs and other aquatic invertebrates"=c("Fish and crustaceans, molluscs and other aquatic invertebrates"),
