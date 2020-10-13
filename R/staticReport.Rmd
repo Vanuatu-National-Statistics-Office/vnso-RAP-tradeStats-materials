@@ -288,7 +288,7 @@ columnCategories <- list(
 )
 
 # Build the table
-importsByHS <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+importsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(importsByHS)
@@ -336,7 +336,7 @@ columnCategories <- list(
 )
 
 # Build the table
-exportsByHS <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+exportsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(exportsByHS)
@@ -384,7 +384,7 @@ columnCategories <- list(
 )
 
 # Build the table
-reExportsByHS <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+reExportsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(reExportsByHS)
@@ -441,7 +441,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalPrincipleExports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalPrincipleExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Calculate the principle Re-Exports 
 
@@ -458,7 +458,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalPrincipleReExports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalPrincipleReExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 
 # Total Exports and Re-Exports
@@ -539,7 +539,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalPrincipleImports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalPrincipleImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(totalPrincipleImports)
@@ -551,7 +551,7 @@ prettyTable(totalPrincipleImports)
 ```
 
 
-## Balance of Trade by Major Partner Countries
+## Table 8: Balance of Trade by Major Partner Countries
 ```{r calculate balance of trade by major partner countries statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate the Exports by Major Partner Countries
@@ -581,16 +581,13 @@ columnCategories <- list(
   "Solomon Islands: Exports"=c("SOLOMON ISLANDS"),
   "Thailand: Exports"=c("THAILAND"),
   "United Kingdom: Exports"=c("UNITED KINGDOM"),
-  "United States of America: Exports"=c("UNITED STATES OF AMERICA"),
-  "All Others: Exports"=c("ALL OTHERS")
+  "United States of America: Exports"=c("UNITED STATES OF AMERICA")
 )
+countries <- unique(processedTradeStats[, "EXPORT.COUNTRY"])
+columnCategories[["All Others: Exports"]] <- countries[countries %in% unlist(columnCategories) == FALSE]
 
 # Build the table
-totalPartnerCountryExports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
-
-# View the table
-prettyTable(totalPartnerCountryExports)
-
+totalPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Calculate the Imports by Major Partner Countries
 
@@ -619,16 +616,13 @@ columnCategories <- list(
   "Solomon Islands: Imports"=c("SOLOMON ISLANDS"),
   "Thailand: Imports"=c("THAILAND"),
   "United Kingdom: Imports"=c("UNITED KINGDOM"),
-  "United States of America: Imports"=c("UNITED STATES OF AMERICA"),
-  "All Others: Imports"=c("ALL OTHERS")
+  "United States of America: Imports"=c("UNITED STATES OF AMERICA")
 )
+countries <- unique(processedTradeStats[, "IMPORT.COUNTRY"])
+columnCategories[["All Others: Imports"]] <- countries[countries %in% unlist(columnCategories) == FALSE]
 
 # Build the table
-totalPartnerCountryImports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
-
-# View the table
-prettyTable(totalPartnerCountryImports)
-
+totalPartnerCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Calculate the Balance of Trade by Major Partner Countries
 
@@ -663,7 +657,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalPartnerRegionExports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalPartnerRegionExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(totalPartnerRegionExports)
@@ -686,7 +680,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalPartnerRegionImports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalPartnerRegionImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(totalPartnerRegionImports)
@@ -730,7 +724,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalTransportExports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalTransportExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(totalTransportExports)
@@ -752,7 +746,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalTransportImports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalTransportImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(totalTransportImports)
@@ -809,7 +803,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalExportsbySITC <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalExportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(totalExportsbySITC)
@@ -845,7 +839,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalImportsbySITC <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+totalImportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(totalImportsbySITC)
