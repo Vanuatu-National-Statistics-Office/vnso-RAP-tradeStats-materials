@@ -108,7 +108,6 @@ tradeStatsCommodities$SITC_1 <- extractCodeSubset(tradeStatsCommodities$SITC, nD
 tradeStatsCommodities$Year<- format(tradeStatsCommodities$Reg..Date, format= "%Y")
 tradeStatsCommodities$Month<- format(tradeStatsCommodities$Reg..Date, format= "%B")
 tradeStatsCommodities$Day<- format(tradeStatsCommodities$Reg..Date, format= "%d")
-
 ```
 
 ## Merge Mode of Transport classifcations with cleaned data
@@ -627,6 +626,10 @@ totalPartnerCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4
 # Calculate the Balance of Trade by Major Partner Countries
 
 balanceOfTradeByMajorPartnerCountries<- totalPartnerCountryExports - totalPartnerCountryImports
+colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTradeByMajorPartnerCountries),
+                                                          FUN=function(colName){
+                                                            return(strsplit(colName, split=":")[[1]][1])
+                                                          })
 prettyTable(balanceOfTradeByMajorPartnerCountries)
 
 ```
