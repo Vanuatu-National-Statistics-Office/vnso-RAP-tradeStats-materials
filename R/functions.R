@@ -272,6 +272,6 @@ searchForMissingObservations <- function(merged, by, column){
   # If NAs are present report the category they are present for
   for(index in naIndices){
     
-    warning(paste0("No observation present in classification table for ", merged[index, by]))
+    warning(paste0("No observation present in classification table for \"", merged[index, by]), "\" in ", by, "\n")
   }
 }

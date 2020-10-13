@@ -131,8 +131,10 @@ searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by=
 # Merge Harmonised System (HS) Code classifications with cleaned data
 tradeStatsFileMergeHSCode <- file.path("..", "data", "open", "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.xlsx") 
 hsDescription <- read.xlsx(tradeStatsFileMergeHSCode, sheet=1, skipEmptyRows=TRUE)
-mergedHSCode<- merge(hsDescription, mergedModeOfTransport, by= "HS.Code_2")
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, hsDescription, by="HS.Code_2", all.x=TRUE)
 
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code_2", column="HS.Section")
 ```
 
 ## Merge Standard International Trade Classification (SITC) classifcations with cleaned data
@@ -142,8 +144,11 @@ mergedHSCode<- merge(hsDescription, mergedModeOfTransport, by= "HS.Code_2")
 # Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
 tradeStatsFileMergeSITCCode <- file.path("..", "data", "open", "OPN_FINAL_ASY_SITCCodeClassifications_31-01-20.xlsx") 
 sitcDescription <- read.xlsx(tradeStatsFileMergeSITCCode, sheet=1, skipEmptyRows=TRUE)
-mergedSITCDescription<- merge(sitcDescription, mergedHSCode, by= "SITC_1")
+colnames(sitcDescription)[2] <- "SITC_description"
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, sitcDescription, by="SITC_1", all.x=TRUE)
 
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="SITC_1", column="SITC_description")
 ```
 
 ## Merge Country Descriptions of Imports classifcations with cleaned data
@@ -152,9 +157,11 @@ mergedSITCDescription<- merge(sitcDescription, mergedHSCode, by= "SITC_1")
 
 # Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
 tradeStatsFileMergeCountryDesImports <- file.path("..", "data", "open", "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.xlsx")
-countryDescritpionImports <- read.xlsx(tradeStatsFileMergeCountryDesImports, sheet=1, skipEmptyRows=TRUE)
-mergedCountryImport<- merge(countryDescritpionImports, mergedSITCDescription, by= "CO")
+countryDescriptionImports <- read.xlsx(tradeStatsFileMergeCountryDesImports, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionImports, by="CO", all.x=TRUE)
 
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="CO", column="IMPORT.REG#")
 ```
 
 ## Merge Country Descriptions of Exports classifcations with cleaned data
@@ -163,9 +170,11 @@ mergedCountryImport<- merge(countryDescritpionImports, mergedSITCDescription, by
 
 # Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
 tradeStatsFileMergeCountryDesExports <- file.path("..", "data", "open", "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.xlsx") 
-countryDescritpionExports <- read.xlsx(tradeStatsFileMergeCountryDesExports, sheet=1, skipEmptyRows=TRUE)
-mergedCountryExport<- merge(countryDescritpionExports, mergedCountryImport, by= "CE/CD")
+countryDescriptionExports <- read.xlsx(tradeStatsFileMergeCountryDesExports, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionExports, by="CE/CD", all.x=TRUE)
 
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="CE/CD", column="EXPORT.REG#")
 ```
 
 ## Merge Principle Commodity classifcations with cleaned data
@@ -175,8 +184,10 @@ mergedCountryExport<- merge(countryDescritpionExports, mergedCountryImport, by= 
 # Merge Principle Commodity Classifications of Exports and Imports with cleaned data
 tradeStatsFileMergePrincipleCommdityClass <- file.path("..", "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx") 
 principleCommodityClassification <- read.xlsx(tradeStatsFileMergePrincipleCommdityClass, sheet=1, skipEmptyRows=TRUE)
-mergedPrincipleCommodity<- merge(principleCommodityClassification, mergedCountryExport, by= "HS.Code")
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, principleCommodityClassification, by="HS.Code", all.x=TRUE)
 
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code", column="TAR_ALL")
 ```
 
 ## Merge Broad Economic Categories (BEC) with cleaned data
@@ -186,8 +197,10 @@ mergedPrincipleCommodity<- merge(principleCommodityClassification, mergedCountry
 # Merge Broad Economic Categories (BEC) classifications with cleaned data
 tradeStatsFileMergeBECDescriptions <- file.path("..", "data", "open", "OPN_FINAL_ASY_BECClassifications_31-01-20.xlsx")
 becDescriptions <- read.xlsx(tradeStatsFileMergeBECDescriptions, sheet=1, skipEmptyRows=TRUE)
-mergedBECDescriptions<- merge(becDescriptions, mergedPrincipleCommodity, by= "HS.Code_6")
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, becDescriptions, by="HS.Code_6", all.x=TRUE)
 
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code_6", column="BEC.Descriptions")
 ```
 
 ## Processed data set stored
@@ -195,7 +208,7 @@ mergedBECDescriptions<- merge(becDescriptions, mergedPrincipleCommodity, by= "HS
 ```{r Processed data set stored}
 
 # Processed data set stored
-processedTradeStats<- mergedPrincipleCommodity
+processedTradeStats<-tradeStatsCommoditiesMergedWithClassifications
 
 ```
 
