@@ -239,7 +239,6 @@ buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, co
   return(summaryTable)
 }
 
-
 #' Calculate the statistical value of exports and imports according to their category 
 #' 
 #' A function that will match according to export or import and given a category to extraction, will calculate its statistical value. 

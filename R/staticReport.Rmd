@@ -689,13 +689,11 @@ colnames(balanceOfTradeByRegion) <- sapply(colnames(balanceOfTradeByRegion),
                                            FUN=function(colName){
                                              return(strsplit(colName, split=":")[[1]][1])
                                            })
-prettyTable(balanceOfTradeByRegion)
 
-# Calculate the Balance of Trade for the Pacific Islands 
-
-pictsExports<- oceaniaExports - australiaExports - newZealandExports
-pictsImports<- oceaniaImports - australiaImports - newZealandImports
-pictsBalance<- oceaniaBalance - australiaBalance - newZealandBalance
+# Calculate the Balance of Trade for the Pacific Islands
+pictsExports <- totalPartnerRegionExports["Oceania: Exports"] - totalPartnerCountryExports["New Zealand: Exports"] - totalPartnerCountryExports["Australia: Exports"]
+pictsImports<- totalPartnerRegionImports["Oceania: Imports"] - totalPartnerCountryImports["New Zealand: Imports"] - totalPartnerCountryImports["Australia: Imports"]
+pictsBalance<- balanceOfTradeByRegion["Oceania"] - balanceOfTradeByMajorPartnerCountries["Australia"] - balanceOfTradeByMajorPartnerCountries["New Zealand"]
 
 
 ```
