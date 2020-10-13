@@ -208,12 +208,12 @@ searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by=
 ```{r Processed data set stored}
 
 # Processed data set stored
-processedTradeStats<-tradeStatsCommoditiesMergedWithClassifications
+processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
 ```
 
 
-## Balance of Trade
+## Table 1: Balance of Trade
 ```{r calculate balance of trade statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate the balance of trade statistics - note that this remove a bit of redundancy
@@ -254,7 +254,7 @@ updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSu
 ```
 
 
-## Import by HS Code
+## Table 2: Import by HS Code
 ```{r calculate import by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
 # Define the CP4 codes need for table (Imports)
@@ -301,7 +301,7 @@ prettyTable(importsByHS)
 
 ```
 
-## Export by HS Code
+## Table 3: Export by HS Code
 
 ```{r calculate export by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
@@ -349,7 +349,7 @@ prettyTable(exportsByHS)
 ```
 
 
-## Re-Export by HS Code
+## Table 4: Re-Export by HS Code
 
 ```{r calculate re-export by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
@@ -396,7 +396,7 @@ prettyTable(reExportsByHS)
 ```
 
 
-## Total Exports by HS Code
+## Table 5: Total Exports by HS Code
 
 ```{r calculate total exports by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
@@ -411,7 +411,7 @@ prettyTable(totalExportsByHS)
 
 ```
 
-## Principle Exports
+## Table 6: Principle Exports
 
 ```{r calculate principle exports statistics with base R, eval=FALSE, echo=FALSE}
 
@@ -443,10 +443,6 @@ columnCategories <- list(
 # Build the table
 totalPrincipleExports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
 
-# View the table
-prettyTable(totalPrincipleExports)
-
-
 # Calculate the principle Re-Exports 
 
 # Define the CP4 codes need for table
@@ -464,14 +460,16 @@ columnCategories <- list(
 # Build the table
 totalPrincipleReExports <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
 
-# View the table
-prettyTable(totalPrincipleReExports)
 
 # Total Exports and Re-Exports
-totalPrincipleExportsandReExports <- totalPrincipleExports + totalPrincipleReExports
+columns <- unique(c(colnames(totalPrincipleExports), colnames(totalPrincipleReExports)))
+totalPrincipleExportsandReExports <- data.frame(matrix(0, nrow=1, ncol=length(columns)))
+colnames(totalPrincipleExportsandReExports) <- columns
+totalPrincipleExportsandReExports[names(totalPrincipleExports)] <- totalPrincipleExports
+totalPrincipleExportsandReExports[names(totalPrincipleReExports)] <- totalPrincipleExportsandReExports[names(totalPrincipleReExports)] + totalPrincipleReExports
 
+# View the final table
 prettyTable(totalPrincipleExportsandReExports)
-
 ```
 
 ```{r insert Principle Exports into final formatted table}
