@@ -70,6 +70,27 @@ tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071
 
 ```
 
+```{r examine missing data}
+# Count the number of missing values in each column
+numberMissing <- apply(tradeStatsCommodities, MARGIN=2,
+                       FUN=function(columnValues){
+                        
+                         return(sum(is.na(columnValues)))
+                              
+                       })
+
+# Convert the counts to a proportion
+proportionMissing <- numberMissing / nrow(tradeStatsCommodities)
+
+# Set the plotting margins
+par(mar=c(10, 4, 4, 1))
+
+# Plot the proportion missing in each column
+barplot(proportionMissing[order(proportionMissing)], las=2, ylim=c(0,1),
+        main="Amount missing values in each column",
+        ylab="Proportion")
+```
+
 ## Adapt data to create new columns
 
 ```{r adapt raw data to create new columns}
