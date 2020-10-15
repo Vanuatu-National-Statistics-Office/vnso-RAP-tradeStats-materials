@@ -234,7 +234,7 @@ prettyTable(tradeBalance)
 
 # Note current year and month of data
 fileNameParts <- strsplit(tradeStatsFile, split="_")[[1]]
-date <- as.Date(strsplit(fileNameParts[length(fileNameParts)], split="\\.")[[1]][1], format="%d-%m-%y")
+date <- max(processedTradeStats$Reg..Date, na.rm=TRUE)
 month <- format(date, "%B")
 year <- format(date, "%Y")
 
