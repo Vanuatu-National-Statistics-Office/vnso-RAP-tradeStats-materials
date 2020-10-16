@@ -238,3 +238,39 @@ buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, co
   
   return(summaryTable)
 }
+
+#' Calculate the statistical value of exports and imports according to their category 
+#' 
+#' A function that will match according to export or import and given a category to extraction, will calculate its statistical value. 
+#' @param processedTradeStats A dataframe containing the cleaned Customs data, including all classifications 
+#' @param codes_CP4 Customs extended procedure codes that are representative of exports (1000), re-exports (3071) and imports (4000, 4071, 7100)
+#' @param categoryCol A column header used to define the subset of data that needs to be summed  
+#' @param categoryValues A variable use to define the statistical value 
+#' @return Returns an integer vector representing a subset of the dataframe processedTradeStats
+calculateStatValueSum<- function(processedTradeStats, codes_CP4, categoryCol, categoryValues){
+  
+  # Calculate sum of products matching CP4 code and category 
+  statValueSum<- sum(processedTradeStats[processedTradeStats$CP4 %in% codes_CP4 &
+                                           processedTradeStats[, categoryCol] %in% categoryValues, 
+                                         "Stat..Value"], na.rm= TRUE)
+  # Return the sum
+  return(statValueSum)
+}
+
+#' Check if classification not present after merging
+#' 
+#' A function that searches column added after merging to identify if any values missing
+#' @param merged A data.frame resulting from a merge operation
+#' @param by The column used as common identifier in merge operation
+#' @param column A column that was pulled in during merge
+searchForMissingObservations <- function(merged, by, column){
+  
+  # Check if any NA values are present in column of interest
+  naIndices <- which(is.na(merged[, column]))
+  
+  # If NAs are present report the category they are present for
+  for(index in naIndices){
+    
+    warning(paste0("No observation present in classification table for \"", merged[index, by]), "\" in ", by, "\n")
+  }
+}
