@@ -15,6 +15,15 @@
 
 Datasets currently present in secure folder:
 
+- `exports_HS-Year_summaryStats_02-10-20.csv` - Summary statistics for *exports* for each HS code and year
+- `exports_HS_summaryStats_02-10-20.csv` - Summary statistics for *exports* for each HS code
+- `imports_HS-Year_summaryStats_02-10-20.csv` - Summary statistics for *imports* for each HS code and year
+- `imports_HS_summaryStats_02-10-20.csv` - Summary statistics for *imports* for each HS code
 - `SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx` - processed version of January's monthly statistics data. Additional sheets provide reference tables to intepret custom codes.
+exploring-historic-data
+- `tradeStats_historic_EXPORTS_14-09-20.csv` - Historic trade statistics for exports (1999-2019)
+- `tradeStats_historic_IMPORTS_14-09-20.csv` - Historic trade statistics for exports (1999-2019)
+
 - `tradeStats_historic_IMPORTS_14-09-20.csv` - trade statistics data for all **IMPORTS** into Vanuatu from 1999 to 2019
 - `tradeStats_historic_EXPORTS_14-09-20.csv` - trade statistics data for all **EXPORTS** into Vanuatu from 1999 to 2019
+master
