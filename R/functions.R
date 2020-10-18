@@ -239,6 +239,49 @@ buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, co
   return(summaryTable)
 }
 
+exploring-historic-data
+
+#' Calculate range of summary statistics for distribution 
+#' 
+#' For values provided, calculates mean, median, standard deviation, 95\\% percentiles, count, range and number of NA values 
+#' @param values A numeric vector of values 
+#' @return Returns an numeric labeled vector containing the summary statistics
+calculateSummaryStatistics <- function(values){
+  
+  # Create an output vector to store the summary statistics
+  output <- c("Mean"=NA, "SD"=NA, "Median"=NA, "Lower-2.5"=NA, "Upper-97.5"=NA,
+              "Min"=NA, "Max"=NA, "Count"=NA, "CountMissing"=NA)
+  
+  # Count number of values and any missing data
+  output["Count"] <- length(values)
+  output["CountMissing"] <- sum(is.na(values) | is.infinite(values) | is.nan(values))
+  
+  # Check if only missing available - if so stop and return empty summary statistics
+  if(output["CountMissing"] == output["Count"]){
+    return(output)
+  }
+  
+  # Calculate mean
+  output["Mean"] <- mean(values, na.rm=TRUE)
+  
+  # Calculate standard deviation
+  output["SD"] <- sd(values, na.rm=TRUE)
+  
+  # Calculate median
+  output["Median"] <- median(values, na.rm=TRUE)
+  
+  # Calculate upper and lower 95% percentile bounds
+  quantiles <- quantile(values, probs=c(0.975, 0.025), na.rm=TRUE)
+  output["Upper-97.5"] <- quantiles[1]
+  output["Lower-2.5"] <- quantiles[2]
+  
+  # Calculate the range of the data
+  minMax <- range(values, na.rm=TRUE)
+  output["Min"] <- minMax[1]
+  output["Max"] <- minMax[2]
+  
+  return(output)
+
 #' Calculate the statistical value of exports and imports according to their category 
 #' 
 #' A function that will match according to export or import and given a category to extraction, will calculate its statistical value. 
@@ -273,4 +316,5 @@ searchForMissingObservations <- function(merged, by, column){
     
     warning(paste0("No observation present in classification table for \"", merged[index, by]), "\" in ", by, "\n")
   }
+master
 }
