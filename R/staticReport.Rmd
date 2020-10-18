@@ -31,12 +31,19 @@ source("functions.R")
 
 ## Importing data files
 
-```{r import and process data}
+```{r import raw data}
 
-# Read in the raw trade data
+# Read in the raw trade data from secure folder of the repository 
+
 # Note that spaces in column names have been automatically replaced with "."s
 tradeStatsFile <- file.path("..", "data", "secure", "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
 tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
+
+```
+
+## Cleaning data files
+
+```{r clean raw data}
 
 # Remove the repeated header row from the trade statistics data
 tradeStats <- tradeStats[tradeStats$Office != "Office", ]
@@ -54,77 +61,158 @@ tradeStatsNoDup$Stat..Value <- as.numeric(tradeStats$Stat..Value)
 # Convert excel figures to dates
 tradeStatsNoDup$Reg..Date <- as.Date(as.numeric(tradeStats$Reg..Date), origin="1899-12-30") # For numeric dates excel sets origin to December 30, 1899 (https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r)
 
-# Create subset for Export and Import commodities 
-tradeStatsCommodities <- tradeStatsNoDup[tradeStatsNoDup$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
-
 # Exclude banknotes from exports
-tradeStatsNoBanknotes <- tradeStatsCommodities[tradeStatsCommodities$HS.Code != "49070010", ]
+tradeStatsNoBanknotes <- tradeStatsNoDup[tradeStatsNoDup$HS.Code != "49070010", ]
 
-# Extract the 6, 4, and 2 digit HS codes into separate columns
-tradeStatsNoBanknotes$HS.Code_6 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=6)
-tradeStatsNoBanknotes$HS.Code_4 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=4)
-tradeStatsNoBanknotes$HS.Code_2 <- extractCodeSubset(tradeStatsNoBanknotes$HS.Code, nDigits=2)
-
-# Extract the 3 and 1 digit SITC codes into separate columns
-tradeStatsNoBanknotes$SITC_3 <- extractCodeSubset(tradeStatsNoBanknotes$SITC, nDigits=3)
-tradeStatsNoBanknotes$SITC_1 <- extractCodeSubset(tradeStatsNoBanknotes$SITC, nDigits=1)
-
-# Create new columns for dates
-tradeStatsNoBanknotes$Year<- format(tradeStatsNoBanknotes$Reg..Date, format= "%Y")
-tradeStatsNoBanknotes$Month<- format(tradeStatsNoBanknotes$Reg..Date, format= "%B")
-tradeStatsNoBanknotes$Day<- format(tradeStatsNoBanknotes$Reg..Date, format= "%d")
-
-# Quality check indicators (Wgt..Net and Stat..Value) 
-#tradeStatsNoBanknotes$Wgt..Net <- as.numeric(tradeStatsNoBanknotes$Wgt..Net) # Convert the net weight to numeric
-#tradeStatsNoBanknotes$PricePerUnit<- tradeStatsNoBanknotes$Stat..Value/tradeStatsNoBanknotes$Wgt..Net # Create new column 
-#tradeStatsCommoditiesSorted<- tradeStatsNoBanknotes[order(-tradeStatsNoBanknotes$Stat..Value), ] # Sort the stats value in descending order (this isn't working)
-
-# Store principle exports and imports 
-
-
-# Merge classifications 
-tradeStatsFileMergeTransport <- file.path("..", "data", "open", "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.xlsx") # Mode of Transport
-modeOfTransport <- read.xlsx(tradeStatsFileMergeTransport, sheet=1, skipEmptyRows=TRUE)
-mergedModeOfTransport<- merge(modeOfTransport, tradeStatsNoBanknotes, by= "Office")
-
-tradeStatsFileMergeHSCode <- file.path("..", "data", "open", "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.xlsx") # HS codes
-hsDescription <- read.xlsx(tradeStatsFileMergeHSCode, sheet=1, skipEmptyRows=TRUE)
-mergedHSCode<- merge(hsDescription, mergedModeOfTransport, by= "HS.Code_2")
-
-tradeStatsFileMergeSITCCode <- file.path("..", "data", "open", "OPN_FINAL_ASY_SITCCodeClassifications_31-01-20.xlsx") # Country of origin
-sitcDescription <- read.xlsx(tradeStatsFileMergeSITCCode, sheet=1, skipEmptyRows=TRUE)
-mergedSITCDescription<- merge(sitcDescription, mergedHSCode, by= "SITC_1")
-
-tradeStatsFileMergePrincipleCommodities <- file.path("..", "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx") # Country of origin
-principleCommodties <- read.xlsx(tradeStatsFileMergePrincipleCommodities, sheet=1, skipEmptyRows=TRUE)
-mergedPrincipleCommodties<- merge(principleCommodties, mergedSITCDescription, by= "HS.Code")
-
-duplicatedRowsMergedPrincipleCommodties <- which(duplicated(mergedPrincipleCommodties))
-duplicatedRowsMergedPrincipleCommodties
-mergedPrincipleCommoditiesNoDup <- mergedPrincipleCommodties[-duplicatedRowsMergedPrincipleCommodties, ]
-
-tradeStatsFileMergeCountryDesImports <- file.path("..", "data", "open", "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.xlsx") # Country of origin (CO)
-countryDescritpionImports <- read.xlsx(tradeStatsFileMergeCountryDesImports, sheet=1, skipEmptyRows=TRUE)
-mergedCountryOrigin<- merge(countryDescritpionImports, mergedPrincipleCommoditiesNoDup, by= "CO")
-
-tradeStatsFileMergeCountryDesExports <- file.path("..", "data", "open", "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.xlsx") 
-countryDescritpionExports <- read.xlsx(tradeStatsFileMergeCountryDesExports, sheet=1, skipEmptyRows=TRUE)
-mergedCountryExport<- merge(countryDescritpionExports, mergedCountryOrigin, by= "CE/CD")
-
-tradeStatsFileMergeBECDescriptions <- file.path("..", "data", "open", "OPN_FINAL_ASY_BECClassifications_31-01-20.xlsx") # Broad economic categories
-becDescriptions <- read.xlsx(tradeStatsFileMergeBECDescriptions, sheet=1, skipEmptyRows=TRUE)
-mergedBECDescriptions<- merge(becDescriptions, mergedCountryExport, by= "HS.Code_6")
-
-
-# New HS codes and SITC codes stored and we are notified
-
-
-# Processed data set stored
-processedTradeStats<- mergedBECDescriptions
+# Create subset for Export and Import commodities 
+tradeStatsSubset <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$Type %in% c("EX / 1","EX / 3", "IM / 4", "IM / 7", "PC / 4"), ]
+tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
 
 ```
 
-## Balance of Trade
+```{r examine missing data}
+# Count the number of missing values in each column
+numberMissing <- apply(tradeStatsCommodities, MARGIN=2,
+                       FUN=function(columnValues){
+                        
+                         return(sum(is.na(columnValues)))
+                              
+                       })
+
+# Convert the counts to a proportion
+proportionMissing <- numberMissing / nrow(tradeStatsCommodities)
+
+# Set the plotting margins
+par(mar=c(10, 4, 4, 1))
+
+# Plot the proportion missing in each column
+barplot(proportionMissing[order(proportionMissing)], las=2, ylim=c(0,1),
+        main="Amount missing values in each column",
+        ylab="Proportion")
+```
+
+## Adapt data to create new columns
+
+```{r adapt raw data to create new columns}
+
+# Extract the 6, 4, and 2 digit HS codes into separate columns
+tradeStatsCommodities$HS.Code_6 <- extractCodeSubset(tradeStatsCommodities$HS.Code, nDigits=6)
+tradeStatsCommodities$HS.Code_4 <- extractCodeSubset(tradeStatsCommodities$HS.Code, nDigits=4)
+tradeStatsCommodities$HS.Code_2 <- extractCodeSubset(tradeStatsCommodities$HS.Code, nDigits=2)
+
+# Extract the 3 and 1 digit SITC codes into separate columns
+tradeStatsCommodities$SITC_3 <- extractCodeSubset(tradeStatsCommodities$SITC, nDigits=3)
+tradeStatsCommodities$SITC_1 <- extractCodeSubset(tradeStatsCommodities$SITC, nDigits=1)
+
+# Create new columns for dates
+tradeStatsCommodities$Year<- format(tradeStatsCommodities$Reg..Date, format= "%Y")
+tradeStatsCommodities$Month<- format(tradeStatsCommodities$Reg..Date, format= "%B")
+tradeStatsCommodities$Day<- format(tradeStatsCommodities$Reg..Date, format= "%d")
+```
+
+## Merge Mode of Transport classifcations with cleaned data
+
+```{r merge Mode of Transport classifcations with cleaned dataset}
+
+# Merge Mode of Transport classifications with cleaned data
+tradeStatsFileMergeTransport <- file.path("..", "data", "open", "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.xlsx") 
+modeOfTransport <- read.xlsx(tradeStatsFileMergeTransport, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, modeOfTransport, by="Office", all.x=TRUE)
+
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="Office", column="Mode.of.Transport")
+```
+
+## Merge Harmonised System (HS) classifcations with cleaned data
+
+```{r merge Harmonised System (HS) classifcations with cleaned dataset}
+
+# Merge Harmonised System (HS) Code classifications with cleaned data
+tradeStatsFileMergeHSCode <- file.path("..", "data", "open", "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.xlsx") 
+hsDescription <- read.xlsx(tradeStatsFileMergeHSCode, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, hsDescription, by="HS.Code_2", all.x=TRUE)
+
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code_2", column="HS.Section")
+```
+
+## Merge Standard International Trade Classification (SITC) classifcations with cleaned data
+
+```{r merge Standard International Trade Classification (SITC) classifcations with cleaned dataset}
+
+# Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
+tradeStatsFileMergeSITCCode <- file.path("..", "data", "open", "OPN_FINAL_ASY_SITCCodeClassifications_31-01-20.xlsx") 
+sitcDescription <- read.xlsx(tradeStatsFileMergeSITCCode, sheet=1, skipEmptyRows=TRUE)
+colnames(sitcDescription)[2] <- "SITC_description"
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, sitcDescription, by="SITC_1", all.x=TRUE)
+
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="SITC_1", column="SITC_description")
+```
+
+## Merge Country Descriptions of Imports classifcations with cleaned data
+
+```{r merge Country Descriptions of Imports classifcations with cleaned dataset}
+
+# Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
+tradeStatsFileMergeCountryDesImports <- file.path("..", "data", "open", "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.xlsx")
+countryDescriptionImports <- read.xlsx(tradeStatsFileMergeCountryDesImports, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionImports, by="CO", all.x=TRUE)
+
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="CO", column="IMPORT.REG#")
+```
+
+## Merge Country Descriptions of Exports classifcations with cleaned data
+
+```{r merge Country Descriptions of Imports classifcations with cleaned dataset}
+
+# Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
+tradeStatsFileMergeCountryDesExports <- file.path("..", "data", "open", "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.xlsx") 
+countryDescriptionExports <- read.xlsx(tradeStatsFileMergeCountryDesExports, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionExports, by="CE/CD", all.x=TRUE)
+
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="CE/CD", column="EXPORT.REG#")
+```
+
+## Merge Principle Commodity classifcations with cleaned data
+
+```{r merge Principle Commodity classifcations with cleaned dataset}
+
+# Merge Principle Commodity Classifications of Exports and Imports with cleaned data
+tradeStatsFileMergePrincipleCommdityClass <- file.path("..", "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx") 
+principleCommodityClassification <- read.xlsx(tradeStatsFileMergePrincipleCommdityClass, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, principleCommodityClassification, by="HS.Code", all.x=TRUE)
+
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code", column="TAR_ALL")
+```
+
+## Merge Broad Economic Categories (BEC) with cleaned data
+
+```{r merge Broad Economic Categories (BEC) with cleaned dataset}
+
+# Merge Broad Economic Categories (BEC) classifications with cleaned data
+tradeStatsFileMergeBECDescriptions <- file.path("..", "data", "open", "OPN_FINAL_ASY_BECClassifications_31-01-20.xlsx")
+becDescriptions <- read.xlsx(tradeStatsFileMergeBECDescriptions, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, becDescriptions, by="HS.Code_6", all.x=TRUE)
+
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code_6", column="BEC.Descriptions")
+```
+
+## Processed data set stored
+
+```{r Processed data set stored}
+
+# Processed data set stored
+processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
+
+```
+
+
+## Table 1: Balance of Trade
 ```{r calculate balance of trade statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate the balance of trade statistics - note that this remove a bit of redundancy
@@ -165,10 +253,10 @@ updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSu
 ```
 
 
-## Import by HS Code
+## Table 2: Import by HS Code
 ```{r calculate import by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
-# Define the CP4 codes need for table
+# Define the CP4 codes need for table (Imports)
 codesCP4 <- c(4000, 4071, 7100)
 
 # Define the categories used for each column
@@ -199,7 +287,7 @@ columnCategories <- list(
 )
 
 # Build the table
-importsByHS <- buildRawSummaryTable(processTradeStats, codesCP4, categoryColumn, columnCategories)
+importsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
 prettyTable(importsByHS)
@@ -212,82 +300,44 @@ prettyTable(importsByHS)
 
 ```
 
-## Export by HS Code
+## Table 3: Export by HS Code
 
 ```{r calculate export by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
-# Calculate the Export by HS Code
-animalProductsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("01", "02", "03", "04", "05"))
+# Define the CP4 codes need for table (Exports)
+codesCP4 <- c(1000)
 
-vegtableProductsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("06", "07", "08", "09", "10", "11", "12", "13", "14"))
+# Define the categories used for each column
+categoryColumn <- "HS.Code_2"
+columnCategories <- list(
+  "Live animals: animal products"=c("01", "02", "03", "04", "05"),
+  "Vegetable products"=c("06", "07", "08", "09", "10", "11", "12", "13", "14"),
+  "Animal or vegetable oils & fats"=c("15"),
+  "Prepared foodstuffs, beverages, spirits & tobacco"=c("16", "17", "18", "19", "20", "21", "22", "23", "24"),
+  "Mineral products"=c("25", "26", "27"),
+  "Chemicals and allied products"=c("28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"),
+  "Plastic, rubber & articles thereof"=c("39", "40"),
+  "Raw hides, skins, leather articles & travel goods"=c("41", "42", "43"),
+  "Wood, cork & articles thereof & plaiting material"=c("44", "45", "46"),
+  "Wood pulp, paper & paperboard & articles thereof"=c("47", "48", "49"),
+  "Textiles & textile articles"=c("50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"),
+  "Footwear, headgear, umbrellas & parts thereof"=c("64", "65", "66", "67"),
+  "Articles of stone, plaster, cement, glass & ceremic products"=c("68", "69", "70"),
+  "Pearls, precious & semi-precious stones & metals"=c("71"),
+  "Base metals & articles thereof"=c("72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83"),
+  "Machinery & mechanical & electrical appliances & parts thereof"=c("84", "85"),
+  "Vehicles, aircraft & associated transport equipment"=c("86", "87", "88", "89"),
+  "Photographic & optical, medical & surgical goods & clocks/watches & musical instruments"=c("90", "91", "92"),
+  "Arms and ammunition, parts & accessories thereof"=c("93"),
+  "Miscellaneous manufactured articles"=c("94", "95", "96"),
+  "Works of art, collectors pieces & antiques"=c("97"),
+  "Others"=c("98", "99")
+)
 
-animalOrVegtableProductsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("15"))
+# Build the table
+exportsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-preparedFoodstuffsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("16", "17", "18", "19", "20", "21", "22", "23", "24"))
-
-mineralProductsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("25", "26", "27"))
-
-chemicalProductsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"))
-
-platsicThereofExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("39", "40"))
-
-rawHidesExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("41", "42", "43"))
-
-woodMaterialExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("44", "45", "46"))
-
-woodThereofExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("47", "48", "49"))
-
-textileArticlesExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"))
-
-footwearThereofExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("64", "65", "66", "67"))
-
-articlesStoneExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("68", "69", "70"))
-
-pearlsStoneExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("71"))
-
-baseMetalsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83"))
-
-machineryThereofExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("84", "85"))
-
-vehiclesEquipmentExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("86", "87", "88", "89"))
-
-photographicGoodsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("90", "91", "92"))
-
-armsThereofExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("93"))
-
-miscellaneousArticlesExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("94", "95", "96"))
-
-worksArtExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("97"))
-
-othersExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "HS.Code_2", categoryValues = c("98", "99"))
-
-totalExportsByHSCode<- animalProductsExports + vegtableProductsExports + animalOrVegtableProductsExports + preparedFoodstuffsExports + mineralProductsExports + chemicalProductsExports + platsicThereofExports + rawHidesExports + woodMaterialExports + woodThereofExports + textileArticlesExports + footwearThereofExports + articlesStoneExports + pearlsStoneExports + baseMetalsExports + machineryThereofExports + vehiclesEquipmentExports + photographicGoodsExports + armsThereofExports + miscellaneousArticlesExports + worksArtExports + othersExports
-
-# Insert values into table
-exportsByHS <- data.frame("Live animals: animal products"=animalProductsExports, 
-"Vegetable products"=vegtableProductsExports, 
-"Animal or vegetable oils & fats"=animalOrVegtableProductsExports, 
-"Prepared foodstuffs, beverages, spirits & tobacco"=preparedFoodstuffsExports, 
-"Mineral products"=mineralProductsExports, 
-"Chemicals and allied products"= chemicalProductsExports, 
-"Plastic, rubber & articles thereof"= platsicThereofExports, 
-"Raw hides, skins, leather articles & travel goods"= rawHidesExports, 
-"Wood, cork & articles thereof & plaiting material"= woodMaterialExports, 
-"Wood pulp, paper & paperboard & articles thereof"= woodThereofExports, 
-"Textiles & textile articles"= textileArticlesExports, 
-"Footwear, headgear, umbrellas & parts thereof"= footwearThereofExports, 
-"Articles of stone, plaster, cement, glass & ceremic products"= articlesStoneExports, 
-"Pearls, precious & semi-precious stones & metals"= pearlsStoneExports, 
-"Base metals & articles thereof"= baseMetalsExports, 
-"Machinery & mechanical & electrical appliances & parts thereof"= machineryThereofExports, 
-"Vehicles, aircraft & associated transport equipment"= vehiclesEquipmentExports, 
-"Photographic & optical, medical & surgical goods & clocks/watches & musical instruments"= photographicGoodsExports, 
-"Arms and ammunition, parts & accessories thereof"= armsThereofExports, 
-"Miscellaneous manufactured articles"= miscellaneousArticlesExports, 
-"Works of art, collectors pieces & antiques"= worksArtExports, 
-"Others"= othersExports, 
-"Total"= totalExportsByHSCode)
-
+# View the table
 prettyTable(exportsByHS)
 
 ```
@@ -298,83 +348,44 @@ prettyTable(exportsByHS)
 ```
 
 
-## Re-Export by HS Code
+## Table 4: Re-Export by HS Code
 
 ```{r calculate re-export by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
-# Calculate the Re-Export by HS Code
+# Define the CP4 codes need for table
+codesCP4 <- c(3071)
 
-animalProductsReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("01", "02", "03", "04", "05"))
+# Define the categories used for each column
+categoryColumn <- "HS.Code_2"
+columnCategories <- list(
+  "Live animals: animal products"=c("01", "02", "03", "04", "05"),
+  "Vegetable products"=c("06", "07", "08", "09", "10", "11", "12", "13", "14"),
+  "Animal or vegetable oils & fats"=c("15"),
+  "Prepared foodstuffs, beverages, spirits & tobacco"=c("16", "17", "18", "19", "20", "21", "22", "23", "24"),
+  "Mineral products"=c("25", "26", "27"),
+  "Chemicals and allied products"=c("28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"),
+  "Plastic, rubber & articles thereof"=c("39", "40"),
+  "Raw hides, skins, leather articles & travel goods"=c("41", "42", "43"),
+  "Wood, cork & articles thereof & plaiting material"=c("44", "45", "46"),
+  "Wood pulp, paper & paperboard & articles thereof"=c("47", "48", "49"),
+  "Textiles & textile articles"=c("50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"),
+  "Footwear, headgear, umbrellas & parts thereof"=c("64", "65", "66", "67"),
+  "Articles of stone, plaster, cement, glass & ceremic products"=c("68", "69", "70"),
+  "Pearls, precious & semi-precious stones & metals"=c("71"),
+  "Base metals & articles thereof"=c("72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83"),
+  "Machinery & mechanical & electrical appliances & parts thereof"=c("84", "85"),
+  "Vehicles, aircraft & associated transport equipment"=c("86", "87", "88", "89"),
+  "Photographic & optical, medical & surgical goods & clocks/watches & musical instruments"=c("90", "91", "92"),
+  "Arms and ammunition, parts & accessories thereof"=c("93"),
+  "Miscellaneous manufactured articles"=c("94", "95", "96"),
+  "Works of art, collectors pieces & antiques"=c("97"),
+  "Others"=c("98", "99")
+)
 
-vegtableProductsReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("06", "07", "08", "09", "10", "11", "12", "13", "14"))
+# Build the table
+reExportsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-animalOrVegtableProductsReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("15"))
-
-preparedFoodstuffsReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("16", "17", "18", "19", "20", "21", "22", "23", "24"))
-
-mineralProductsReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("25", "26", "27"))
-
-chemicalProductsReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38"))
-
-platsicThereofReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("39", "40"))
-
-rawHidesReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("41", "42", "43"))
-
-woodMaterialReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("44", "45", "46"))
-
-woodThereofReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("47", "48", "49"))
-
-textileArticlesReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63"))
-
-footwearThereofReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("64", "65", "66", "67"))
-
-articlesStoneReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("68", "69", "70"))
-
-pearlsStoneReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("71"))
-
-baseMetalsReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83"))
-
-machineryThereofReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("84", "85"))
-
-vehiclesEquipmentReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("86", "87", "88", "89"))
-
-photographicGoodsReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("90", "91", "92"))
-
-armsThereofReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("93"))
-
-miscellaneousArticlesReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("94", "95", "96"))
-
-worksArtReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("97"))
-
-othersReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "HS.Code_2", categoryValues = c("98", "99"))
-
-totalReExportsByHSCode<- animalProductsReExports + vegtableProductsReExports + animalOrVegtableProductsReExports + preparedFoodstuffsReExports + mineralProductsReExports + chemicalProductsReExports + platsicThereofReExports + rawHidesReExports + woodMaterialReExports + woodThereofReExports + textileArticlesReExports + footwearThereofReExports + articlesStoneReExports + pearlsStoneReExports + baseMetalsReExports + machineryThereofReExports + vehiclesEquipmentReExports + photographicGoodsReExports + armsThereofReExports + miscellaneousArticlesReExports + worksArtReExports + othersReExports
-
-# Insert values into table
-reExportsByHS <- data.frame("Live animals: animal products"=animalProductsReExports, 
-"Vegetable products"=vegtableProductsReExports, 
-"Animal or vegetable oils & fats"=animalOrVegtableProductsReExports, 
-"Prepared foodstuffs, beverages, spirits & tobacco"=preparedFoodstuffsReExports, 
-"Mineral products"=mineralProductsReExports, 
-"Chemicals and allied products"= chemicalProductsReExports, 
-"Plastic, rubber & articles thereof"= platsicThereofReExports, 
-"Raw hides, skins, leather articles & travel goods"= rawHidesReExports, 
-"Wood, cork & articles thereof & plaiting material"= woodMaterialReExports, 
-"Wood pulp, paper & paperboard & articles thereof"= woodThereofReExports, 
-"Textiles & textile articles"= textileArticlesReExports, 
-"Footwear, headgear, umbrellas & parts thereof"= footwearThereofReExports, 
-"Articles of stone, plaster, cement, glass & ceremic products"= articlesStoneReExports, 
-"Pearls, precious & semi-precious stones & metals"= pearlsStoneReExports, 
-"Base metals & articles thereof"= baseMetalsReExports, 
-"Machinery & mechanical & electrical appliances & parts thereof"= machineryThereofReExports, 
-"Vehicles, aircraft & associated transport equipment"= vehiclesEquipmentReExports, 
-"Photographic & optical, medical & surgical goods & clocks/watches & musical instruments"= photographicGoodsReExports, 
-"Arms and ammunition, parts & accessories thereof"= armsThereofReExports, 
-"Miscellaneous manufactured articles"= miscellaneousArticlesReExports, 
-"Works of art, collectors pieces & antiques"= worksArtReExports, 
-"Others"= othersReExports, 
-"Total"= totalReExportsByHSCode)
-
+# View the table
 prettyTable(reExportsByHS)
 
 ```
@@ -384,7 +395,7 @@ prettyTable(reExportsByHS)
 ```
 
 
-## Total Exports by HS Code
+## Table 5: Total Exports by HS Code
 
 ```{r calculate total exports by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
@@ -399,91 +410,65 @@ prettyTable(totalExportsByHS)
 
 ```
 
-## Principle Exports
+## Table 6: Principle Exports
 
 ```{r calculate principle exports statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate the principle Exports 
 
-alcoholicDrinksExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("ALCOHOLIC DRINKS"))
+# Define the CP4 codes need for table
+codesCP4 <- c(1000)
 
-beefExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("BEEF"))
+# Define the categories used for each column
+categoryColumn <- "Principle.Exports"
+columnCategories <- list(
+  "Alcoholic Drinks"=c("Alcoholic Drinks"),
+  "Beef fresh, chilled, frozen and preserved"=c("Beef fresh, chilled, frozen and preserved"),
+  "Cocoa"=c("Cocoa"),
+  "Coconut Meal"=c("Coconut Meal"),
+  "Coconut oil"=c("Coconut Oil"),
+  "Coffee, all types"=c("Coffee, all types"),
+  "Copra"=c("Copra"),
+  "Cowhides"=c("Cowhides"),
+  "Fish: Tuna"=c("Fish: Tuna"),
+  "Kava"=c("Kava"),
+  "Ornamental fish"=c("Ornamental fish"),
+  "Shell buttons"=c("Shell buttons"),
+  "Vanilla"=c("Vanilla"),
+  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal"),
+  "Other products"=c("Other products")
+)
 
-cocoaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("COCOA"))
-
-copraMealExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("COPRA MEAL"))
-
-coconutOilExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("COCONUT OIL"))
-
-coffeeAllTypesExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("COFFEE"))
-
-copraExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("COPRA"))
-
-cowhidesExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("COWHIDES"))
-
-fishTunaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("TUNA FISH"))
-
-kavaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("KAVA"))
-
-ornamentalFishExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("LIFE FISH"))
-
-woodArticlesExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("WOOD"))
-
-shellButtonsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("SHELL BUTTONS"))
-
-vanillaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("VANILLA"))
-
-otherProductsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("OTHER PRODUCTS"))
-
-totalPExports<- alcoholicDrinksExports + beefExports + cocoaExports + copraMealExports + coconutOilExports + coffeeAllTypesExports + copraExports + cowhidesExports + fishTunaExports + kavaExports + ornamentalFishExports + woodArticlesExports + shellButtonsExports + vanillaExports + otherProductsExports
-
-# Insert values into table
-totalPrincipleExports <- data.frame("Alcoholic Drinks"=alcoholicDrinksExports, 
-                            "Beef fresh, chilled, frozen and preserved"=beefExports, 
-                            "Cocoa"=cocoaExports, 
-                            "Copra Meal"=copraMealExports, 
-                            "Coconut oil"=coconutOilExports, 
-                            "Coffee, all types"= coffeeAllTypesExports,
-                            "Copra"= copraExports, 
-                            "Cowhides"= cowhidesExports, 
-                            "Fish: Tuna"= fishTunaExports, 
-                            "Kava"= kavaExports, 
-                            "Ornamental fish"= ornamentalFishExports, 
-                            "Wood and articles of wood; wood charcoal"= woodArticlesExports, 
-                            "Shell buttons"= shellButtonsExports, 
-                            "Vanilla"= vanillaExports, 
-                            "Other products"= otherProductsExports, 
-                            "Total exports"= totalPExports) 
-
-prettyTable(totalPrincipleExports)
-
+# Build the table
+totalPrincipleExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Calculate the principle Re-Exports 
 
-alcoholicDrinksReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("ALCOHOLIC DRINKS"))
+# Define the CP4 codes need for table
+codesCP4 <- c(3071)
 
-tobaccoReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("CIGARETTES containing tobacco"))
+# Define the categories used for each column
+categoryColumn <- "Principle.Exports"
+columnCategories <- list(
+  "Alcoholic Drinks"=c("Alcoholic Drinks"),
+  "Tobacco and cigarettes"=c("Tobacco and cigarettes"),
+  "Fuel"=c("Fuel"),
+  "Other products"=c("Other products")
+)
 
-fuelReExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("FUEL"))
+# Build the table
+totalPrincipleReExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-otherProductsReExports<- calculateStatValueSum(processedTradeStats, codes_CP4 = c(3071), categoryCol = "PRINCIPAL.EXPORTS", categoryValues = c("OTHER PRODUCTS"))
-
-totalPReExports<- alcoholicDrinksReExports + tobaccoReExports + fuelReExports + otherReProductsReExports 
-
-# Insert values into table
-totalPrincipleReExports <- data.frame("Alcoholic Drinks"=alcoholicDrinksReExports, 
-                              "Tobacco and cigarettes"=tobaccoReExports, 
-                              "Fuel"=fuelReExports, 
-                              "Other products"=otherProductsReExports, 
-                              "Total re-exports"=totalPReExports) 
-
-prettyTable(totalPrincipleRePExports)
 
 # Total Exports and Re-Exports
-totalPrincipleExportsandReExports <- totalPExports + totalPReExports
+columns <- unique(c(colnames(totalPrincipleExports), colnames(totalPrincipleReExports)))
+totalPrincipleExportsandReExports <- data.frame(matrix(0, nrow=1, ncol=length(columns)))
+colnames(totalPrincipleExportsandReExports) <- columns
+totalPrincipleExportsandReExports[names(totalPrincipleExports)] <- totalPrincipleExports
+totalPrincipleExportsandReExports[names(totalPrincipleReExports)] <- totalPrincipleExportsandReExports[names(totalPrincipleReExports)] + totalPrincipleReExports
 
+# View the final table
 prettyTable(totalPrincipleExportsandReExports)
-
 ```
 
 ```{r insert Principle Exports into final formatted table}
@@ -491,168 +476,72 @@ prettyTable(totalPrincipleExportsandReExports)
 ```
 
 
-## Principle Imports
+## Table 7: Principle Imports
 
 ```{r calculate principle imports statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate the principle Imports 
-meatPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Meat and edible offal of poultry"))
 
-fishPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Fish and crustaceans, molluscs and other aquatic invertebrates"))
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
 
-milkPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Milk and Cream"))
+# Define the categories used for each column
+categoryColumn <- "Principle.Imports"
+columnCategories <- list(
+  "Meat and edible offal of poultry"=c("Meat and edible offal of poultry"),
+  "Fish and crustaceans, molluscs and other aquatic invertebrates"=c("Fish and crustaceans, molluscs and other aquatic invertebrates"),
+  "Milk and Cream"=c("Milk and Cream"),
+  "Rice"=c("Rice"),
+  "Wheat or meslin flour"=c("Wheat or meslin flour"),
+  "Other prepared or preserved meat, meat offal or blood"=c("Other prepared or preserved meat, meat offal or blood"),
+  "Prepared or preserved fish"=c("Prepared or preserved fish"),
+  "Sugar"=c("Sugar"),
+  "Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"=c("Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"),
+  "Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"=c("Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"),
+  "Bread, pastry, cakes, biscuits and other bakers' wares"=c("Bread, pastry, cakes, biscuits and other bakers' wares"),
+  "Non-alcoholic drinks including mineral water"=c("Non-alcoholic drinks including mineral water"),
+  "Alcoholic drinks"=c("Alcoholic drinks"),
+  "Preparations of a kind used in animal feeding"=c("Preparations of a kind used in animal feeding"),
+  "Cigars, cheroots, cigarillos and cigarettes, of tobacco or of tobacco substitutes"=c("Cigars, cheroots, cigarillos and cigarettes, of tobacco or of tobacco substitutes"),
+  "Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"=c("Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"),
+  "Petroleum oils and oils obtained from bituminous minerals"=c("Petroleum oils and oils obtained from bituminous minerals"),
+  "Petroleum gases and other gaseous hydrocarbons"=c("Petroleum gases and other gaseous hydrocarbons"),
+  "Medicaments"=c("Medicaments"),
+  "Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"=c("Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"),
+  "Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics"=c("Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics"),
+  "Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"=c("Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"),
+  "New pneumatic tires, of rubber"=c("New pneumatic tires, of rubber"),
+  "Wood sawn or chipped lengthwise, sliced or peeled, whether or not planed, sanded or end-jointed"=c("Wood sawn or chipped lengthwise, sliced or peeled, whether or not planed, sanded or end-jointed"),
+  "Toilet paper and similar paper"=c("Toilet paper and similar paper"),
+  "Printed books, brochures, leaflets and similar printed matter"=c("Printed books, brochures, leaflets and similar printed matter"),
+  "Articles of apparel and clothing accessories"=c("Articles of apparel and clothing accessories"),
+  "Other made up textile articles; sets; worn clothing and worn textile articles; rags"=c("Other made up textile articles; sets; worn clothing and worn textile articles; rags"),
+  "Footwear, gaiters and the like; parts of such articles"=c("Footwear, gaiters and the like; parts of such articles"),
+  "Iron and steel"=c("Iron and steel"),
+  "Articles of iron or steel"=c("Articles of iron or steel"),
+  "Aluminium and articles thereof"=c("Aluminium and articles thereof"),
+  "Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)"=c("Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)"),
+  "Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines"=c("Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines"),
+  "Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"=c("Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"),
+  "Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers"=c("Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers"),
+  "Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data"=c("Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data"),
+  "Electric generating sets and rotary converters"=c("Electric generating sets and rotary converters"),
+  "Telephone sets, including telephones for cellular networks or for other wireless networks"=c("Telephone sets, including telephones for cellular networks or for other wireless networks"),
+  "Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"=c("Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"),
+  "Motor vehicles for the transport of passengers"=c("Motor vehicles for the transport of passengers"),
+  "Motor vehicles for the transport of goods"=c("Motor vehicles for the transport of goods"),
+  "Parts of aircraft"=c("Parts of aircraft"),
+  "Yachts and other vessels for pleasure or sports; rowing boats and canoes"=c("Yachts and other vessels for pleasure or sports; rowing boats and canoes"),
+  "Other furniture and parts thereof"=c("Other furniture and parts thereof"),
+  "Personal and household effects"=c("Personal and household effects"),
+  "Other Imports"=c("Other Imports")
+)
 
-ricePrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("RICE"))
+# Build the table
+totalPrincipleImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-wheatPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Wheat or meslin flour"))
-
-preparedMeatPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Other prepared or preserved meat, meat offal or blood"))
-
-preparedFishPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Prepared or preserved fish"))
-
-sugarPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Sugar"))
-
-pastaPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"))
-
-preparedFoodsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"))
-
-breadPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Bread, pastry, cakes, biscuits and other bakers' wares"))
-
-nonAlcoholicPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Non-alcoholic drinks including mineral water"))
-
-alcoholicPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("ALCOHOLIC DRINKS"))
-
-animalFeedingPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Preparations of a kind used in animal feeding"))
-
-tobaccoProductsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Cigars, cheroots, cigarillos and cigarettes, of tobacco or of tobacco substitutes"))
-
-cementPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"))
-
-cementPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"))
-
-petroleumPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Petroleum oils and oils obtained from bituminous minerals"))
-
-hydrocarbonsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Petroleum gases and other gaseous hydrocarbons"))
-
-medicamentsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Medicaments"))
-
-perfumesPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"))
-
-pipesPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics."))
-
-lidsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"))
-
-tiresPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("New pneumatic tires, of rubber"))
-
-woodPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Wood sawn or chipped lengthwise, sliced or peeled, whether or not planed, sanded or end-jointed"))
-
-toiletPaperPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Toilet paper and similar paper"))
-
-printedBooksPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Printed books, brochures, leaflets and similar printed matter"))
-
-clothingPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Articles of apparel and clothing accessories"))
-
-textileClothingPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Other made up textile articles; sets; worn clothing and worn textile articles; rags"))
-
-footwearPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Footwear, gaiters and the like; parts of such articles"))
-
-ironSteelPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Iron and steel"))
-
-articlesIronSteelPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Articles of iron or steel"))
-
-aluminiumThereofPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Aluminium and articles thereof"))
- 
-enginesThereofPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)"))
- 
-refridgeratorsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines"))
-
-purifyingMachineryPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"))
-
-bulldozersPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers"))
-
-dataProcessingMachinesPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data."))
-
-electricConvertersPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Electric generating sets and rotary converters"))
-
-telephonePrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Telephone sets, including telephones for cellular networks or for other wireless networks"))
-
-telephonePrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Telephone sets, including telephones for cellular networks or for other wireless networks")) 
-
-conductorsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors")) 
-
-conductorsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors")) 
-
-motorVehiclesPassengersPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Motor vehicles for the transport of passengers")) 
-
-motorVehiclesGoodsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Motor vehicles for the transport of goods")) 
-
-partsAircraftPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Parts of aircraft")) 
-
-yachtsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Yachts and other vessels for pleasure or sports; rowing boats and canoes"))
-
-furniturePrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Other furniture and parts thereof"))
-
-personalEffectsPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Personal and household effects"))
-
-otherPrincipleImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "PRINCIPAL.IMPORTS", categoryValues = c("Other Imports"))
-
-totalPImports<- meatPrincipleImports + fishPrincipleImports + milkPrincipleImports + ricePrincipleImports + wheatPrincipleImports + preparedMeatPrincipleImports + preparedFishPrincipleImports + sugarPrincipleImports + pastaPrincipleImports + preparedFoodsPrincipleImports + breadPrincipleImports + nonAlcoholicPrincipleImports + alcoholicPrincipleImports + animalFeedingPrincipleImports + tobaccoProductsPrincipleImports + cementPrincipleImports + petroleumPrincipleImports + hydrocarbonsPrincipleImports + medicamentsPrincipleImports + perfumesPrincipleImports + pipesPrincipleImports + lidsPrincipleImports + tiresPrincipleImports + woodPrincipleImports + toiletPaperPrincipleImports + printedBooksPrincipleImports + clothingPrincipleImports + textileClothingPrincipleImports + footwearPrincipleImports + ironSteelPrincipleImports + articlesIronSteelPrincipleImports + aluminiumThereofPrincipleImports + enginesThereofPrincipleImports + refridgeratorsPrincipleImports + purifyingMachineryPrincipleImports + bulldozersPrincipleImports + dataProcessingMachinesPrincipleImports + electricConvertersPrincipleImports + telephonePrincipleImports + conductorsPrincipleImports + motorVehiclesPassengersPrincipleImports + motorVehiclesGoodsPrincipleImports + partsAircraftPrincipleImports + yachtsPrincipleImports + furniturePrincipleImports + personalEffectsPrincipleImports + otherPrincipleImports
-
-
-# Insert values into table
-totalPrincipleImports <- data.frame("Meat and edible offal of poultry"= meatPrincipleImports, 
-                                    "Fish and crustaceans, molluscs and other aquatic invertebrates"= fishPrincipleImports, 
-                                    "Milk and Cream"= milkPrincipleImports, 
-                                    "Rice"= ricePrincipleImports, 
-                                    "Wheat or meslin flour"= wheatPrincipleImports, 
-                                    "Other prepared or preserved meat, meat offal or blood"= preparedMeatPrincipleImports, 
-                                    "Prepared or preserved fish"= preparedFishPrincipleImports, 
-                                    "Sugar"= sugarPrincipleImports, 
-                                    "Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"= pastaPrincipleImports, 
-                                    "Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"= preparedFoodsPrincipleImports, 
-                                    "Bread, pastry, cakes, biscuits and other bakers' wares"= breadPrincipleImports, 
-                                    "Non-alcoholic drinks including mineral water"= nonAlcoholicPrincipleImports, 
-                                    "Alcoholic drinks"= alcoholicPrincipleImports, 
-                                    "Preparations of a kind used in animal feeding"= animalFeedingPrincipleImports, 
-                                    "Cigars, cheroots, cigarillos and cigarettes, of tobacco or of tobacco substitutes"= tobaccoProductsPrincipleImports, 
-                                    "Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"= cementPrincipleImports, 
-                                    "Petroleum oils and oils obtained from bituminous minerals"= petroleumPrincipleImports, 
-                                    "Petroleum gases and other gaseous hydrocarbons"= hydrocarbonsPrincipleImports, 
-                                    "Medicaments"= medicamentsPrincipleImports, 
-                                    "Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"= perfumesPrincipleImports, 
-                                    "Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics."= pipesPrincipleImports, 
-                                    "Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"= lidsPrincipleImports, 
-                                    "New pneumatic tires, of rubber"= tiresPrincipleImports, 
-                                    "Wood sawn or chipped lengthwise, sliced or peeled, whether or not planed, sanded or end-jointed"= woodPrincipleImports, 
-                                    "Toilet paper and similar paper"= toiletPaperPrincipleImports, 
-                                    "Printed books, brochures, leaflets and similar printed matter"= printedBooksPrincipleImports, 
-                                    "Articles of apparel and clothing accessories"= clothingPrincipleImports, 
-                                    "Other made up textile articles; sets; worn clothing and worn textile articles; rags"= textileClothingPrincipleImports, 
-                                    "Footwear, gaiters and the like; parts of such articles"= footwearPrincipleImports, 
-                                    "Iron and steel"= ironSteelPrincipleImports, 
-                                    "Articles of iron or steel"= articlesIronSteelPrincipleImports, 
-                                    "Aluminium and articles thereof"= aluminiumThereofPrincipleImports, 
-                                    "Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)"= enginesThereofPrincipleImports, 
-                                    "Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines"= refridgeratorsPrincipleImports, 
-                                    "Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"= purifyingMachineryPrincipleImports, 
-                                    "Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers"= bulldozersPrincipleImports, 
-                                    "Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data."= dataProcessingMachinesPrincipleImports, 
-                                    "Electric generating sets and rotary converters"= electricConvertersPrincipleImports, 
-                                    "Telephone sets, including telephones for cellular networks or for other wireless networks"= telephonePrincipleImports, 
-                                    "Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"= conductorsPrincipleImports, 
-                                    "Motor vehicles for the transport of passengers"= motorVehiclesPassengersPrincipleImports, 
-                                    "Motor vehicles for the transport of goods"= motorVehiclesGoodsPrincipleImports, 
-                                    "Parts of aircraft"= partsAircraftPrincipleImports, 
-                                    "Yachts and other vessels for pleasure or sports; rowing boats and canoes"= yachtsPrincipleImports, 
-                                    "Other furniture and parts thereof"= furniturePrincipleImports, 
-                                    "Personal and household effects"= personalEffectsPrincipleImports, 
-                                    "Other Imports"= otherPrincipleImports, 
-                                    "TOTAL IMPORTS"= totalPImports) 
-
+# View the table
 prettyTable(totalPrincipleImports)
-
-
-
 
 ```
 
@@ -661,176 +550,86 @@ prettyTable(totalPrincipleImports)
 ```
 
 
-## Balance of Trade by Major Partner Countries
+## Table 8: Balance of Trade by Major Partner Countries
 ```{r calculate balance of trade by major partner countries statistics with base R, eval=FALSE, echo=FALSE}
+
+# Calculate the Exports by Major Partner Countries
+
+# Define the CP4 codes need for table
+codesCP4 <- c(1000, 3071)
+
+# Define the categories used for each column
+categoryColumn <- "EXPORT.COUNTRY"
+columnCategories <- list(
+  "Australia: Exports"=c("AUSTRALIA"),
+  "China, People's Republic of: Exports"=c("CHINA, PEOPLES REPUBLIC OF"),
+  "Fiji: Exports"=c("FIJI"),
+  "France: Exports"=c("FRANCE"),
+  "Hong Kong: Exports"=c("HONG KONG"),
+  "India: Exports"=c("INDIA"),
+  "Indonesia: Exports"=c("INDONESIA"),
+  "Japan: Exports"=c("JAPAN"),
+  "Korea, Republic Of: Exports"=c("KOREA, REPUBLIC OF"),
+  "Malaysia: Exports"=c("MALAYSIA"),
+  "Netherlands: Exports"=c("NETHERLANDS"),
+  "New Caledonia: Exports"=c("NEW CALEDONIA"),
+  "New Zealand: Exports"=c("NEW ZEALAND"),
+  "Papua New Guinea: Exports"=c("PAPUA NEW GUINEA"),
+  "Philippines: Exports"=c("PHILIPPINES"),
+  "Singapore: Exports"=c("SINGAPORE"),
+  "Solomon Islands: Exports"=c("SOLOMON ISLANDS"),
+  "Thailand: Exports"=c("THAILAND"),
+  "United Kingdom: Exports"=c("UNITED KINGDOM"),
+  "United States of America: Exports"=c("UNITED STATES OF AMERICA")
+)
+countries <- unique(processedTradeStats[, "EXPORT.COUNTRY"])
+columnCategories[["All Others: Exports"]] <- countries[countries %in% unlist(columnCategories) == FALSE]
+
+# Build the table
+totalPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+# Calculate the Imports by Major Partner Countries
+
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "IMPORT.COUNTRY"
+columnCategories <- list(
+  "Australia: Imports"=c("AUSTRALIA"),
+  "China, People's Republic of: Imports"=c("CHINA, PEOPLES REPUBLIC OF"),
+  "Fiji: Imports"=c("FIJI"),
+  "France: Imports"=c("FRANCE"),
+  "Hong Kong: Imports"=c("HONG KONG"),
+  "India: Imports"=c("INDIA"),
+  "Indonesia: Imports"=c("INDONESIA"),
+  "Japan: Imports"=c("JAPAN"),
+  "Korea, Republic Of: Imports"=c("KOREA, REPUBLIC OF"),
+  "Malaysia: Imports"=c("MALAYSIA"),
+  "Netherlands: Imports"=c("NETHERLANDS"),
+  "New Caledonia: Imports"=c("NEW CALEDONIA"),
+  "New Zealand: Imports"=c("NEW ZEALAND"),
+  "Papua New Guinea: Imports"=c("PAPUA NEW GUINEA"),
+  "Philippines: Imports"=c("PHILIPPINES"),
+  "Singapore: Imports"=c("SINGAPORE"),
+  "Solomon Islands: Imports"=c("SOLOMON ISLANDS"),
+  "Thailand: Imports"=c("THAILAND"),
+  "United Kingdom: Imports"=c("UNITED KINGDOM"),
+  "United States of America: Imports"=c("UNITED STATES OF AMERICA")
+)
+countries <- unique(processedTradeStats[, "IMPORT.COUNTRY"])
+columnCategories[["All Others: Imports"]] <- countries[countries %in% unlist(columnCategories) == FALSE]
+
+# Build the table
+totalPartnerCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Calculate the Balance of Trade by Major Partner Countries
 
-australiaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol ="COUNTRY", categoryValues = c("AUSTRALIA"))
-australiaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol ="COUNTRY", categoryValues = c("AUSTRALIA"))
-australiaTradeBalance<- australiaExports - australiaImports
-
-chinaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("CHINA, PEOPLES REPUBLIC OF"))
-chinaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("CHINA, PEOPLES REPUBLIC OF"))
-chinaTradeBalance<- chinaExports - chinaImports
-
-fijiExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("FIJI"))
-fijiImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("FIJI"))
-fijiTradeBalance<- fijiExports - fijiImports
-
-franceExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("FRANCE"))
-franceImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("FRANCE"))
-franceTradeBalance<- franceExports - franceImports
-	
-hongkongExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("HONG KONG"))
-hongkongImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("HONG KONG"))
-hongkongTradeBalance<- hongkongExports - hongkongImports
-
-indiaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("INDIA"))
-indiaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("INDIA"))
-indiaTradeBalance<- indiaExports - indiaImports
-
-indonesiaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("INDONESIA"))
-indonesiaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("INDONESIA"))
-indonesiaTradeBalance<- indonesiaExports - indonesiaImports
-
-japanExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("JAPAN"))
-japanImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("JAPAN"))
-japanTradeBalance<- japanExports - japanImports
-
-koreaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("KOREA, REPUBLIC OF"))
-koreaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("KOREA, REPUBLIC OF"))
-koreaTradeBalance<- koreaExports - koreaImports
-
-malaysiaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("MALAYSIA"))
-malaysiaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("MALAYSIA"))
-malaysiaTradeBalance<- malaysiaExports - malaysiaImports
-
-netherlandsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("NETHERLANDS"))
-netherlandsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("NETHERLANDS"))
-netherlandsTradeBalance<- netherlandsExports - netherlandsImports
-
-netherlandsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("NETHERLANDS"))
-netherlandsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("NETHERLANDS"))
-netherlandsTradeBalance<- netherlandsExports - netherlandsImports
-
-newCaledoniaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("NEW CALEDONIA"))
-newCaledoniaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("NEW CALEDONIA"))
-newCaledoniaTradeBalance<- newCaledoniaExports - newCaledoniaImports
-
-newZealandExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("NEW ZEALAND"))
-newZealandImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("NEW ZEALAND"))
-newZealandTradeBalance<- newZealandExports - newZealandImports
-
-papuaNewGuineaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("PAPUA NEW GUINEA"))
-papuaNewGuineaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("PAPUA NEW GUINEA"))
-papuaNewGuineaTradeBalance<- papuaNewGuineaExports - papuaNewGuineaImports
-
-philippinesExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("PHILIPPINES"))
-philippinesImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("PHILIPPINES"))
-philippinesTradeBalance<- philippinesExports - philippinesImports
-
-singaporeExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("SINGAPORE"))
-singaporeImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("SINGAPORE"))
-singaporeTradeBalance<- singaporeExports - singaporeImports
-
-solomonIslandsExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("SOLOMON ISLANDS"))
-solomonIslandsImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("SOLOMON ISLANDS"))
-solomonIslandsTradeBalance<- solomonIslandsExports - solomonIslandsImports
-
-thailandExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("THAILAND"))
-thailandImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("THAILAND"))
-thailandTradeBalance<- thailandExports - thailandImports
-
-ukExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("UNITED KINGDOM"))
-ukImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("UNITED KINGDOM"))
-ukTradeBalance<- ukExports - ukImports
-
-americaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("UNITED STATES OF AMERICA"))
-americaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("UNITED STATES OF AMERICA"))
-americaTradeBalance<- americaExports - americaImports
-
-allOthersExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "COUNTRY", categoryValues = c("ALL OTHERS"))
-allOthersImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(000, 4071, 7100), categoryCol = "COUNTRY", categoryValues = c("ALL OTHERS"))
-allOthersTradeBalance<- allOthersExports - allOthersImports
-
-totalPCExports<- australiaExports + chinaExports + fijiExports + franceExports + hongkongExports + indiaExports + indonesiaExports + japanExports + koreaExports + malaysiaExports + netherlandsExports + newCaledoniaExports + newZealandExports + papuaNewGuineaExports + philippinesExports + singaporeExports + solomonIslandsExports + thailandExports + ukExports + americaExports + allOthersExports
-
-totalPCImports<- australiaImports + chinaImports + fijiImports + franceImports + hongkongImports + indiaImports + indonesiaImports + japanImports + koreaImports + malaysiaImports + netherlandsImports + newCaledoniaImports + newZealandImports + papuaNewGuineaImports + philippinesImports + singaporeImports + solomonIslandsImports + thailandImports + ukImports + americaImports + allOthersImports
-
-totalPCBalance<- totalPCExports - totalPCImports
-
-# Insert values into table
-balanceOfTradeByMajorPartnerCountries <- data.frame("Australia: Exports"=australiaExports, 
-                                                    "Australia: Imports"=australiaImports, 
-                                                    "Australia: Balance"= australiaBalance, 
-                                                    "China, People's Republic of: Exports"=chinaExports, 
-                                                    "China, People's Republic of: Imports"=chinaImports, 
-                                                    "China, People's Republic of: Balance"= chinaBalance, 
-                                                    "Fiji: Exports"=fijiExports, 
-                                                    "Fiji: Imports"=fijiImports, 
-                                                    "Fiji: Balance"= fijiBalance, 
-                                                    "France: Exports"=franceExports, 
-                                                    "France: Imports"=franceImports, 
-                                                    "France: Balance"= franceBalance, 
-                                                    "Hong Kong: Exports"=hongkongExports, 
-                                                    "Hong Kong: Imports"=hongkongImports, 
-                                                    "Hong Kong: Balance"= hongkongBalance, 
-                                                    "India: Exports"=indiaExports, 
-                                                    "India: Imports"=indiaImports, 
-                                                    "India: Balance"= indiaBalance, 
-                                                    "Indonesia: Exports"=indonesiaExports, 
-                                                    "Indonesia: Imports"=indonesiaImports, 
-                                                    "Indonesia: Balance"= indonesiaBalance, 
-                                                    "Japan: Exports"=japanExports, 
-                                                    "Japan: Imports"=japanImports, 
-                                                    "Japan: Balance"= japanBalance, 
-                                                    "Korea, Republic of: Exports"=koreaExports, 
-                                                    "Korea, Republic of: Imports"=koreaImports, 
-                                                    "Korea, Republic of: Balance"= koreaBalance, 
-                                                    "Malaysia: Exports"=malaysiaExports, 
-                                                    "Malaysia: Imports"=malaysiaImports, 
-                                                    "Malaysia: Balance"= malaysiaBalance, 
-                                                    "Netherlands: Exports"=netherlandsExports, 
-                                                    "Netherlands: Imports"=netherlandsImports, 
-                                                    "Netherlands: Balance"= netherlandsBalance, 
-                                                    "New Caledonia: Exports"=newCaledoniaExports, 
-                                                    "New Caledonia: Imports"=newCaledoniaImports, 
-                                                    "New Caledonia: Balance"= newCaledoniaBalance,
-                                                    "New Zealand: Exports"=newZealandExports, 
-                                                    "New Zealand: Imports"=newZealandImports, 
-                                                    "New Zealand: Balance"= newZealandBalance, 
-                                                    "Papua NEW Guinea: Exports"=papuaNewGuineaExports, 
-                                                    "Papua New Guinea: Imports"=papuaNewGuineaImports, 
-                                                    "Papua New Guinea: Balance"= papuaNewGuineaBalance, 
-                                                    "Philippines: Exports"=philippinesExports, 
-                                                    "Philippines: Imports"=philippinesImports, 
-                                                    "Philippines: Balance"= philippinesBalance, 
-                                                    "Singapore: Exports"=singaporeExports, 
-                                                    "Singapore: Imports"=singaporeImports, 
-                                                    "Singapore: Balance"= singaporeBalance, 
-                                                    "Solomon Islands: Exports"=solomonIslandsExports, 
-                                                    "Solomon Islands: Imports"=solomonIslandsImports, 
-                                                    "Solomon Islands: Balance"= solomonIslandsBalance, 
-                                                    "Solomon Islands: Exports"=solomonIslandsExports, 
-                                                    "Solomon Islands: Imports"=solomonIslandsImports, 
-                                                    "Solomon Islands: Balance"= solomonIslandsBalance, 
-                                                    "Thailand: Exports"=thailandExports, 
-                                                    "Thailand: Imports"=thailandImports, 
-                                                    "thailand: Balance"= thailandBalance, 
-                                                    "United Kingdon: Exports"=ukExports, 
-                                                    "United Kingdom: Imports"=ukImports, 
-                                                    "United Kingdom: Balance"= ukBalance, 
-                                                    "United States of America: Exports"=americaExports, 
-                                                    "United States of America: Imports"=americaImports, 
-                                                    "United States of America: Balance"= americaBalance, 
-                                                    "All Others: Exports"=allOthersExports, 
-                                                    "All Others: Imports"=allOthersImports, 
-                                                    "All Others: Balance"= allOthersBalance, 
-                                                    "Total: Exports"=totalPCExports, 
-                                                    "Total: Imports"=totalPCImports, 
-                                                    "Total: Balance"= totalPCBalance)
-                                                    
+balanceOfTradeByMajorPartnerCountries<- totalPartnerCountryExports - totalPartnerCountryImports
+colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTradeByMajorPartnerCountries),
+                                                          FUN=function(colName){
+                                                            return(strsplit(colName, split=":")[[1]][1])
+                                                          })
 prettyTable(balanceOfTradeByMajorPartnerCountries)
 
 ```
@@ -841,70 +640,61 @@ prettyTable(balanceOfTradeByMajorPartnerCountries)
 ```
 
 
-## Balance of Trade by Region
+## Table 9: Balance of Trade by Region
 ```{r calculate balance of trade by region statistics with base R, eval=FALSE, echo=FALSE}
 
+# Calculate the Exports by Region
+
+# Define the CP4 codes need for table
+codesCP4 <- c(1000, 3071)
+
+# Define the categories used for each column
+categoryColumn <- "EXPORT.REGION"
+columnCategories <- list(
+  "Africa: Exports"=c("AFRICA"),
+  "The Americas: Exports"=c("AMERICAS"),
+  "Asia: Exports"=c("ASIA"),
+  "Europe: Exports"=c("EUROPE"),
+  "Oceania: Exports"=c("OCEANIA"),
+  "Various: Exports"=c("VARIOUS")
+)
+
+# Build the table
+totalPartnerRegionExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+
+# Calculate the Imports by Region
+
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "IMPORT.REGION"
+columnCategories <- list(
+  "Africa: Imports"=c("AFRICA"),
+  "The Americas: Imports"=c("AMERICAS"),
+  "Asia: Imports"=c("ASIA"),
+  "Europe: Imports"=c("EUROPE"),
+  "Oceania: Imports"=c("OCEANIA"),
+  "Various: Imports"=c("VARIOUS")
+)
+
+# Build the table
+totalPartnerRegionImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
 # Calculate the Balance of Trade by Region
-africaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "REGION", categoryValues = c("AFRICA"))
-africaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "REGION", categoryValues = c("AFRICA"))
-africaBalance<- africaExports - africaImports
 
-theAmericasExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "REGION", categoryValues = c("AMERICAS"))
-theAmericasImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "REGION", categoryValues = c("AMERICAS"))
-theAmericasBalance<- theAmericasExports - theAmericasImports
+balanceOfTradeByRegion <- totalPartnerRegionExports - totalPartnerRegionImports
+colnames(balanceOfTradeByRegion) <- sapply(colnames(balanceOfTradeByRegion),
+                                           FUN=function(colName){
+                                             return(strsplit(colName, split=":")[[1]][1])
+                                           })
 
-asiaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "REGION", categoryValues = c("ASIA"))
-asiaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "REGION", categoryValues = c("ASIA"))
-asiaBalance<- asiaExports - asiaImports
+# Calculate the Balance of Trade for the Pacific Islands
+pictsExports <- totalPartnerRegionExports["Oceania: Exports"] - totalPartnerCountryExports["New Zealand: Exports"] - totalPartnerCountryExports["Australia: Exports"]
+pictsImports<- totalPartnerRegionImports["Oceania: Imports"] - totalPartnerCountryImports["New Zealand: Imports"] - totalPartnerCountryImports["Australia: Imports"]
+pictsBalance<- balanceOfTradeByRegion["Oceania"] - balanceOfTradeByMajorPartnerCountries["Australia"] - balanceOfTradeByMajorPartnerCountries["New Zealand"]
 
-europeExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "REGION", categoryValues = c("EUROPE"))
-europeImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "REGION", categoryValues = c("EUROPE"))
-europeBalance<- europeExports - europeImports
-
-oceaniaExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "REGION", categoryValues = c("OCEANIA"))
-oceaniaImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "REGION", categoryValues = c("OCEANIA"))
-oceaniaBalance<- oceaniaExports - oceaniaImports
-
-variousExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "REGION", categoryValues = c("VARIOUS"))
-variousImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "REGION", categoryValues = c("VARIOUS"))
-variousBalance<- variousExports - variousImports
-
-totalRegionExports<- africaExports + theAmericasExports + asiaExports + europeExports + oceaniaExports + variousExports
-totalRegionImports<- africaImports + theAmericasImports + asiaImports + europeImports + oceaniaImports + variousImports
-totalRegionBalance<- totalRegionExports - totalRegionImports
-
-pictsExports<- oceaniaExports - australiaExports - newZealandExports
-pictsImports<- oceaniaImports - australiaImports - newZealandImports
-pictsBalance<- oceaniaBalance - australiaBalance - newZealandBalance
-
-
-# Insert values into table
-balanceOfTradeByRegion <- data.frame("Africa: Exports"=africaExports, 
-                                     "Africa: Imports"=africaImports, 
-                                     "Africa: Balance"= africaBalance, 
-                                     "The Americas: Exports"=theAmericasExports, 
-                                     "The Americas: Imports"=theAmericasImports, 
-                                     "The Americas: Balance"= theAmericasBalance, 
-                                     "Asia: Exports"=asiaExports, 
-                                     "Asia: Imports"=asiaImports, 
-                                     "Asia: Balance"= asiaBalance, 
-                                     "Europe: Exports"=europeExports, 
-                                     "Europe: Imports"=europeImports, 
-                                     "Europe: Balance"= europeBalance, 
-                                     "Oceania: Exports"=oceaniaExports, 
-                                     "Oceania: Imports"=oceaniaImports, 
-                                     "Oceania: Balance"= oceaniaBalance, 
-                                     "Various: Exports"=variousExports, 
-                                     "Various: Imports"=variousImports, 
-                                     "Various: Balance"= variousBalance, 
-                                     "Total: Exports"=totalRegionExports, 
-                                     "Total: Imports"=totalRegionImports, 
-                                     "Total: Balance"= totalRegionBalance, 
-                                     "of which the PICTs: Exports"=pictsExports, 
-                                     "of which the PICTs: Imports"=pictsImports, 
-                                     "of which the PICTs: Balance"= pictsBalance)
-                                                    
-prettyTable(balanceOfTradeByRegion)
 
 ```
 
@@ -917,40 +707,155 @@ prettyTable(balanceOfTradeByRegion)
 ## Trade by Mode of Transport 
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
+# Calculate Export Trade by Mode of Transport
+
+# Define the CP4 codes need for table
+codesCP4 <- c(1000, 3071)
+
+# Define the categories used for each column
+categoryColumn <- "Mode.of.Transport"
+columnCategories <- list(
+  "Air: Exports"=c("AIR"),
+  "Water: Exports"=c("SEA"),
+  "Land: Exports"=c("LAND"),
+  "Postal: Exports"=c("POSTAGE"),
+  "Other: Exports"=c("OTHER")
+)
+
+# Build the table
+totalTransportExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+# View the table
+prettyTable(totalTransportExports)
+
+
+# Calculate Import Trade by Mode of Transport
+
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "Mode.of.Transport"
+columnCategories <- list(
+  "Air: Imports"=c("AIR"),
+  "Water: Imports"=c("SEA"),
+  "Land: Imports"=c("LAND"),
+  "Postal: Imports"=c("POSTAGE"),
+  "Other: Imports"=c("OTHER")
+)
+
+# Build the table
+totalTransportImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+# View the table
+prettyTable(totalTransportImports)
+
 # Calculate Trade by Mode of Transport
-
-airExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "Mode.of.Transport", categoryValues = c("AIR"))
-airImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "Mode.of.Transport", categoryValues = c("AIR"))
-
-waterExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "Mode.of.Transport", categoryValues = c("WATER"))
-waterImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "Mode.of.Transport", categoryValues = c("WATER"))
-
-landExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "Mode.of.Transport", categoryValues = c("LAND"))
-landImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "Mode.of.Transport", categoryValues = c("LAND"))
-
-postageExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "Mode.of.Transport", categoryValues = c("POSTAL"))
-postageImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "Mode.of.Transport", categoryValues = c("POSTAL"))
-
-otherTransportExports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(1000, 3071), categoryCol = "Mode.of.Transport", categoryValues = c("OTHERL"))
-otherTransportImports <- calculateStatValueSum(processedTradeStats, codes_CP4 = c(4000, 4071, 7100), categoryCol = "Mode.of.Transport", categoryValues = c("OTHER"))
-
-totalTransportExports<- airExports + waterExports + landExports + postageExports + otherTransportExports
-totalTransportImports<- airImports + waterImports + landImports + postageImports + otherTransportImports
-
-# Insert values into table
-tradebyModeOfTransport <- data.frame("Air: Exports"=airExports, 
-                                     "Air: Imports"=airImports, 
-                                     "Water: Exports"=airExports, 
-                                     "Water: Imports"=waterImports, 
-                                     "Land: Exports"=landExports, 
-                                     "Land: Imports"=landImports, 
-                                     "Postal consignments, mail or courier: Exports"= postageExports, 
-                                     "Postal consignments, mail or courier: Imports"= postageImports, 
-                                     "Others: Exports"= otherTransportExports, "Others: Imports"= otherTransportImports, 
-                                     "Total: Exports"= totalTransportExports, 
-                                     "Total: Imports"= totalTransportImports)
-                                                    
+tradebyModeOfTransport<- totalTransportExports + totalTransportImports
 prettyTable(tradebyModeOfTransport)
+
+```
+
+```{r insert balance of trade by Region into final formatted table}
+
+
+```
+
+## Trade by Trade Agreement
+```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
+
+# Calculate Trade by Trade Agreement (whether the commodity complies with the trade agreement can only be confirmed by the receiving country hence only for imports)
+
+
+#Create subset of trade agreements separately then run the principle commodities 
+
+msgDataFrame<- processedTradeStats[processedTradeStats$PRF == "MSG", ]
+
+```
+
+```{r insert balance of trade by Region into final formatted table}
+
+
+```
+
+## Exports by SITC 
+```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
+
+# Calculate Exports by SITC 
+
+# Define the CP4 codes need for table
+codesCP4 <- c(1000, 3071)
+
+# Define the categories used for each column
+categoryColumn <- "SITC_1"
+columnCategories <- list(
+  "Food and live animals"=c("0"),
+  "Beverages and tobacco"=c("1"),
+  "Crude materials, inedible, except fuels"=c("2"),
+  "Mineral fuels, lubricants and related materials"=c("3"),
+  "Animal and vegetable oils, fats and waxes"=c("4"),
+  "Chemicals and related products, not elsewhere specified"=c("5"),
+  "Manufactured goods classified chiefly by material"=c("6"),
+  "Machinery and transport equipment"=c("7"),
+  "Miscellaneous manufactured goods"=c("8"),
+  "Commodities and transactions not classified elsewhere in SITC"=c("9")
+)
+
+# Build the table
+totalExportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+# View the table
+prettyTable(totalExportsbySITC)
+
+```
+
+```{r insert balance of trade by Region into final formatted table}
+
+
+```
+
+## Imports by SITC
+```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
+
+# Calculate Exports by SITC 
+
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "SITC_1"
+columnCategories <- list(
+  "Food and live animals"=c("0"),
+  "Beverages and tobacco"=c("1"),
+  "Crude materials, inedible, except fuels"=c("2"),
+  "Mineral fuels, lubricants and related materials"=c("3"),
+  "Animal and vegetable oils, fats and waxes"=c("4"),
+  "Chemicals and related products, not elsewhere specified"=c("5"),
+  "Manufactured goods classified chiefly by material"=c("6"),
+  "Machinery and transport equipment"=c("7"),
+  "Miscellaneous manufactured goods"=c("8"),
+  "Commodities and transactions not classified elsewhere in SITC"=c("9")
+)
+
+# Build the table
+totalImportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+# View the table
+prettyTable(totalImportsbySITC)
+
+```
+
+```{r insert balance of trade by Region into final formatted table}
+
+
+```
+
+##  Retained Imports Classified by Broad Economic Categories		
+```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
+
+# Calculate Export Trade by Mode of Transport
+
+
 
 ```
 
