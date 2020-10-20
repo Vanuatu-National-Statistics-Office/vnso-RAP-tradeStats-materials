@@ -242,7 +242,7 @@ finalWorkbookFileName <- file.path("..", "outputs", "SEC_FINAL_MAN_FinalTradeSta
 
 ## Updating the Annual and Monthly sub tables
 # Extract the balance of trade data and extract sub tables
-balanceOfTradeSubTables <- extractHistoricBalanceOfTradeStatistics(finalWorkbookFileName)
+balanceOfTradeSubTables <- extractStatisticsByTime(finalWorkbookFileName, sheet="1_BOT", startRow=5)
 
 # Update the sub tables for the balance of trade data
 balanceOfTradeSubTables <- updateBalanceOfTradeSubTables(balanceOfTradeSubTables, month, year, tradeBalance/1000000)
