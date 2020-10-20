@@ -96,7 +96,7 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
     # Calculate the sum of statistics for the last year
     januaryRows <- which(subTables$Monthly$Month == "January")
     lastYearsRows <- januaryRows[length(januaryRows)]:nrow(subTables$Monthly)
-    currentYearsTotals <- data.frame("Year"=year, "blank"=NA, stringsAsFactors=FALSE)
+    currentYearsTotals <- data.frame("Year"=as.numeric(year), "blank"=NA, stringsAsFactors=FALSE)
     currentYearsTotals[, colnames(subTables$Annually)[3:nColumns]] <- 
       colSums(subTables$Monthly[lastYearsRows, 3:nColumns], na.rm=TRUE) + newStatistics
     
@@ -126,59 +126,62 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
 #' @keywords openxlsx
 insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, nRowsInHeader){
 
-  # Add one to the nRowsInHeader variable - as excel header included
-  nRowsInHeader <- nRowsInHeader + 1
-  
   # Calculate the number of rows and columns taken up by each sub table
   nRowsInAnnual <- nrow(subTables$Annually)
   nRowsInMonthly <- nrow(subTables$Monthly)
   nRows <- nRowsInAnnual + 2 + nRowsInMonthly
   nColumns <- ncol(subTables$Annually)
-  
+ 
+  # Calculate the start of each sub table
+  annualStartRow <- nRowsInHeader + 1
+  monthlyStartRow <- nRowsInHeader + nRowsInAnnual + 3
+  notesStartRow <- monthlyStartRow + nRowsInMonthly + 1
+
   # Load the final tables workbook for editing
   finalWorkbook <- openxlsx::loadWorkbook(fileName)
 
   # Clear the current contents of the workbook
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader, x=matrix(NA, nrow=nRows+4, ncol=nColumns), colNames=FALSE)
-  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=seq_len(nColumns), rows=nRowsInHeader:(nRowsInHeader+nRows))
-  openxlsx::setRowHeights(finalWorkbook, sheet=sheet, rows=nRowsInHeader:(nRowsInHeader+nRows), heights=14.5)
-  
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=annualStartRow, x=matrix(NA, nrow=nRows+4, ncol=nColumns), colNames=FALSE)
+  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=seq_len(nColumns), rows=annualStartRow:notesStartRow)
+  openxlsx::setRowHeights(finalWorkbook, sheet=sheet, rows=annualStartRow:notesStartRow, heights=14.5)
+
   # Insert the Annual sub table
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader, x=subTables$Annually, colNames=FALSE)
-  
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=annualStartRow, x=subTables$Annually, colNames=FALSE)
+
   # Insert the monthly sub table
-  writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader+nRowsInAnnual+2, x="Monthly", colNames=FALSE)
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader+nRowsInAnnual+1, x=subTables$Monthly, colNames=FALSE)
-  
+  writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=monthlyStartRow-1, x="Monthly", colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=monthlyStartRow, x=subTables$Monthly, colNames=FALSE)
+
   # Insert the notes
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader+nRows, x=subTables$Notes, colNames=FALSE)
- 
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=notesStartRow, x=subTables$Notes, colNames=FALSE)
+
   # Apply a general formatting to the table contents
-  default <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"), fontName="Times New Roman")
+  default <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"),
+                                   fontName="Times New Roman")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=seq_len(nColumns), 
-                     rows=nRowsInHeader:(nRowsInHeader+nRows+4), stack=FALSE)
-  
+                     rows=annualStartRow:(notesStartRow+2), stack=FALSE)
+
   # Format the Monthly sub table name as bold
   bold <- openxlsx::createStyle(textDecoration="bold")
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=bold, rows=nRowsInHeader+nRowsInAnnual, cols=1, stack=TRUE)
-  
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=bold, rows=monthlyStartRow-1, cols=1, stack=TRUE)
+
   # Format the balance of trade statistics as numbers
   number <- openxlsx::createStyle(numFmt="#,##0")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, gridExpand=TRUE, stack=TRUE, cols=3:nColumns,
-                     rows=nRowsInHeader:(nRowsInHeader+nRows))
-  
+                     rows=annualStartRow:notesStartRow)
+
   # Format the year values in table as numbers
   number <- openxlsx::createStyle(numFmt="0")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, stack=TRUE, cols=1, gridExpand=TRUE,
-                     rows=nRowsInHeader:(nRowsInHeader+nRowsInAnnual-2))
+                     rows=annualStartRow:(monthlyStartRow-2))
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, stack=TRUE, cols=1, gridExpand=TRUE,
-                     rows=(nRowsInHeader+nRowsInAnnual+1):(nRowsInHeader+nRows-2))
+                     rows=monthlyStartRow:notesStartRow)
 
   # Format the notes as italics
   italics <- openxlsx::createStyle(textDecoration="italic")
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=italics, cols=1:2, stack=TRUE, gridExpand=TRUE,
-                     rows=(nRowsInHeader+nRows):(nRowsInHeader+nRows+4))
-  
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=italics, cols=1:nColumns, stack=TRUE, gridExpand=TRUE,
+                     rows=notesStartRow:(notesStartRow+4))
+
   # Save the edited workbook as a new file
   openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
 }
