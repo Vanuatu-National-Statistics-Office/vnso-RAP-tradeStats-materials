@@ -35,7 +35,7 @@ prettyTable <- function(table, full_width=FALSE, position="left", bootstrap_opti
 #' @param sheet A character string providing name of sheet to extract data from
 #' @return Returns list with dataframes representing the Annual and Monthly sub tables and notes
 #' @keywords openxlsx
-extractStatisticsByTime <- function(fileName, sheet, startRow){
+extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow){
   
   # Extract the full historic table
   historic <- openxlsx::read.xlsx(fileName, sheet=sheet, skipEmptyRows=FALSE, startRow=startRow)
@@ -46,7 +46,7 @@ extractStatisticsByTime <- function(fileName, sheet, startRow){
   end <- which(historic[, 1] == "Notes:") - 1
   
   # Extract the Annual statistics
-  annually <- historic[1:(monthlyStart-1), ]
+  annually <- historic[1:(monthlyStart-2), ]
   colnames(annually)[c(1,2)] <- c("Year", "blank")
   for(columnIndex in seq_len(ncol(annually))){
     annually[, columnIndex] <- as.numeric(annually[, columnIndex])
@@ -67,16 +67,16 @@ extractStatisticsByTime <- function(fileName, sheet, startRow){
   return(list("Annually"=annually, "Monthly"=monthly, "Notes"=notes))
 }
 
-#' Update Annual and Monthly sub-tables of the Balance of Trade table
+#' Update Annual and Monthly sub-tables of specific formatted table
 #' 
 #' A function that informatively updates the annual and monthly tables. In December add row to annual table. In January include year in monthly table.
 #' @param subTables A list with dataframes representing the Annual and Monthly sub tables
 #' @param month Full name of month with first letter upper case
 #' @param year Full year
-#' @param newTradeBalanceStatistics Data.frame with single row storing balance of trade statistics for current month
+#' @param newStatistics Data.frame with single row storing statistics for current month to be added to table
 #' @return Returns list with updated dataframes representing the Annual and Monthly sub tables and notes
 #' @keywords openxlsx
-updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanceStatistics){
+updateSubTablesByTime <- function(subTables, month, year, newStatistics){
 
   # Check if data have already been inserted into sub tables
   latestYearInSubTables <- max(subTables$Monthly$Year, na.rm=TRUE)
@@ -87,31 +87,31 @@ updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanc
     return(NULL)
   }
     
+  # Note the number of columns in the sub tables
+  nColumns <- ncol(subTables$Monthly)
+
   # Check if we need to update the annual table
   if(month == "December"){
     
     # Calculate the sum of statistics for the last year
     januaryRows <- which(subTables$Monthly == "January")
     lastYearsRows <- januaryRows[length(januaryRows)]:nrow(subTables$Monthly)
-    currentYearsTotals <- data.frame("Year"=year, "blank"=NA,
-                                     "Export"=sum(subTables$Monthly$Export[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$Export,
-                                     "Re-Export"=sum(subTables$Monthly$`Re-Export`[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$`Re-Export`,
-                                     "Total Export"=sum(subTables$Monthly$`Total Export`[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$`Total Export`,
-                                     "Imports CIF"=sum(subTables$Monthly$`Imports CIF`[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$`Imports CIF`,
-                                     "Trade Balance"=sum(subTables$Monthly$`Trade Balance`[lastYearsRows], na.rm=TRUE) + newTradeBalanceStatistics$`Trade Balance`,
-                                     stringsAsFactors=FALSE)
+    currentYearsTotals <- data.frame("Year"=year, "blank"=NA, stringsAsFactors=FALSE)
+    currentYearsTotals[, colnames(subTables$Annually)[3:nColumns]] <- 
+      colSums(subTables$Monthly[lastYearsRows, 3:nColumns], na.rm=TRUE) + newStatistics
     
     # Add a new row to the annual table for this years data
     subTables$Annually <- rbind(subTables$Annually, currentYearsTotals)
   }
   
   # Update the monthly table
-  newTradeBalanceStatistics$Year <- ifelse(month == "January", as.numeric(year), NA)
-  newTradeBalanceStatistics$Month <- month
+  names(newStatistics) <- colnames(subTables$Monthly)[3:nColumns] 
+  newStatistics$Year <- ifelse(month == "January", as.numeric(year), NA)
+  newStatistics$Month <- month
   if(month == "December"){
-    newTradeBalanceStatistics <- rbind(newTradeBalanceStatistics, NA)
+    newStatistics <- rbind(newStatistics, NA)
   }
-  subTables$Monthly <- rbind(subTables$Monthly, newTradeBalanceStatistics)
+  subTables$Monthly <- rbind(subTables$Monthly, newStatistics)
   
   return(subTables)
 }
