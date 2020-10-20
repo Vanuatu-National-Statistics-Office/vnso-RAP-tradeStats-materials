@@ -181,6 +181,13 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   italics <- openxlsx::createStyle(textDecoration="italic")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=italics, cols=1:nColumns, stack=TRUE, gridExpand=TRUE,
                      rows=notesStartRow:(notesStartRow+4))
+  
+  # Remove formatting outside the table region
+  blank <- openxlsx::createStyle(borderStyle="none", border=c("top", "bottom", "left", "right"))
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=(nColumns+1):100, 
+                     rows=1:100, stack=FALSE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=1:100, 
+                     rows=(notesStartRow+5):100, stack=FALSE)
 
   # Save the edited workbook as a new file
   openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
