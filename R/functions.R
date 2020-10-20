@@ -169,7 +169,6 @@ updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsI
   openxlsx::saveWorkbook(finalWorkbook, file=editedFinalWorkbookFileName, overwrite=TRUE)
 }
 
-
 #' Extract the subset codes from the original 8 digit HS codes or 6 digit SITC codes
 #' 
 #' A function that given a length of subset to extract, it will subset each code in a vector from the large original codes. Designed to work with 8 digit HS codes or 6 digit SITC codes.
