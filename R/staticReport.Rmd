@@ -233,13 +233,12 @@ prettyTable(tradeBalance)
 # Extremely helpful resource for openxlsx here: https://rdrr.io/cran/openxlsx/
 
 # Note current year and month of data
-fileNameParts <- strsplit(tradeStatsFile, split="_")[[1]]
 date <- max(processedTradeStats$Reg..Date, na.rm=TRUE)
 month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formmatted tables
-finalWorkbookFileName <- file.path("..", "outputs", "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20.xlsx")
+finalWorkbookFileName <- file.path("..", "outputs", "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_EDITED.xlsx")
 
 ## Updating the Annual and Monthly sub tables
 # Extract the balance of trade data and extract sub tables
@@ -249,7 +248,9 @@ balanceOfTradeSubTables <- extractHistoricBalanceOfTradeStatistics(finalWorkbook
 balanceOfTradeSubTables <- updateBalanceOfTradeSubTables(balanceOfTradeSubTables, month, year, tradeBalance/1000000)
 
 ## Editing the final formatted tables
-updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSubTables)
+if(is.null(balanceOfTradeSubTables) == FALSE){
+  updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSubTables)
+}
 ```
 
 

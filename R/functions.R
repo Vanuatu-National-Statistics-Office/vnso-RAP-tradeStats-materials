@@ -74,10 +74,16 @@ extractHistoricBalanceOfTradeStatistics <- function(fileName){
 #' @return Returns list with updated dataframes representing the Annual and Monthly sub tables and notes
 #' @keywords BoT openxlsx
 updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanceStatistics){
-  
-  # Check if December
-  december <- month == "December"
-  
+
+  # Check if data have already been inserted into sub tables
+  latestYearInSubTables <- max(subTables$Monthly$Year, na.rm=TRUE)
+  months <- subTables$Monthly$Month[is.na(subTables$Monthly$Month) == FALSE]
+  latestMonth <- months[length(months)]
+  if(latestYearInSubTables == year && latestMonth == month){
+    warning("Sub tables already contain data for specified month.")
+    return(NULL)
+  }
+    
   # Check if we need to update the annual table
   if(month == "December"){
     
@@ -165,8 +171,7 @@ updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsI
                      rows=(nRowsInHeader+nRows):(nRowsInHeader+nRows+4))
   
   # Save the edited workbook as a new file
-  editedFinalWorkbookFileName <- gsub(pattern=".xlsx", replacement="_EDITED.xlsx", fileName)
-  openxlsx::saveWorkbook(finalWorkbook, file=editedFinalWorkbookFileName, overwrite=TRUE)
+  openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
 }
 
 #' Extract the subset codes from the original 8 digit HS codes or 6 digit SITC codes
