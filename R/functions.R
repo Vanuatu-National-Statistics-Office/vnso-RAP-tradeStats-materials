@@ -28,16 +28,17 @@ prettyTable <- function(table, full_width=FALSE, position="left", bootstrap_opti
     scroll_box(height = "400px")
 }
 
-#' Extracting the Balance of Trade historic sub-tables from excel workbook with final formatted tbales
+#' Extracting the reported statistics in sub-tables from sheet in excel workbook with final formatted tables
 #' 
-#' A function to extract the pre-inserted historic data in a currently formatted Balance of Trade Table
+#' A function to extract the pre-inserted historic data in a currently formatted sheet
 #' @param fileName A character string of full path for formatted trade statistics tables in excel workbook
+#' @param sheet A character string providing name of sheet to extract data from
 #' @return Returns list with dataframes representing the Annual and Monthly sub tables and notes
-#' @keywords BoT openxlsx
-extractHistoricBalanceOfTradeStatistics <- function(fileName){
+#' @keywords openxlsx
+extractStatisticsByTime <- function(fileName, sheet, startRow){
   
   # Extract the full historic table
-  historic <- openxlsx::read.xlsx(fileName, sheet="1_BOT", skipEmptyRows=FALSE, startRow=5)
+  historic <- openxlsx::read.xlsx(fileName, sheet=sheet, skipEmptyRows=FALSE, startRow=startRow)
   
   # Identify when each sub-table starts
   annualStart <- 1
@@ -46,16 +47,18 @@ extractHistoricBalanceOfTradeStatistics <- function(fileName){
   
   # Extract the Annual statistics
   annually <- historic[1:(monthlyStart-1), ]
-  colnames(annually) <- c("Year", "blank", "Export", "Re-Export", "Total Export", "Imports CIF", "Trade Balance")
-  annually$`Total Export` <- as.numeric(annually$`Total Export`)
-  annually$Year <- as.numeric(annually$Year)
-  
+  colnames(annually)[c(1,2)] <- c("Year", "blank")
+  for(columnIndex in seq_len(ncol(annually))){
+    annually[, columnIndex] <- as.numeric(annually[, columnIndex])
+  }
+
   # Extract the monthly statistics
   monthly <- historic[(monthlyStart+1):end, ]
-  colnames(monthly) <- c("Year", "Month", "Export", "Re-Export", "Total Export", "Imports CIF", "Trade Balance")
-  monthly$`Total Export` <- as.numeric(monthly$`Total Export`)
-  monthly$Year <- as.numeric(monthly$Year)
-  
+  colnames(monthly)[c(1,2)] <- c("Year", "Month")
+  for(columnIndex in seq_len(ncol(monthly))[-2]){
+    monthly[, columnIndex] <- as.numeric(monthly[, columnIndex])
+  }
+
   # Extract the notes from the table
   notes <- historic[(end+1):nrow(historic), c(1,2)]
   colnames(notes) <- c("Notes", "blank")
@@ -72,7 +75,7 @@ extractHistoricBalanceOfTradeStatistics <- function(fileName){
 #' @param year Full year
 #' @param newTradeBalanceStatistics Data.frame with single row storing balance of trade statistics for current month
 #' @return Returns list with updated dataframes representing the Annual and Monthly sub tables and notes
-#' @keywords BoT openxlsx
+#' @keywords openxlsx
 updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanceStatistics){
 
   # Check if data have already been inserted into sub tables
@@ -119,7 +122,7 @@ updateBalanceOfTradeSubTables <- function(subTables, month, year, newTradeBalanc
 #' @param fileName A character string of full path for formatted trade statistics tables in excel workbook
 #' @param subTables A list with dataframes representing the Annual and Monthly sub tables
 #' @param nRowsInHeader The number of rows that make up the header of the formatted Balance of Trade table
-#' @keywords BoT openxlsx
+#' @keywords openxlsx
 updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsInHeader=6){
 
   # Calculate the number of rows taken up by each sub table
