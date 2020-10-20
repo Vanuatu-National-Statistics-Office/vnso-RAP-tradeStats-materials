@@ -32,7 +32,7 @@ prettyTable <- function(table, full_width=FALSE, position="left", bootstrap_opti
 #' 
 #' A function to extract the pre-inserted historic data in a currently formatted sheet
 #' @param fileName A character string of full path for formatted trade statistics tables in excel workbook
-#' @param sheet A character string providing name of sheet to extract data from
+#' @param sheet A character string identifying the sheet to extract data from
 #' @return Returns list with dataframes representing the Annual and Monthly sub tables and notes
 #' @keywords openxlsx
 extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow){
@@ -91,10 +91,10 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
   nColumns <- ncol(subTables$Monthly)
 
   # Check if we need to update the annual table
-  if(month == "December"){
+  if(month == "January"){
     
     # Calculate the sum of statistics for the last year
-    januaryRows <- which(subTables$Monthly == "January")
+    januaryRows <- which(subTables$Monthly$Month == "January")
     lastYearsRows <- januaryRows[length(januaryRows)]:nrow(subTables$Monthly)
     currentYearsTotals <- data.frame("Year"=year, "blank"=NA, stringsAsFactors=FALSE)
     currentYearsTotals[, colnames(subTables$Annually)[3:nColumns]] <- 
@@ -116,61 +116,67 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
   return(subTables)
 }
 
-#' Inserts updated Balance of Trade sub tables back into formatted excel sheet
+#' Inserts updated sub tables back into formatted excel sheet
 #' 
 #' A function that inserts the updated Annual and Monthly statistics back into formatted Balance of Trade table 
 #' @param fileName A character string of full path for formatted trade statistics tables in excel workbook
+#' @param sheet A character string identifying the sheet to extract data from
 #' @param subTables A list with dataframes representing the Annual and Monthly sub tables
 #' @param nRowsInHeader The number of rows that make up the header of the formatted Balance of Trade table
 #' @keywords openxlsx
-updatedFinalFormattedBalanceOfTradeTable <- function(fileName, subTables, nRowsInHeader=6){
+insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, nRowsInHeader){
 
-  # Calculate the number of rows taken up by each sub table
+  # Add one to the nRowsInHeader variable - as excel header included
+  nRowsInHeader <- nRowsInHeader + 1
+  
+  # Calculate the number of rows and columns taken up by each sub table
   nRowsInAnnual <- nrow(subTables$Annually)
   nRowsInMonthly <- nrow(subTables$Monthly)
   nRows <- nRowsInAnnual + 2 + nRowsInMonthly
+  nColumns <- ncol(subTables$Annually)
   
   # Load the final tables workbook for editing
   finalWorkbook <- openxlsx::loadWorkbook(fileName)
 
   # Clear the current contents of the workbook
-  openxlsx::writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader, x=matrix(NA, nrow=nRows+4, ncol=7), colNames=FALSE)
-  openxlsx::removeCellMerge(finalWorkbook, sheet="1_BOT", cols=1:7, rows=nRowsInHeader:(nRowsInHeader+nRows))
-  openxlsx::setRowHeights(finalWorkbook, sheet="1_BOT", rows=nRowsInHeader:(nRowsInHeader+nRows), heights=14.5)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader, x=matrix(NA, nrow=nRows+4, ncol=nColumns), colNames=FALSE)
+  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=seq_len(nColumns), rows=nRowsInHeader:(nRowsInHeader+nRows))
+  openxlsx::setRowHeights(finalWorkbook, sheet=sheet, rows=nRowsInHeader:(nRowsInHeader+nRows), heights=14.5)
   
   # Insert the Annual sub table
-  openxlsx::writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader, x=subTables$Annually, colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader, x=subTables$Annually, colNames=FALSE)
   
   # Insert the monthly sub table
-  writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual, x="Monthly", colNames=FALSE)
-  openxlsx::writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRowsInAnnual+1, x=subTables$Monthly, colNames=FALSE)
+  writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader+nRowsInAnnual+2, x="Monthly", colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader+nRowsInAnnual+1, x=subTables$Monthly, colNames=FALSE)
   
   # Insert the notes
-  openxlsx::writeData(finalWorkbook, sheet="1_BOT", startCol=1, startRow=nRowsInHeader+nRows, x=subTables$Notes, colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=nRowsInHeader+nRows, x=subTables$Notes, colNames=FALSE)
  
   # Apply a general formatting to the table contents
   default <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"), fontName="Times New Roman")
-  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=default, gridExpand=TRUE, cols=1:7, rows=nRowsInHeader:(nRowsInHeader+nRows+4), stack=FALSE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=seq_len(nColumns), 
+                     rows=nRowsInHeader:(nRowsInHeader+nRows+4), stack=FALSE)
   
   # Format the Monthly sub table name as bold
   bold <- openxlsx::createStyle(textDecoration="bold")
-  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=bold, rows=nRowsInHeader+nRowsInAnnual, cols=1, stack=TRUE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=bold, rows=nRowsInHeader+nRowsInAnnual, cols=1, stack=TRUE)
   
   # Format the balance of trade statistics as numbers
   number <- openxlsx::createStyle(numFmt="#,##0")
-  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=number, gridExpand=TRUE, stack=TRUE, cols=3:7,
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, gridExpand=TRUE, stack=TRUE, cols=3:nColumns,
                      rows=nRowsInHeader:(nRowsInHeader+nRows))
   
   # Format the year values in table as numbers
   number <- openxlsx::createStyle(numFmt="0")
-  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=number, stack=TRUE, cols=1, gridExpand=TRUE,
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, stack=TRUE, cols=1, gridExpand=TRUE,
                      rows=nRowsInHeader:(nRowsInHeader+nRowsInAnnual-2))
-  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=number, stack=TRUE, cols=1, gridExpand=TRUE,
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, stack=TRUE, cols=1, gridExpand=TRUE,
                      rows=(nRowsInHeader+nRowsInAnnual+1):(nRowsInHeader+nRows-2))
 
   # Format the notes as italics
   italics <- openxlsx::createStyle(textDecoration="italic")
-  openxlsx::addStyle(finalWorkbook, sheet="1_BOT", style=italics, cols=1:2, stack=TRUE, gridExpand=TRUE,
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=italics, cols=1:2, stack=TRUE, gridExpand=TRUE,
                      rows=(nRowsInHeader+nRows):(nRowsInHeader+nRows+4))
   
   # Save the edited workbook as a new file
