@@ -238,7 +238,7 @@ month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formmatted tables
-finalWorkbookFileName <- file.path("..", "outputs", "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_EDITED.xlsx")
+finalWorkbookFileName <- file.path("..", "outputs", "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_ORIGINAL - Copy.xlsx")
 
 ## Updating the Annual and Monthly sub tables
 # Extract the balance of trade data and extract sub tables
