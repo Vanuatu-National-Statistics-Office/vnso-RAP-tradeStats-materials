@@ -249,7 +249,7 @@ balanceOfTradeSubTables <- updateSubTablesByTime(balanceOfTradeSubTables, month,
 
 ## Editing the final formatted tables
 if(is.null(balanceOfTradeSubTables) == FALSE){
-  updatedFinalFormattedBalanceOfTradeTable(finalWorkbookFileName, balanceOfTradeSubTables)
+  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="1_BOT", subTables=balanceOfTradeSubTables, nRowsInHeader=5)
 }
 ```
 
