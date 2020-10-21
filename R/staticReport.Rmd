@@ -297,8 +297,17 @@ prettyTable(importsByHS)
 
 
 ```{r insert Import by HS Code into final formatted table}
+## Updating the Annual and Monthly sub tables
+# Extract the  sub tables from the formatted excel table
+importsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="2_M", startRow=7, nColumns=25)
 
+# Update the sub tables
+importsByHSCodeSubTables <- updateSubTablesByTime(importsByHSCodeSubTables, month, year, importsByHS/1000000)
 
+# Insert updated sub tables back into excel formatted table
+if(is.null(importByHSCodeSubTables) == FALSE){
+  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="2_M", subTables=importsByHSCodeSubTables, nRowsInHeader=7)
+}
 ```
 
 ## Table 3: Export by HS Code

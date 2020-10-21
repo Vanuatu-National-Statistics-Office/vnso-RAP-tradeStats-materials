@@ -33,12 +33,16 @@ prettyTable <- function(table, full_width=FALSE, position="left", bootstrap_opti
 #' A function to extract the pre-inserted historic data in a currently formatted sheet
 #' @param fileName A character string of full path for formatted trade statistics tables in excel workbook
 #' @param sheet A character string identifying the sheet to extract data from
+#' @param startRow An integer specifying the row that the Annual table starts in
 #' @return Returns list with dataframes representing the Annual and Monthly sub tables and notes
 #' @keywords openxlsx
-extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow){
+extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, nColumns=NULL){
   
   # Extract the full historic table
   historic <- openxlsx::read.xlsx(fileName, sheet=sheet, skipEmptyRows=FALSE, startRow=startRow)
+  if(is.null(nColumns) == FALSE){
+    historic <- historic[, seq_len(nColumns)]
+  }
   
   # Identify when each sub-table starts
   annualStart <- 1
@@ -46,8 +50,9 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow){
   end <- which(historic[, 1] == "Notes:") - 1
   
   # Extract the Annual statistics
-  annually <- historic[1:(monthlyStart-2), ]
+  annually <- historic[1:(monthlyStart-1), ]
   colnames(annually)[c(1,2)] <- c("Year", "blank")
+  annually <- annually[is.na(annually$Year) == FALSE, ]
   for(columnIndex in seq_len(ncol(annually))){
     annually[, columnIndex] <- as.numeric(annually[, columnIndex])
   }
@@ -178,7 +183,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
                      rows=monthlyStartRow:notesStartRow)
 
   # Format the notes as italics
-  italics <- openxlsx::createStyle(textDecoration="italic")
+  italics <- openxlsx::createStyle(textDecoration="italic", halign="left", valign="bottom")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=italics, cols=1:nColumns, stack=TRUE, gridExpand=TRUE,
                      rows=notesStartRow:(notesStartRow+4))
   
@@ -187,7 +192,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=(nColumns+1):100, 
                      rows=1:100, stack=FALSE)
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=1:100, 
-                     rows=(notesStartRow+5):100, stack=FALSE)
+                     rows=(notesStartRow+nrow(subTables$Notes)):100, stack=FALSE)
 
   # Save the edited workbook as a new file
   openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
