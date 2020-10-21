@@ -166,8 +166,9 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=seq_len(nColumns), 
                      rows=annualStartRow:(notesStartRow+2), stack=FALSE)
 
-  # Format the Monthly sub table name as bold
-  bold <- openxlsx::createStyle(textDecoration="bold")
+  # Format the Monthly and Annually sub table names as bold
+  bold <- openxlsx::createStyle(textDecoration="bold", halign="left")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=bold, rows=annualStartRow-1, cols=1, stack=TRUE)
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=bold, rows=monthlyStartRow-1, cols=1, stack=TRUE)
 
   # Format the balance of trade statistics as numbers
