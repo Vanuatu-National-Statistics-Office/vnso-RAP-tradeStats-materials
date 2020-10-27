@@ -739,7 +739,7 @@ pictsBalance<- balanceOfTradeByRegion["Oceania"] - balanceOfTradeByMajorPartnerC
 ```
 
 
-## Trade by Mode of Transport 
+## Table 10: Trade by Mode of Transport 
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate Export Trade by Mode of Transport
@@ -796,7 +796,7 @@ prettyTable(tradebyModeOfTransport)
 
 ```
 
-## Trade by Trade Agreement
+## Table 11: Trade by Trade Agreement
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate Trade by Trade Agreement (whether the commodity complies with the trade agreement can only be confirmed by the receiving country hence only for imports)
