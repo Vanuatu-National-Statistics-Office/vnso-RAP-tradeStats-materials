@@ -425,15 +425,24 @@ if(is.null(reExportsByHSCodeSubTables) == FALSE){
 
 ```{r calculate total exports by HS Code statistics with base R, eval=FALSE, echo=FALSE}
 
-# Insert values into table
+# Calculate the total exports
 totalExportsByHS <- exportsByHS + reExportsByHS
 
-prettyTable(totalExportsByHS)
+#prettyTable(totalExportsByHS)
 
 ```
 
 ```{r insert Total Exports by HS Code into final formatted table}
+# Extract the  sub tables from the formatted excel table
+totalExportsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="5_TX", startRow=7, nColumns=25)
 
+# Update the sub tables
+totalExportsByHSCodeSubTables <- updateSubTablesByTime(totalExportsByHSCodeSubTables, month, year, totalExportsByHS/1000000)
+
+# Insert updated sub tables back into excel formatted table
+if(is.null(totalExportsByHSCodeSubTables) == FALSE){
+  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="5_TX", subTables=totalExportsByHSCodeSubTables, nRowsInHeader=7)
+}
 ```
 
 ## Table 6: Principle Exports

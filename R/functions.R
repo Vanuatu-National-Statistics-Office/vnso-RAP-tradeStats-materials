@@ -172,15 +172,15 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=bold, rows=monthlyStartRow-1, cols=1, stack=TRUE)
 
   # Format the balance of trade statistics as numbers
-  number <- openxlsx::createStyle(numFmt="#,##0")
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, gridExpand=TRUE, stack=TRUE, cols=3:nColumns,
+  numberWithComma <- openxlsx::createStyle(numFmt="#,##0")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithComma, gridExpand=TRUE, stack=TRUE, cols=3:nColumns,
                      rows=annualStartRow:notesStartRow)
 
   # Format the year values in table as numbers
-  number <- openxlsx::createStyle(numFmt="0")
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, stack=TRUE, cols=1, gridExpand=TRUE,
+  numberWithoutComma <- openxlsx::createStyle(numFmt="0")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, stack=TRUE, cols=1, gridExpand=TRUE,
                      rows=annualStartRow:(monthlyStartRow-2))
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=number, stack=TRUE, cols=1, gridExpand=TRUE,
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, stack=TRUE, cols=1, gridExpand=TRUE,
                      rows=monthlyStartRow:notesStartRow)
 
   # Format the notes as italics
