@@ -53,7 +53,7 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   annually <- historic[1:(monthlyStart-1), ]
   colnames(annually)[c(1,2)] <- c("Year", "blank")
   annually <- annually[is.na(annually$Year) == FALSE, ]
-  for(columnIndex in seq_len(ncol(annually))){
+  for(columnIndex in c(1, 3:ncol(annually))){
     annually[, columnIndex] <- as.numeric(annually[, columnIndex])
   }
 
