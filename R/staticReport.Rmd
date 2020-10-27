@@ -225,7 +225,7 @@ balance <- totalExports - imports
 # Insert values into table
 tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Export"=totalExports, "Imports CIF"=imports, "Trade Balance"=balance)
 
-prettyTable(tradeBalance)
+#prettyTable(tradeBalance)
 ```
 
 ```{r insert balance of trade statistics into final formatted table}
@@ -291,7 +291,7 @@ columnCategories <- list(
 importsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
-prettyTable(importsByHS)
+#prettyTable(importsByHS)
 
 ```
 
@@ -347,7 +347,7 @@ columnCategories <- list(
 exportsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
-prettyTable(exportsByHS)
+#prettyTable(exportsByHS)
 
 ```
 
@@ -403,12 +403,21 @@ columnCategories <- list(
 reExportsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
-prettyTable(reExportsByHS)
+#prettyTable(reExportsByHS)
 
 ```
 
 ```{r insert Re-Export by HS Code into final formatted table}
+# Extract the  sub tables from the formatted excel table
+reExportsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="4_ReX", startRow=7, nColumns=25)
 
+# Update the sub tables
+reExportsByHSCodeSubTables <- updateSubTablesByTime(reExportsByHSCodeSubTables, month, year, reExportsByHS/1000000)
+
+# Insert updated sub tables back into excel formatted table
+if(is.null(reExportsByHSCodeSubTables) == FALSE){
+  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="4_ReX", subTables=reExportsByHSCodeSubTables, nRowsInHeader=7)
+}
 ```
 
 
