@@ -510,6 +510,9 @@ principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=
 principleExportsTable <- updateTableByCommodity(principleExportsTable, month, year, latestPrincipleExports / 1000000)
 
 # Insert the updated table back into the formatted excel sheet
+if(is.null(principleExportsTable) == FALSE){
+  insertUpdatedTableAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable)
+}
 ```
 
 
