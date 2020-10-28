@@ -240,6 +240,35 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
 }
 
+#' Inserts updated table (time as columns) back into formatted excel sheet
+#' 
+#' A function that inserts the updated Annual and Monthly statistics back into formatted Balance of Trade table 
+#' @param fileName A character string of full path for formatted trade statistics tables in excel workbook
+#' @param sheet A character string identifying the sheet to extract data from
+#' @param table A structured data.frame updated to include the latest data
+#' @keywords openxlsx
+insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table){
+  
+  # Get the column names and number of columns
+  colNames <- colnames(table)
+  nColumns <- length(colNames)
+  
+  # Note the indices of the January monthly statistics
+  januaryIndices <- which(grepl(colnames(table), pattern="Jan"))
+  lastMonthyInYearIndices <- ifelse(januaryIndices+11 < nColumns, januaryIndices+11, nColumns)
+
+  # Identify the column where the annual table ends
+  lastAnnualColumn <- januaryIndices[1] - 1
+  
+  # Note the years monthly data available for
+  years <- as.numeric(colNames[lastAnnualColumn]) - c((length(januaryIndices)-1):0)
+
+  # !!!!!!!!!!!!!!!!!!! ADD HERE !!!!!!!!!!!!!!!!!!!!!!!!
+
+  # Save the edited workbook as a new file
+  openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
+}
+
 #' Extract the subset codes from the original 8 digit HS codes or 6 digit SITC codes
 #' 
 #' A function that given a length of subset to extract, it will subset each code in a vector from the large original codes. Designed to work with 8 digit HS codes or 6 digit SITC codes.
