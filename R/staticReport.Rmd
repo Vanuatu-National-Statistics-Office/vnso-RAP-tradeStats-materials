@@ -494,20 +494,22 @@ columnCategories <- list(
 # Build the table
 totalPrincipleReExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-
-# Total Exports and Re-Exports
-columns <- unique(c(colnames(totalPrincipleExports), colnames(totalPrincipleReExports)))
-totalPrincipleExportsandReExports <- data.frame(matrix(0, nrow=1, ncol=length(columns)))
-colnames(totalPrincipleExportsandReExports) <- columns
-totalPrincipleExportsandReExports[names(totalPrincipleExports)] <- totalPrincipleExports
-totalPrincipleExportsandReExports[names(totalPrincipleReExports)] <- totalPrincipleExportsandReExports[names(totalPrincipleReExports)] + totalPrincipleReExports
-
 # View the final table
-prettyTable(totalPrincipleExportsandReExports)
+#prettyTable(totalPrincipleExportsandReExports)
 ```
 
 ```{r insert Principle Exports into final formatted table}
+# Build a single vector storing the exports, re-exports and total
+overallTotal <- sum(c(as.numeric(totalPrincipleExports[1, ]), as.numeric(totalPrincipleReExports[1, ])))
+latestPrincipleExports <- c(NA, as.numeric(totalPrincipleExports[1, ]), NA, NA, as.numeric(totalPrincipleReExports[1, ]), NA, overallTotal)
 
+# Extract the table from the formatted excel sheet
+principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=5:31, cols=1:33)
+
+# Add the latest month's statistics
+principleExportsTable <- updateTableByCommodity(principleExportsTable, month, year, latestPrincipleExports / 1000000)
+
+# Insert the updated table back into the formatted excel sheet
 ```
 
 
