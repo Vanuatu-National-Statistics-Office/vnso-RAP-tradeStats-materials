@@ -72,9 +72,9 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   return(list("Annually"=annually, "Monthly"=monthly, "Notes"=notes))
 }
 
-#' Update Annual and Monthly sub-tables of specific formatted table
+#' Update Annual and Monthly sub-tables of specific formatted table (commodities as columns, time as rows)
 #' 
-#' A function that informatively updates the annual and monthly tables. In December add row to annual table. In January include year in monthly table.
+#' A function that informatively updates the annual and monthly tables. In December add row to annual table.
 #' @param subTables A list with dataframes representing the Annual and Monthly sub tables
 #' @param month Full name of month with first letter upper case
 #' @param year Full year
@@ -119,6 +119,47 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
   subTables$Monthly <- rbind(subTables$Monthly, newStatistics)
   
   return(subTables)
+}
+
+#' Update a structured table that has statistics oriented with time (years and then months) in columns and commodities as rows
+#' 
+#' A function that informatively updates the annual and monthly stored in a structured table (time as columns, commodities as rows)
+#' @param subTables A list with dataframes representing the Annual and Monthly sub tables
+#' @param month Full name of month with first letter upper case
+#' @param year Full year
+#' @param newStatistics A vector representing the statistics for latest month (ordered by rows in structured table)
+#' @return Returns structured table (data.frame) with latest month's data inserted
+#' @keywords openxlsx
+updateTableByCommodity <- function(structuredTable, month, year, newStatistics){
+  
+  # Check if data have already been inserted into sub tables
+  colNames <- colnames(structuredTable)
+  if(year %in% colNames && colNames[length(colNames)] == month){
+    warning("Table already contains data for specified month.")
+    return(NULL)
+  }
+  
+  # Add the latest month's statistics
+  nColumns <- ncol(structuredTable)
+  structuredTable[, nColumns + 1] <- newStatistics
+  colnames(structuredTable)[nColumns + 1] <- substr(month, 1, 3)
+  nColumns <- nColumns + 1
+  
+  # Check if January - then the annual section of table needs to be updated as well
+  if(month == "January"){
+    
+    # Calculate the sum for each commodity over the previous year
+    previousYearsTotals <- rowSums(structuredTable[, (nColumns - 12):(nColumns - 1)])
+    
+    # Identify the column where the annual table ends
+    lastAnnualColumn <- which(grepl(colnames(structuredTable), pattern="Jan"))[1] - 1
+    
+    # Insert the data for current year
+    structuredTable <- cbind(structuredTable[, 1:lastAnnualColumn], previousYearsTotals, structuredTable[, (lastAnnualColumn+1):nColumns])
+    colnames(structuredTable)[lastAnnualColumn+1] <- year
+  }
+  
+  return(structuredTable)
 }
 
 #' Inserts updated sub tables back into formatted excel sheet
