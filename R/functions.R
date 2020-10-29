@@ -246,6 +246,10 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
 #' @param fileName A character string of full path for formatted trade statistics tables in excel workbook
 #' @param sheet A character string identifying the sheet to extract data from
 #' @param table A structured data.frame updated to include the latest data
+#' @param tableNumber The number of the table - reported in top left of formatted table in excel notebook
+#' @param tableName The name of table (all caps) - second cell in top row 
+#' @param boldRows A vector of numbers noting the rows in the formatted table that are formatted as bold
+#' @param nRowsInNotes An integer indicating how many rows are in the notes section below the formatted table
 #' @keywords openxlsx
 insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumber, tableName, boldRows, nRowsInNotes=4){
   

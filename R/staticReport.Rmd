@@ -511,7 +511,8 @@ principleExportsTable <- updateTableByCommodity(principleExportsTable, month, ye
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
-  insertUpdatedTableAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable)
+  insertUpdatedTableAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, 
+                                     tableNumber="6", tableName="PRINCIPLE EXPORTS", boldRows=c(6,22,24,29,31), nRowsInNotes=4)
 }
 ```
 
