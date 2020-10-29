@@ -284,7 +284,7 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumb
                                 })
   parsedColNames[1, 1] <- NA
   for(column in 2:lastAnnualColumn){
-    parsedColumns[, column] <- as.numeric(parsedColumns[, column])
+    parsedColNames[, column] <- as.numeric(parsedColNames[, column])
   }
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=5, x=parsedColNames, colNames=FALSE)
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=6, x=table, colNames=FALSE)
