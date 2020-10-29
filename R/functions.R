@@ -247,11 +247,12 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
 #' @param sheet A character string identifying the sheet to extract data from
 #' @param table A structured data.frame updated to include the latest data
 #' @keywords openxlsx
-insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table){
+insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumber, tableName, boldRows){
   
-  # Get the column names and number of columns
+  # Get the column names and dimensions
   colNames <- colnames(table)
   nColumns <- length(colNames)
+  nRows <- nrow(table)
   
   # Note the indices of the January monthly statistics
   januaryIndices <- which(grepl(colnames(table), pattern="Jan"))
@@ -263,7 +264,71 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table){
   # Note the years monthly data available for
   years <- as.numeric(colNames[lastAnnualColumn]) - c((length(januaryIndices)-1):0)
 
-  # !!!!!!!!!!!!!!!!!!! ADD HERE !!!!!!!!!!!!!!!!!!!!!!!!
+  # Set class of all columns except first to numeric
+  for(column in 2:nColumns){
+    table[, column] <- as.numeric(table[, column])
+  }
+
+  # Load the final tables workbook for editing
+  finalWorkbook <- openxlsx::loadWorkbook(fileName)
+  
+  # Clear the current contents of the workbook
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=1, x=matrix(NA, nrow=nRows+5, ncol=nColumns), colNames=FALSE)
+  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=seq_len(nColumns), rows=1:(nRows+5))
+  
+  # Insert the updated table
+  parsedColNames <- data.frame(matrix(nrow=1, ncol=length(colNames)))
+  parsedColNames[1, ] <- sapply(colNames, 
+                                FUN=function(colName){
+                                  return(strsplit(colName, split="\\.")[[1]][1])
+                                })
+  parsedColNames[1, 1] <- NA
+  for(column in 2:lastAnnualColumn){
+    parsedColumns[, column] <- as.numeric(parsedColumns[, column])
+  }
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=5, x=parsedColNames, colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=6, x=table, colNames=FALSE)
+  
+  # Add in the header section
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=1, x=paste0("Table ", tableNumber), colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=1, x=tableName, colNames=FALSE)
+  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=2:nColumns, rows=1)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=2, x="[VT Million]", colNames=FALSE)
+  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=2:nColumns, rows=2)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=3, x="ANNUALLY", colNames=FALSE)
+  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=(lastAnnualColumn+1):nColumns, rows=3)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=januaryIndices[1], startRow=3, x="MONTHLY", colNames=FALSE)
+  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=2:lastAnnualColumn, rows=3:4)
+  for(index in seq_along(years)){
+    openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=januaryIndices[index], startRow=4, x=years[index], colNames=FALSE)
+    openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=januaryIndices[index]:lastMonthyInYearIndices[index], rows=4)
+  }
+  
+  # Set the general style for the table
+  defaultFormat <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"),
+                                   fontName="Times New Roman")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=defaultFormat, gridExpand=TRUE, cols=seq_len(nColumns), 
+                     rows=1:(nRows+5), stack=FALSE)
+  
+  # Set the row heights and column widths
+  openxlsx::setRowHeights(finalWorkbook, sheet=sheet, rows=1:(nRows+5), heights=14.5)
+  openxlsx::setColWidths(finalWorkbook, sheet=sheet, cols=2:nColumns, width=5.14)
+  
+  # Format the header region
+  headerFormat <- openxlsx::createStyle(textDecoration="bold", halign="center")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=headerFormat, gridExpand=TRUE, cols=seq_len(nColumns), rows=1:5, stack=TRUE)
+  numberWithoutComma <- openxlsx::createStyle(numFmt="0")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, gridExpand=TRUE, cols=2:lastAnnualColumn, rows=5, stack=TRUE)
+  
+  # Format the numbers
+  numberWithComma <- openxlsx::createStyle(numFmt="#,##0")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithComma, gridExpand=TRUE, cols=2:nColumns, rows=6:(nRows+5), stack=TRUE)
+  
+  # Format the bold rows
+  bold <- openxlsx::createStyle(textDecoration="bold")
+  for(row in boldRows){
+    openxlsx::addStyle(finalWorkbook, sheet=sheet, style=bold, gridExpand=TRUE, cols=1:nColumns, rows=row, stack=TRUE)
+  }
 
   # Save the edited workbook as a new file
   openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
