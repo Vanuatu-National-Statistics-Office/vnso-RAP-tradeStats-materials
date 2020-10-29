@@ -231,9 +231,9 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   
   # Remove formatting outside the table region
   blank <- openxlsx::createStyle(borderStyle="none", border=c("top", "bottom", "left", "right"))
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=(nColumns+1):100, 
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=(nColumns+1):100, 
                      rows=1:100, stack=FALSE)
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=1:100, 
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=1:100, 
                      rows=(notesStartRow+nrow(subTables$Notes)):100, stack=FALSE)
 
   # Save the edited workbook as a new file
@@ -247,7 +247,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
 #' @param sheet A character string identifying the sheet to extract data from
 #' @param table A structured data.frame updated to include the latest data
 #' @keywords openxlsx
-insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumber, tableName, boldRows){
+insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumber, tableName, boldRows, nRowsInNotes=4){
   
   # Get the column names and dimensions
   colNames <- colnames(table)
@@ -308,7 +308,7 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumb
   defaultFormat <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"),
                                    fontName="Times New Roman")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=defaultFormat, gridExpand=TRUE, cols=seq_len(nColumns), 
-                     rows=1:(nRows+5), stack=FALSE)
+                     rows=1:(nRows+5+1+nRowsInNotes), stack=FALSE)
   
   # Set the row heights and column widths
   openxlsx::setRowHeights(finalWorkbook, sheet=sheet, rows=1:(nRows+5), heights=14.5)
@@ -316,7 +316,7 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumb
   
   # Format the header region
   headerFormat <- openxlsx::createStyle(textDecoration="bold", halign="center")
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=headerFormat, gridExpand=TRUE, cols=seq_len(nColumns), rows=1:5, stack=TRUE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=headerFormat, gridExpand=TRUE, cols=2:nColumns, rows=1:5, stack=TRUE)
   numberWithoutComma <- openxlsx::createStyle(numFmt="0")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, gridExpand=TRUE, cols=2:lastAnnualColumn, rows=5, stack=TRUE)
   
@@ -329,6 +329,13 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumb
   for(row in boldRows){
     openxlsx::addStyle(finalWorkbook, sheet=sheet, style=bold, gridExpand=TRUE, cols=1:nColumns, rows=row, stack=TRUE)
   }
+  
+  # Remove formatting outside the table region
+  blank <- openxlsx::createStyle(borderStyle="none", border=c("top", "bottom", "left", "right"))
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=(nColumns+1):100, 
+                     rows=1:100, stack=FALSE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=1:100, 
+                     rows=(nRows+5+1+nRowsInNotes+1):100, stack=FALSE)
 
   # Save the edited workbook as a new file
   openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
