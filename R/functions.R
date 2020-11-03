@@ -130,13 +130,25 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
 #' @param newStatistics A vector representing the statistics for latest month (ordered by rows in structured table)
 #' @return Returns structured table (data.frame) with latest month's data inserted
 #' @keywords openxlsx
-updateTableByCommodity <- function(structuredTable, month, year, newStatistics){
+updateTableByCommodity <- function(structuredTable, month, year, newStatistics, numericColumns=NULL){
   
   # Check if data have already been inserted into sub tables
   colNames <- colnames(structuredTable)
   if(year %in% colNames && colNames[length(colNames)] == month){
     warning("Table already contains data for specified month.")
     return(NULL)
+  }
+  
+  # Check the class of the new statistics to add
+  if(class(newStatistics) == "data.frame"){
+    newStatistics <- as.numeric(newStatistics[1, ])
+  }
+  
+  # Convert the numeric columns to numeric if not already
+  if(is.null(numericColumns) == FALSE){
+    for(column in numericColumns){
+      structuredTable[, column] <- as.numeric(structuredTable[, column])
+    }
   }
   
   # Add the latest month's statistics
@@ -251,7 +263,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
 #' @param boldRows A vector of numbers noting the rows in the formatted table that are formatted as bold
 #' @param nRowsInNotes An integer indicating how many rows are in the notes section below the formatted table
 #' @keywords openxlsx
-insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumber, tableName, boldRows, nRowsInNotes=4){
+insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table, tableNumber, tableName, boldRows, nRowsInNotes=4, numericColumns){
   
   # Get the column names and dimensions
   colNames <- colnames(table)
@@ -269,7 +281,7 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumb
   years <- as.numeric(colNames[lastAnnualColumn]) - c((length(januaryIndices)-1):0)
 
   # Set class of all columns except first to numeric
-  for(column in 2:nColumns){
+  for(column in numericColumns){
     table[, column] <- as.numeric(table[, column])
   }
 
@@ -286,7 +298,7 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumb
                                 FUN=function(colName){
                                   return(strsplit(colName, split="\\.")[[1]][1])
                                 })
-  parsedColNames[1, 1] <- NA
+  parsedColNames[1, 1] <- ifelse(parsedColNames[1, 1] == "X1", NA, parsedColNames[1, 1])
   for(column in 2:lastAnnualColumn){
     parsedColNames[, column] <- as.numeric(parsedColNames[, column])
   }
@@ -307,6 +319,10 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumb
     openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=januaryIndices[index], startRow=4, x=years[index], colNames=FALSE)
     openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=januaryIndices[index]:lastMonthyInYearIndices[index], rows=4)
   }
+  if(is.na(parsedColNames[1, 1]) == FALSE){
+    openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=3, x=parsedColNames[1, 1], colNames=FALSE)
+    openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=1, rows=3:5)
+  }
   
   # Set the general style for the table
   defaultFormat <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"),
@@ -314,15 +330,16 @@ insertUpdatedTableAsFormattedTable <- function(fileName, sheet, table, tableNumb
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=defaultFormat, gridExpand=TRUE, cols=seq_len(nColumns), 
                      rows=1:(nRows+5+1+nRowsInNotes), stack=FALSE)
   
-  # Set the row heights and column widths
-  openxlsx::setRowHeights(finalWorkbook, sheet=sheet, rows=1:(nRows+5), heights=14.5)
-  openxlsx::setColWidths(finalWorkbook, sheet=sheet, cols=2:nColumns, width=5.14)
-  
+  # Set the column widths
+  openxlsx::setColWidths(finalWorkbook, sheet=sheet, cols=2:nColumns, width=6.5)
+
   # Format the header region
   headerFormat <- openxlsx::createStyle(textDecoration="bold", halign="center")
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=headerFormat, gridExpand=TRUE, cols=2:nColumns, rows=1:5, stack=TRUE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=headerFormat, gridExpand=TRUE, cols=1:nColumns, rows=1:5, stack=TRUE)
   numberWithoutComma <- openxlsx::createStyle(numFmt="0")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, gridExpand=TRUE, cols=2:lastAnnualColumn, rows=5, stack=TRUE)
+  tableNumberFormat <- openxlsx::createStyle(textDecoration="bold", halign="left")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=tableNumberFormat, cols=1, rows=1, stack=TRUE)
   
   # Format the numbers
   numberWithComma <- openxlsx::createStyle(numFmt="#,##0")
