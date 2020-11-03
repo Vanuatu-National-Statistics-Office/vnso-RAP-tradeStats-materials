@@ -507,12 +507,14 @@ latestPrincipleExports <- c(NA, as.numeric(totalPrincipleExports[1, ]), NA, NA, 
 principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=5:31, cols=1:33)
 
 # Add the latest month's statistics
-principleExportsTable <- updateTableByCommodity(principleExportsTable, month, year, latestPrincipleExports / 1000000)
+principleExportsTable <- updateTableByCommodity(principleExportsTable, month, year, newStatistics=latestPrincipleExports / 1000000,
+                                                numericColumns=2:33)
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
-  insertUpdatedTableAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, 
-                                     tableNumber="6", tableName="PRINCIPLE EXPORTS", boldRows=c(6,22,24,29,31), nRowsInNotes=4)
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, 
+                                                tableNumber="6", tableName="PRINCIPLE EXPORTS", boldRows=c(6,22,24,29,31), nRowsInNotes=4,
+                                                numericColumns=2:33)
 }
 ```
 
@@ -582,12 +584,25 @@ columnCategories <- list(
 totalPrincipleImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
-prettyTable(totalPrincipleImports)
+#prettyTable(totalPrincipleImports)
 
 ```
 
 ```{r insert Principle Imports into final formatted table}
-
+# Extract the table from the formatted excel sheet
+principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=5:53, cols=1:33)
+colnames(principleImportsTable)[1] <- "Commodity"
+ 
+# Add the latest month's statistics
+principleImportsTable <- updateTableByCommodity(principleImportsTable, month, year, newStatistics=totalPrincipleImports / 1000000, 
+                                                numericColumns=2:33)
+ 
+# Insert the updated table back into the formatted excel sheet
+if(is.null(principleExportsTable) == FALSE){
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, 
+                                                tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
+                                                numericColumns=2:33)
+}
 ```
 
 
