@@ -280,7 +280,7 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   # Note the years monthly data available for
   years <- as.numeric(colNames[lastAnnualColumn]) - c((length(januaryIndices)-1):0)
 
-  # Set class of all columns except first to numeric
+  # Set class of numeric columns to numeric
   for(column in numericColumns){
     table[, column] <- as.numeric(table[, column])
   }
@@ -298,8 +298,8 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
                                 FUN=function(colName){
                                   return(strsplit(colName, split="\\.")[[1]][1])
                                 })
-  parsedColNames[1, 1] <- ifelse(parsedColNames[1, 1] == "X1", NA, parsedColNames[1, 1])
-  for(column in 2:lastAnnualColumn){
+  parsedColNames[1, grepl(parsedColNames[1, ], pattern="^X")] <- NA
+  for(column in numericColumns[1]:lastAnnualColumn){
     parsedColNames[, column] <- as.numeric(parsedColNames[, column])
   }
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=5, x=parsedColNames, colNames=FALSE)
@@ -309,12 +309,13 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=1, x=paste0("Table ", tableNumber), colNames=FALSE)
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=1, x=tableName, colNames=FALSE)
   openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=2:nColumns, rows=1)
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=2, x="[VT Million]", colNames=FALSE)
-  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=2:nColumns, rows=2)
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=3, x="ANNUALLY", colNames=FALSE)
-  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=(lastAnnualColumn+1):nColumns, rows=3)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=2, x="[VT Million]", colNames=FALSE)
+  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=numericColumns[1]:nColumns, rows=2)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=3, x="ANNUALLY", colNames=FALSE)
+  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=numericColumns[1]:lastAnnualColumn, rows=3:4)
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=januaryIndices[1], startRow=3, x="MONTHLY", colNames=FALSE)
-  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=2:lastAnnualColumn, rows=3:4)
+  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=(lastAnnualColumn+1):nColumns, rows=3)
+  
   for(index in seq_along(years)){
     openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=januaryIndices[index], startRow=4, x=years[index], colNames=FALSE)
     openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=januaryIndices[index]:lastMonthyInYearIndices[index], rows=4)
