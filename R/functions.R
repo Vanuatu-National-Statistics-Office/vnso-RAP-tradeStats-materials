@@ -239,7 +239,7 @@ buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, co
   return(summaryTable)
 }
 
-exploring-historic-data
+#exploring-historic-data
 
 #' Calculate range of summary statistics for distribution 
 #' 
@@ -260,7 +260,7 @@ calculateSummaryStatistics <- function(values){
   if(output["CountMissing"] == output["Count"]){
     return(output)
   }
-  
+}
   # Calculate mean
   output["Mean"] <- mean(values, na.rm=TRUE)
   
