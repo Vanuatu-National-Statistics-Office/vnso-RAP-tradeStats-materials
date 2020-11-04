@@ -873,7 +873,7 @@ msgDataFrame<- processedTradeStats[processedTradeStats$PRF == "MSG", ]
 
 ```
 
-## Exports by SITC 
+## Table 12: Exports by SITC 
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate Exports by SITC 
@@ -909,7 +909,7 @@ prettyTable(totalExportsbySITC)
 
 ```
 
-## Imports by SITC
+## Table 13: Imports by SITC
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate Exports by SITC 
