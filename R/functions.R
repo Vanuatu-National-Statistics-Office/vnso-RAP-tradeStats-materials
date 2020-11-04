@@ -329,7 +329,8 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
                      rows=6:(nRows+5+1+nRowsInNotes), stack=FALSE)
   
   # Set the column widths
-  openxlsx::setColWidths(finalWorkbook, sheet=sheet, cols=2:nColumns, width=6.5)
+  openxlsx::setColWidths(finalWorkbook, sheet=sheet, cols=numericColumns[1]:lastAnnualColumn, width=7.5)
+  openxlsx::setColWidths(finalWorkbook, sheet=sheet, cols=(lastAnnualColumn+1):nColumns, width=6.5)
 
   # Format the header region
   headerFormat <- openxlsx::createStyle(textDecoration="bold", halign="center")
