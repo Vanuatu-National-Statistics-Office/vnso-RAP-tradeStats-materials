@@ -696,13 +696,14 @@ balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", r
 # Add the latest month's statistics
 balanceOfTradeMajorTable <- updateTableByCommodity(balanceOfTradeMajorTable, month, year, 
                                                    newStatistics=balanceOfTradeByMajorPartnerCountries / 1000000, 
-                                                   numericColumns=3:33)
+                                                   numericColumns=3:ncol(balanceOfTradeMajorTable))
  
 # Insert the updated table back into the formatted excel sheet
-if(is.null(principleExportsTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, 
-                                                tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
-                                                numericColumns=2:33)
+if(is.null(balanceOfTradeMajorTable) == FALSE){
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="8_BOT_PC", table=balanceOfTradeMajorTable, 
+                                                tableNumber="8", tableName="BALANCE OF TRADE BY MAJOR PARTNER COUNTRIES", 
+                                                boldRows=c(69, 70, 71), nRowsInNotes=2,
+                                                numericColumns=3:ncol(balanceOfTradeMajorTable))
 }
 ```
 
