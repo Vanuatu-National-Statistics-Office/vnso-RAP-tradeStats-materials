@@ -690,12 +690,18 @@ colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTrad
 ```
 
 ```{r insert balance of trade by major partner countries into final formatted table}
+# Build a single vector aligned with the format of table 8: Exports, Imports, Balance for each major partner country
+majorPartnerCountryStatistics <- c()
+majorPartnerCountryStatistics[seq(from=1, by=3, length.out=length(totalPartnerCountryExports))] <- as.numeric(totalPartnerCountryExports)
+majorPartnerCountryStatistics[seq(from=2, by=3, length.out=length(totalPartnerCountryImports))] <- as.numeric(totalPartnerCountryImports)
+majorPartnerCountryStatistics[seq(from=3, by=3, length.out=length(balanceOfTradeByMajorPartnerCountries))] <- as.numeric(balanceOfTradeByMajorPartnerCountries)
+
 # Extract the table from the formatted excel sheet
 balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", rows=5:71, cols=1:34)
 
 # Add the latest month's statistics
 balanceOfTradeMajorTable <- updateTableByCommodity(balanceOfTradeMajorTable, month, year, 
-                                                   newStatistics=balanceOfTradeByMajorPartnerCountries / 1000000, 
+                                                   newStatistics=majorPartnerCountryStatistics / 1000000, 
                                                    numericColumns=3:ncol(balanceOfTradeMajorTable))
  
 # Insert the updated table back into the formatted excel sheet
@@ -762,8 +768,6 @@ colnames(balanceOfTradeByRegion) <- sapply(colnames(balanceOfTradeByRegion),
 pictsExports <- totalPartnerRegionExports["Oceania: Exports"] - totalPartnerCountryExports["New Zealand: Exports"] - totalPartnerCountryExports["Australia: Exports"]
 pictsImports<- totalPartnerRegionImports["Oceania: Imports"] - totalPartnerCountryImports["New Zealand: Imports"] - totalPartnerCountryImports["Australia: Imports"]
 pictsBalance<- balanceOfTradeByRegion["Oceania"] - balanceOfTradeByMajorPartnerCountries["Australia"] - balanceOfTradeByMajorPartnerCountries["New Zealand"]
-
-
 ```
 
 ```{r insert balance of trade by Region into final formatted table}
