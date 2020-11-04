@@ -134,7 +134,7 @@ updateTableByCommodity <- function(structuredTable, month, year, newStatistics, 
   
   # Check if data have already been inserted into sub tables
   colNames <- colnames(structuredTable)
-  if(year %in% colNames && colNames[length(colNames)] == month){
+  if(year %in% colNames && grepl(colNames[length(colNames)], pattern=substr(month, 1, 3))){
     warning("Table already contains data for specified month.")
     return(NULL)
   }

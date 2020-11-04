@@ -504,11 +504,11 @@ overallTotal <- sum(c(as.numeric(totalPrincipleExports[1, ]), as.numeric(totalPr
 latestPrincipleExports <- c(NA, as.numeric(totalPrincipleExports[1, ]), NA, NA, as.numeric(totalPrincipleReExports[1, ]), NA, overallTotal)
 
 # Extract the table from the formatted excel sheet
-principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=5:31, cols=1:33)
+principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=5:31)
 
 # Add the latest month's statistics
 principleExportsTable <- updateTableByCommodity(principleExportsTable, month, year, newStatistics=latestPrincipleExports / 1000000,
-                                                numericColumns=2:33)
+                                                numericColumns=2:ncol(principleExportsTable))
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
@@ -590,11 +590,11 @@ totalPrincipleImports <- buildRawSummaryTable(processedTradeStats, codesCP4, cat
 
 ```{r insert Principle Imports into final formatted table}
 # Extract the table from the formatted excel sheet
-principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=5:53, cols=1:33)
+principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=5:53)
 
 # Add the latest month's statistics
 principleImportsTable <- updateTableByCommodity(principleImportsTable, month, year, newStatistics=totalPrincipleImports / 1000000, 
-                                                numericColumns=2:33)
+                                                numericColumns=2:ncol(principleImportsTable))
  
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
@@ -697,7 +697,7 @@ majorPartnerCountryStatistics[seq(from=2, by=3, length.out=length(totalPartnerCo
 majorPartnerCountryStatistics[seq(from=3, by=3, length.out=length(balanceOfTradeByMajorPartnerCountries))] <- as.numeric(balanceOfTradeByMajorPartnerCountries)
 
 # Extract the table from the formatted excel sheet
-balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", rows=5:71, cols=1:34)
+balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", rows=5:71)
 
 # Add the latest month's statistics
 balanceOfTradeMajorTable <- updateTableByCommodity(balanceOfTradeMajorTable, month, year, 
