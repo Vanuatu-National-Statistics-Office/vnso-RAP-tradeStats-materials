@@ -289,8 +289,8 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   finalWorkbook <- openxlsx::loadWorkbook(fileName)
   
   # Clear the current contents of the workbook
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=1, x=matrix(NA, nrow=nRows+5, ncol=nColumns), colNames=FALSE)
-  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=seq_len(nColumns), rows=1:(nRows+5))
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=1, x=matrix(NA, nrow=nRows+5, ncol=nColumns-1), colNames=FALSE)
+  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=2:nColumns, rows=1:(nRows+5))
   
   # Insert the updated table
   parsedColNames <- data.frame(matrix(nrow=1, ncol=length(colNames)))
@@ -298,11 +298,10 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
                                 FUN=function(colName){
                                   return(strsplit(colName, split="\\.")[[1]][1])
                                 })
-  parsedColNames[1, grepl(parsedColNames[1, ], pattern="^X")] <- NA
   for(column in numericColumns[1]:lastAnnualColumn){
     parsedColNames[, column] <- as.numeric(parsedColNames[, column])
   }
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=5, x=parsedColNames, colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=5, x=parsedColNames[, numericColumns], colNames=FALSE)
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=6, x=table, colNames=FALSE)
   
   # Add in the header section
@@ -320,16 +319,14 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
     openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=januaryIndices[index], startRow=4, x=years[index], colNames=FALSE)
     openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=januaryIndices[index]:lastMonthyInYearIndices[index], rows=4)
   }
-  if(is.na(parsedColNames[1, 1]) == FALSE){
-    openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=3, x=parsedColNames[1, 1], colNames=FALSE)
-    openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=1, rows=3:5)
-  }
-  
+
   # Set the general style for the table
   defaultFormat <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"),
                                    fontName="Times New Roman")
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=defaultFormat, gridExpand=TRUE, cols=seq_len(nColumns), 
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=defaultFormat, gridExpand=TRUE, cols=numericColumns, 
                      rows=1:(nRows+5+1+nRowsInNotes), stack=FALSE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=defaultFormat, gridExpand=TRUE, cols=seq_len(nColumns), 
+                     rows=6:(nRows+5+1+nRowsInNotes), stack=FALSE)
   
   # Set the column widths
   openxlsx::setColWidths(finalWorkbook, sheet=sheet, cols=2:nColumns, width=6.5)
@@ -338,13 +335,19 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   headerFormat <- openxlsx::createStyle(textDecoration="bold", halign="center")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=headerFormat, gridExpand=TRUE, cols=1:nColumns, rows=1:5, stack=TRUE)
   numberWithoutComma <- openxlsx::createStyle(numFmt="0")
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, gridExpand=TRUE, cols=2:lastAnnualColumn, rows=5, stack=TRUE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, gridExpand=TRUE, cols=numericColumns[1]:lastAnnualColumn, rows=5,
+                     stack=TRUE)
   tableNumberFormat <- openxlsx::createStyle(textDecoration="bold", halign="left")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=tableNumberFormat, cols=1, rows=1, stack=TRUE)
   
   # Format the numbers
   numberWithComma <- openxlsx::createStyle(numFmt="#,##0")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithComma, gridExpand=TRUE, cols=2:nColumns, rows=6:(nRows+5), stack=TRUE)
+  
+  # Format the non-numeric columns
+  nonNumericColumns <- seq_along(nColumns)[seq_along(nColumns) %in% numericColumns == FALSE]
+  tableNumberFormat <- openxlsx::createStyle(halign="left", wrapText=TRUE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=tableNumberFormat, cols=nonNumericColumns, rows=6:nRows, stack=TRUE)
   
   # Format the bold rows
   bold <- openxlsx::createStyle(textDecoration="bold")
@@ -358,7 +361,7 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
                      rows=1:100, stack=FALSE)
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=1:100, 
                      rows=(nRows+5+1+nRowsInNotes+1):100, stack=FALSE)
-
+  
   # Save the edited workbook as a new file
   openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
 }
