@@ -771,7 +771,30 @@ pictsBalance<- balanceOfTradeByRegion["Oceania"] - balanceOfTradeByMajorPartnerC
 ```
 
 ```{r insert balance of trade by Region into final formatted table}
+# Build a single vector aligned with the format of table 8: Exports, Imports, Balance for each region
+majorRegionStatistics <- c()
+majorRegionStatistics[seq(from=1, by=3, length.out=length(totalPartnerRegionExports))] <- as.numeric(totalPartnerRegionExports)
+majorRegionStatistics[seq(from=2, by=3, length.out=length(totalPartnerRegionImports))] <- as.numeric(totalPartnerRegionImports)
+majorRegionStatistics[seq(from=3, by=3, length.out=length(balanceOfTradeByRegion))] <- as.numeric(balanceOfTradeByRegion)
 
+# Add in pacific islands statistics
+majorRegionStatistics <- c(majorRegionStatistics, NA, as.numeric(pictsExports), as.numeric(pictsImports), as.numeric(pictsBalance))
+
+# Extract the table from the formatted excel sheet
+balanceOfTradeRegionsTable <- read.xlsx(finalWorkbookFileName, sheet="9_Trade_Reg", rows=5:30)
+
+# Add the latest month's statistics
+balanceOfTradeRegionsTable <- updateTableByCommodity(balanceOfTradeRegionsTable, month, year, 
+                                                     newStatistics=majorRegionStatistics / 1000000, 
+                                                     numericColumns=3:ncol(balanceOfTradeRegionsTable))
+ 
+# Insert the updated table back into the formatted excel sheet
+if(is.null(balanceOfTradeRegionsTable) == FALSE){
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="9_Trade_Reg", table=balanceOfTradeRegionsTable, 
+                                                tableNumber="9", tableName="TRADE BY REGION", 
+                                                boldRows=c(24, 25, 26), nRowsInNotes=2,
+                                                numericColumns=3:ncol(balanceOfTradeRegionsTable))
+}
 
 ```
 

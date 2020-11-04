@@ -161,7 +161,12 @@ updateTableByCommodity <- function(structuredTable, month, year, newStatistics, 
   if(month == "January"){
     
     # Calculate the sum for each commodity over the previous year
-    previousYearsTotals <- rowSums(structuredTable[, (nColumns - 12):(nColumns - 1)])
+    naCounts <- unlist(apply(structuredTable[, (nColumns - 12):(nColumns - 1)], MARGIN=1,
+                             FUN=function(values){
+                                return(sum(is.na(values)))
+                             }))
+    previousYearsTotals <- rowSums(structuredTable[, (nColumns - 12):(nColumns - 1)], na.rm=TRUE)
+    previousYearsTotals[naCounts == 12] <- NA # Not calculating row sum for empty rows in table
     
     # Identify the column where the annual table ends
     lastAnnualColumn <- which(grepl(colnames(structuredTable), pattern="Jan"))[1] - 1
