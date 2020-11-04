@@ -235,7 +235,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
                      rows=annualStartRow:notesStartRow)
 
   # Format the year values in table as numbers
-  numberWithoutComma <- openxlsx::createStyle(numFmt="0")
+  numberWithoutComma <- openxlsx::createStyle(numFmt="GENERAL")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, stack=TRUE, cols=1, gridExpand=TRUE,
                      rows=annualStartRow:(monthlyStartRow-2))
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, stack=TRUE, cols=1, gridExpand=TRUE,
@@ -340,7 +340,7 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   # Format the header region
   headerFormat <- openxlsx::createStyle(textDecoration="bold", halign="center")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=headerFormat, gridExpand=TRUE, cols=1:nColumns, rows=1:5, stack=TRUE)
-  numberWithoutComma <- openxlsx::createStyle(numFmt="0")
+  numberWithoutComma <- openxlsx::createStyle(numFmt="GENERAL")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithoutComma, gridExpand=TRUE, cols=numericColumns[1]:lastAnnualColumn, rows=5,
                      stack=TRUE)
   tableNumberFormat <- openxlsx::createStyle(textDecoration="bold", halign="left")
