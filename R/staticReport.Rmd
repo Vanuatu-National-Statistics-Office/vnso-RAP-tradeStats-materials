@@ -514,7 +514,7 @@ principleExportsTable <- updateTableByCommodity(principleExportsTable, month, ye
 if(is.null(principleExportsTable) == FALSE){
   insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, 
                                                 tableNumber="6", tableName="PRINCIPLE EXPORTS", boldRows=c(6,22,24,29,31), nRowsInNotes=4,
-                                                numericColumns=2:33)
+                                                numericColumns=2:ncol(principleExportsTable))
 }
 ```
 
@@ -591,8 +591,7 @@ totalPrincipleImports <- buildRawSummaryTable(processedTradeStats, codesCP4, cat
 ```{r insert Principle Imports into final formatted table}
 # Extract the table from the formatted excel sheet
 principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=5:53, cols=1:33)
-colnames(principleImportsTable)[1] <- "Commodity"
- 
+
 # Add the latest month's statistics
 principleImportsTable <- updateTableByCommodity(principleImportsTable, month, year, newStatistics=totalPrincipleImports / 1000000, 
                                                 numericColumns=2:33)
@@ -601,7 +600,7 @@ principleImportsTable <- updateTableByCommodity(principleImportsTable, month, ye
 if(is.null(principleExportsTable) == FALSE){
   insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, 
                                                 tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
-                                                numericColumns=2:33)
+                                                numericColumns=2:ncol(principleImportsTable))
 }
 ```
 
@@ -681,18 +680,30 @@ totalPartnerCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4
 
 # Calculate the Balance of Trade by Major Partner Countries
 
-balanceOfTradeByMajorPartnerCountries<- totalPartnerCountryExports - totalPartnerCountryImports
+balanceOfTradeByMajorPartnerCountries <- totalPartnerCountryExports - totalPartnerCountryImports
 colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTradeByMajorPartnerCountries),
                                                           FUN=function(colName){
                                                             return(strsplit(colName, split=":")[[1]][1])
                                                           })
-prettyTable(balanceOfTradeByMajorPartnerCountries)
+#prettyTable(balanceOfTradeByMajorPartnerCountries)
 
 ```
 
 ```{r insert balance of trade by major partner countries into final formatted table}
+# Extract the table from the formatted excel sheet
+balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", rows=5:71, cols=1:34)
 
-
+# Add the latest month's statistics
+balanceOfTradeMajorTable <- updateTableByCommodity(balanceOfTradeMajorTable, month, year, 
+                                                   newStatistics=balanceOfTradeByMajorPartnerCountries / 1000000, 
+                                                   numericColumns=3:33)
+ 
+# Insert the updated table back into the formatted excel sheet
+if(is.null(principleExportsTable) == FALSE){
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, 
+                                                tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
+                                                numericColumns=2:33)
+}
 ```
 
 
