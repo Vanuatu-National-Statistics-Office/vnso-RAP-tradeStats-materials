@@ -239,8 +239,6 @@ buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, co
   return(summaryTable)
 }
 
-#exploring-historic-data
-
 #' Calculate range of summary statistics for distribution 
 #' 
 #' For values provided, calculates mean, median, standard deviation, 95\\% percentiles, count, range and number of NA values 
@@ -260,7 +258,7 @@ calculateSummaryStatistics <- function(values){
   if(output["CountMissing"] == output["Count"]){
     return(output)
   }
-}
+  
   # Calculate mean
   output["Mean"] <- mean(values, na.rm=TRUE)
   
@@ -281,6 +279,7 @@ calculateSummaryStatistics <- function(values){
   output["Max"] <- minMax[2]
   
   return(output)
+}
 
 #' Calculate the statistical value of exports and imports according to their category 
 #' 
@@ -316,5 +315,4 @@ searchForMissingObservations <- function(merged, by, column){
     
     warning(paste0("No observation present in classification table for \"", merged[index, by]), "\" in ", by, "\n")
   }
-master
 }
