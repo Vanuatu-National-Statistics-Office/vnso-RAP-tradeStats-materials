@@ -96,7 +96,7 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
   nColumns <- ncol(subTables$Monthly)
 
   # Check if we need to update the annual table
-  if(month == "January"){
+  if(month == "December"){
     
     # Calculate the sum of statistics for the last year
     januaryRows <- which(subTables$Monthly$Month == "January")
@@ -157,19 +157,19 @@ updateTableByCommodity <- function(structuredTable, month, year, newStatistics, 
   colnames(structuredTable)[nColumns + 1] <- substr(month, 1, 3)
   nColumns <- nColumns + 1
   
-  # Check if January - then the annual section of table needs to be updated as well
-  if(month == "January"){
+  # Check if December - then the annual section of table needs to be updated as well
+  if(month == "December"){
     
     # Calculate the sum for each commodity over the previous year
-    naCounts <- unlist(apply(structuredTable[, (nColumns - 12):(nColumns - 1)], MARGIN=1,
+    naCounts <- unlist(apply(structuredTable[, (nColumns - 11):nColumns], MARGIN=1,
                              FUN=function(values){
                                 return(sum(is.na(values)))
                              }))
-    previousYearsTotals <- rowSums(structuredTable[, (nColumns - 12):(nColumns - 1)], na.rm=TRUE)
+    previousYearsTotals <- rowSums(structuredTable[, (nColumns - 11):nColumns], na.rm=TRUE)
     previousYearsTotals[naCounts == 12] <- NA # Not calculating row sum for empty rows in table
-    
+
     # Identify the column where the annual table ends
-    lastAnnualColumn <- which(grepl(colnames(structuredTable), pattern="Jan"))[1] - 1
+    lastAnnualColumn <- grep(colnames(structuredTable), pattern="Jan")[1] - 1
     
     # Insert the data for current year
     structuredTable <- cbind(structuredTable[, 1:lastAnnualColumn], previousYearsTotals, structuredTable[, (lastAnnualColumn+1):nColumns])
@@ -263,12 +263,13 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
 #' @param fileName A character string of full path for formatted trade statistics tables in excel workbook
 #' @param sheet A character string identifying the sheet to extract data from
 #' @param table A structured data.frame updated to include the latest data
+#' @param year A character vector indicating the year of new statistics to be added
 #' @param tableNumber The number of the table - reported in top left of formatted table in excel notebook
 #' @param tableName The name of table (all caps) - second cell in top row 
 #' @param boldRows A vector of numbers noting the rows in the formatted table that are formatted as bold
 #' @param nRowsInNotes An integer indicating how many rows are in the notes section below the formatted table
 #' @keywords openxlsx
-insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table, tableNumber, tableName, boldRows, nRowsInNotes=4, numericColumns){
+insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table, year, tableNumber, tableName, boldRows, nRowsInNotes=4, numericColumns){
   
   # Get the column names and dimensions
   colNames <- colnames(table)
@@ -283,7 +284,7 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   lastAnnualColumn <- januaryIndices[1] - 1
   
   # Note the years monthly data available for
-  years <- as.numeric(colNames[lastAnnualColumn]) - c((length(januaryIndices)-1):0)
+  years <- as.numeric(year) - c((length(januaryIndices)-1):0)
 
   # Set class of numeric columns to numeric
   for(column in numericColumns){
@@ -475,4 +476,36 @@ searchForMissingObservations <- function(merged, by, column){
     
     warning(paste0("No observation present in classification table for \"", merged[index, by]), "\" in ", by, "\n")
   }
+}
+
+#' Remove empty columns from the end of table
+#' 
+#' A function that will remove columns that are empty (all NA values) - often happens when importing table from excel
+#' @param table A data.frame 
+removeEmptyColumnsAtEnd <- function(table){
+  
+  # Get the column names
+  colNames <- colnames(table)
+  
+  # Identify the non-labelled columns
+  nonLabelledColumns <- grep(colNames, pattern="^X")
+  
+  # If no unlabelled coklumns found finish
+  if(length(nonLabelledColumns) == 0){
+    return(table)
+  }
+  
+  # Identify last monthly column
+  monthlyColumns <- which(colNames %in% c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+  
+  # Identify non-labelled columns after last monthly column
+  nonLabelledColumnsToRemove <- nonLabelledColumns[nonLabelledColumns > monthlyColumns[length(monthlyColumns)]]
+  
+  # Remove unlablled columns after last monthly column if found
+  if(length(nonLabelledColumnsToRemove) > 0){
+    
+    table <- table[, -nonLabelledColumnsToRemove]
+  }
+  
+  return(table)
 }

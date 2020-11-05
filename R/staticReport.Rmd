@@ -506,13 +506,16 @@ latestPrincipleExports <- c(NA, as.numeric(totalPrincipleExports[1, ]), NA, NA, 
 # Extract the table from the formatted excel sheet
 principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=5:31)
 
+# Remove empty columns at end
+principleExportsTable <- removeEmptyColumnsAtEnd(principleExportsTable)
+
 # Add the latest month's statistics
 principleExportsTable <- updateTableByCommodity(principleExportsTable, month, year, newStatistics=latestPrincipleExports / 1000000,
                                                 numericColumns=2:ncol(principleExportsTable))
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, 
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, year=year,
                                                 tableNumber="6", tableName="PRINCIPLE EXPORTS", boldRows=c(6,22,24,29,31), nRowsInNotes=4,
                                                 numericColumns=2:ncol(principleExportsTable))
 }
@@ -592,13 +595,16 @@ totalPrincipleImports <- buildRawSummaryTable(processedTradeStats, codesCP4, cat
 # Extract the table from the formatted excel sheet
 principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=5:53)
 
+# Remove empty columns at end
+principleImportsTable <- removeEmptyColumnsAtEnd(principleImportsTable)
+
 # Add the latest month's statistics
 principleImportsTable <- updateTableByCommodity(principleImportsTable, month, year, newStatistics=totalPrincipleImports / 1000000, 
                                                 numericColumns=2:ncol(principleImportsTable))
- 
+
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, 
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, year=year,
                                                 tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
                                                 numericColumns=2:ncol(principleImportsTable))
 }
@@ -699,6 +705,9 @@ majorPartnerCountryStatistics[seq(from=3, by=3, length.out=length(balanceOfTrade
 # Extract the table from the formatted excel sheet
 balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", rows=5:71)
 
+# Remove empty columns at end
+balanceOfTradeMajorTable <- removeEmptyColumnsAtEnd(balanceOfTradeMajorTable)
+
 # Add the latest month's statistics
 balanceOfTradeMajorTable <- updateTableByCommodity(balanceOfTradeMajorTable, month, year, 
                                                    newStatistics=majorPartnerCountryStatistics / 1000000, 
@@ -706,7 +715,7 @@ balanceOfTradeMajorTable <- updateTableByCommodity(balanceOfTradeMajorTable, mon
  
 # Insert the updated table back into the formatted excel sheet
 if(is.null(balanceOfTradeMajorTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="8_BOT_PC", table=balanceOfTradeMajorTable, 
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="8_BOT_PC", table=balanceOfTradeMajorTable, year=year, 
                                                 tableNumber="8", tableName="BALANCE OF TRADE BY MAJOR PARTNER COUNTRIES", 
                                                 boldRows=c(69, 70, 71), nRowsInNotes=2,
                                                 numericColumns=3:ncol(balanceOfTradeMajorTable))
@@ -783,6 +792,9 @@ majorRegionStatistics <- c(majorRegionStatistics, NA, as.numeric(pictsExports), 
 # Extract the table from the formatted excel sheet
 balanceOfTradeRegionsTable <- read.xlsx(finalWorkbookFileName, sheet="9_Trade_Reg", rows=5:30)
 
+# Remove empty columns at end
+balanceOfTradeRegionsTable <- removeEmptyColumnsAtEnd(balanceOfTradeRegionsTable)
+
 # Add the latest month's statistics
 balanceOfTradeRegionsTable <- updateTableByCommodity(balanceOfTradeRegionsTable, month, year, 
                                                      newStatistics=majorRegionStatistics / 1000000, 
@@ -790,7 +802,7 @@ balanceOfTradeRegionsTable <- updateTableByCommodity(balanceOfTradeRegionsTable,
  
 # Insert the updated table back into the formatted excel sheet
 if(is.null(balanceOfTradeRegionsTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="9_Trade_Reg", table=balanceOfTradeRegionsTable, 
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="9_Trade_Reg", table=balanceOfTradeRegionsTable, year=year,
                                                 tableNumber="9", tableName="TRADE BY REGION", 
                                                 boldRows=c(24, 25, 26), nRowsInNotes=2,
                                                 numericColumns=3:ncol(balanceOfTradeRegionsTable))
