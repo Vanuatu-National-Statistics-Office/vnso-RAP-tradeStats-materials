@@ -962,13 +962,28 @@ columnCategories <- list(
 totalImportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
-prettyTable(totalImportsbySITC)
+#prettyTable(totalImportsbySITC)
 
 ```
 
 ```{r insert balance of trade by Region into final formatted table}
+# Extract the table from the formatted excel sheet
+totalImportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="12_X_SITC", rows=5:16)
 
+# Remove empty columns at end
+totalImportsbySITCTable <- removeEmptyColumnsAtEnd(totalImportsbySITCTable)
 
+# Add the latest month's statistics
+totalImportsbySITCTable <- updateTableByCommodity(totalImportsbySITCTable, month, year, 
+                                                  newStatistics=totalImportsbySITC / 1000000, 
+                                                  numericColumns=3:ncol(totalImportsbySITCTable))
+
+# Insert the updated table back into the formatted excel sheet
+if(is.null(totalImportsbySITCTable) == FALSE){
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="13_M_SITC", table=totalImportsbySITCTable, year=year,
+                                                tableNumber="13", tableName="IMPORTS BY SITC", boldRows=c(16), nRowsInNotes=2,
+                                                numericColumns=3:ncol(totalImportsbySITCTable))
+}
 ```
 
 ##  Retained Imports Classified by Broad Economic Categories		

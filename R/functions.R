@@ -87,7 +87,7 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
   latestYearInSubTables <- max(subTables$Monthly$Year, na.rm=TRUE)
   months <- subTables$Monthly$Month[is.na(subTables$Monthly$Month) == FALSE]
   latestMonth <- months[length(months)]
-  if(latestYearInSubTables == year-1 && latestMonth == month){
+  if(latestYearInSubTables == (as.numeric(year)-1) && latestMonth == month){
     warning("Sub tables already contain data for specified month.")
     return(NULL)
   }
@@ -134,7 +134,7 @@ updateTableByCommodity <- function(structuredTable, month, year, newStatistics, 
   
   # Check if data have already been inserted into sub tables
   colNames <- colnames(structuredTable)
-  if(year - 1 %in% colNames && grepl(colNames[length(colNames)], pattern=substr(month, 1, 3))){
+  if((as.numeric(year) - 1) %in% colNames && grepl(colNames[length(colNames)], pattern=substr(month, 1, 3))){
     warning("Table already contains data for specified month.")
     return(NULL)
   }
