@@ -912,13 +912,27 @@ columnCategories <- list(
 totalExportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
-prettyTable(totalExportsbySITC)
-
+#prettyTable(totalExportsbySITC)
 ```
 
 ```{r insert balance of trade by Region into final formatted table}
+# Extract the table from the formatted excel sheet
+totalExportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="12_X_SITC", rows=5:16)
 
+# Remove empty columns at end
+totalExportsbySITCTable <- removeEmptyColumnsAtEnd(totalExportsbySITCTable)
 
+# Add the latest month's statistics
+totalExportsbySITCTable <- updateTableByCommodity(totalExportsbySITCTable, month, year, 
+                                                  newStatistics=totalExportsbySITC / 1000000, 
+                                                  numericColumns=3:ncol(totalExportsbySITCTable))
+
+# Insert the updated table back into the formatted excel sheet
+if(is.null(totalExportsbySITCTable) == FALSE){
+  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="12_X_SITC", table=totalExportsbySITCTable, year=year,
+                                                tableNumber="12", tableName="EXPORTS BY SITC", boldRows=c(16), nRowsInNotes=3,
+                                                numericColumns=3:ncol(totalExportsbySITCTable))
+}
 ```
 
 ## Table 13: Imports by SITC

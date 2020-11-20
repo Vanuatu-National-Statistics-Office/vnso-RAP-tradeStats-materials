@@ -87,7 +87,7 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
   latestYearInSubTables <- max(subTables$Monthly$Year, na.rm=TRUE)
   months <- subTables$Monthly$Month[is.na(subTables$Monthly$Month) == FALSE]
   latestMonth <- months[length(months)]
-  if(latestYearInSubTables == year && latestMonth == month){
+  if(latestYearInSubTables == year-1 && latestMonth == month){
     warning("Sub tables already contain data for specified month.")
     return(NULL)
   }
@@ -134,7 +134,7 @@ updateTableByCommodity <- function(structuredTable, month, year, newStatistics, 
   
   # Check if data have already been inserted into sub tables
   colNames <- colnames(structuredTable)
-  if(year %in% colNames && grepl(colNames[length(colNames)], pattern=substr(month, 1, 3))){
+  if(year - 1 %in% colNames && grepl(colNames[length(colNames)], pattern=substr(month, 1, 3))){
     warning("Table already contains data for specified month.")
     return(NULL)
   }
@@ -295,8 +295,8 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   finalWorkbook <- openxlsx::loadWorkbook(fileName)
   
   # Clear the current contents of the workbook
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=1, x=matrix(NA, nrow=nRows+5, ncol=nColumns-1), colNames=FALSE)
-  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=2:nColumns, rows=1:(nRows+5))
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=1, x=matrix(NA, nrow=nRows+5, ncol=nColumns-numericColumns[1]), colNames=FALSE)
+  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=numericColumns[1]:nColumns, rows=1:(nRows+5))
   
   # Insert the updated table
   parsedColNames <- data.frame(matrix(nrow=1, ncol=length(colNames)))
@@ -312,8 +312,8 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   
   # Add in the header section
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=1, x=paste0("Table ", tableNumber), colNames=FALSE)
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=2, startRow=1, x=tableName, colNames=FALSE)
-  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=2:nColumns, rows=1)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=1, x=tableName, colNames=FALSE)
+  openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=numericColumns[1]:nColumns, rows=1)
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=2, x="[VT Million]", colNames=FALSE)
   openxlsx::mergeCells(finalWorkbook, sheet=sheet, cols=numericColumns[1]:nColumns, rows=2)
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=3, x="ANNUALLY", colNames=FALSE)
@@ -352,9 +352,10 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=numberWithComma, gridExpand=TRUE, cols=2:nColumns, rows=6:(nRows+5), stack=TRUE)
   
   # Format the non-numeric columns
-  nonNumericColumns <- seq_along(nColumns)[seq_along(nColumns) %in% numericColumns == FALSE]
-  tableNumberFormat <- openxlsx::createStyle(halign="left", wrapText=TRUE)
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=tableNumberFormat, cols=nonNumericColumns, rows=6:nRows, stack=TRUE)
+  nonNumericColumns <- seq_len(numericColumns[1]-1)
+  tableNumberFormat <- openxlsx::createStyle(halign="left", wrapText=TRUE, borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"),
+                                             fontName="Times New Roman")
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=tableNumberFormat, gridExpand=TRUE, cols=nonNumericColumns, rows=6:(nRows+5), stack=FALSE)
   
   # Format the bold rows
   bold <- openxlsx::createStyle(textDecoration="bold")
