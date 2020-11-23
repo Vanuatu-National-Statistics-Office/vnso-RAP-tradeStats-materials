@@ -833,7 +833,7 @@ columnCategories <- list(
 totalTransportExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
-prettyTable(totalTransportExports)
+#prettyTable(totalTransportExports)
 
 
 # Calculate Import Trade by Mode of Transport
@@ -855,17 +855,25 @@ columnCategories <- list(
 totalTransportImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # View the table
-prettyTable(totalTransportImports)
+#prettyTable(totalTransportImports)
 
 # Calculate Trade by Mode of Transport
 tradebyModeOfTransport<- totalTransportExports + totalTransportImports
-prettyTable(tradebyModeOfTransport)
+#prettyTable(tradebyModeOfTransport)
 
 ```
 
 ```{r insert balance of trade by Region into final formatted table}
+# Extract the  sub tables from the formatted excel table
+tradeByModeOfTransportSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="10_Trade_Trspt", startRow=8, nColumns=8, numericColumns=3:8)
 
+# Update the sub tables
+totalExportsByHSCodeSubTables <- updateSubTablesByTime(totalExportsByHSCodeSubTables, month, year, totalExportsByHS/1000000)
 
+# Insert updated sub tables back into excel formatted table
+if(is.null(totalExportsByHSCodeSubTables) == FALSE){
+  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="5_TX", subTables=totalExportsByHSCodeSubTables, nRowsInHeader=7)
+}
 ```
 
 ## Table 11: Trade by Trade Agreement
@@ -968,7 +976,7 @@ totalImportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, catego
 
 ```{r insert balance of trade by Region into final formatted table}
 # Extract the table from the formatted excel sheet
-totalImportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="12_X_SITC", rows=5:16)
+totalImportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="13_M_SITC", rows=5:16)
 
 # Remove empty columns at end
 totalImportsbySITCTable <- removeEmptyColumnsAtEnd(totalImportsbySITCTable)

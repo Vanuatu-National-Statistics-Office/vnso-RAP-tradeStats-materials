@@ -36,7 +36,8 @@ prettyTable <- function(table, full_width=FALSE, position="left", bootstrap_opti
 #' @param startRow An integer specifying the row that the Annual table starts in
 #' @return Returns list with dataframes representing the Annual and Monthly sub tables and notes
 #' @keywords openxlsx
-extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, nColumns=NULL){
+extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, nColumns,
+                                                     numericColumns=c(1,3:nColumns)){
   
   # Extract the full historic table
   historic <- openxlsx::read.xlsx(fileName, sheet=sheet, skipEmptyRows=FALSE, startRow=startRow)
@@ -46,13 +47,12 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   
   # Identify when each sub-table starts
   annualStart <- 1
-  monthlyStart <- which(historic[, 1] == "Monthly")
+  monthlyStart <- which(tolower(historic[, 1]) == "monthly")
   end <- which(historic[, 1] == "Notes:") - 1
   
   # Extract the Annual statistics
-  annually <- historic[1:(monthlyStart-1), ]
+  annually <- historic[1:(monthlyStart-2), ]
   colnames(annually)[c(1,2)] <- c("Year", "blank")
-  annually <- annually[is.na(annually$Year) == FALSE, ]
   for(columnIndex in c(1, 3:ncol(annually))){
     annually[, columnIndex] <- as.numeric(annually[, columnIndex])
   }
@@ -60,7 +60,7 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   # Extract the monthly statistics
   monthly <- historic[(monthlyStart+1):end, ]
   colnames(monthly)[c(1,2)] <- c("Year", "Month")
-  for(columnIndex in seq_len(ncol(monthly))[-2]){
+  for(columnIndex in numericColumns){
     monthly[, columnIndex] <- as.numeric(monthly[, columnIndex])
   }
 
@@ -69,7 +69,7 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   colnames(notes) <- c("Notes", "blank")
   
   # Return the extract sub tables
-  return(list("Annually"=annually, "Monthly"=monthly, "Notes"=notes))
+  return(list("Annually"=annually, "Monthly"=monthly[rowSums(is.na(monthly)) != ncol(monthly), ], "Notes"=notes))
 }
 
 #' Update Annual and Monthly sub-tables of specific formatted table (commodities as columns, time as rows)
