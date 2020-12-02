@@ -874,8 +874,8 @@ tradeByModeOfTransportSubTables <- extractSubTablesFromFormattedTableByTime(fina
 tradeByModeOfTransportSubTables <- updateSubTablesByTime(tradeByModeOfTransportSubTables, month, year, tradeByModeOfTransport/1000000)
 
 # Insert updated sub tables back into excel formatted table
-if(is.null(totalExportsByHSCodeSubTables) == FALSE){
-  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="5_TX", subTables=totalExportsByHSCodeSubTables, nRowsInHeader=7)
+if(is.null(tradeByModeOfTransportSubTables) == FALSE){
+  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="10_Trade_Trspt", subTables=tradeByModeOfTransportSubTables, nRowsInHeader=8)
 }
 ```
 
