@@ -81,7 +81,7 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
 #' @param newStatistics Data.frame with single row storing statistics for current month to be added to table
 #' @return Returns list with updated dataframes representing the Annual and Monthly sub tables and notes
 #' @keywords openxlsx
-updateSubTablesByTime <- function(subTables, month, year, newStatistics){
+updateSubTablesByTime <- function(subTables, month, year, newStatistics, monthColumn="Month", numericColumns=3:ncol(subTables$Annually)){
 
   # Check if data have already been inserted into sub tables
   latestYearInSubTables <- max(subTables$Monthly$Year, na.rm=TRUE)
@@ -91,31 +91,65 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics){
     warning("Sub tables already contain data for specified month.")
     return(NULL)
   }
-    
-  # Note the number of columns in the sub tables
-  nColumns <- ncol(subTables$Monthly)
 
+  # Note whether new statistics are split by imports and exports
+  twoRows <- nrow(newStatistics) == 2
+  
   # Check if we need to update the annual table
   if(month == "December"){
     
-    # Calculate the sum of statistics for the last year
-    januaryRows <- which(subTables$Monthly$Month == "January")
+    # Identify the rows for last year
+    januaryRows <- grep(subTables$Monthly[, monthColumn], pattern="Jan")
     lastYearsRows <- januaryRows[length(januaryRows)]:nrow(subTables$Monthly)
-    currentYearsTotals <- data.frame("Year"=as.numeric(year), "blank"=NA, stringsAsFactors=FALSE)
-    currentYearsTotals[, colnames(subTables$Annually)[3:nColumns]] <- 
-      colSums(subTables$Monthly[lastYearsRows, 3:nColumns], na.rm=TRUE) + newStatistics
     
-    # Add a new row to the annual table for this years data
+    # Initialise a variables to stroe last year's totals
+    currentYearsTotals <- data.frame("Year"=as.numeric(year), "blank"=NA, stringsAsFactors=FALSE)
+    
+    # Check if tables inlcude both Exports and Imports data
+    if(twoRows){
+      currentYearsTotals[1, colnames(subTables$Annually)[numericColumns]] <- 
+        colSums(subTables$Monthly[lastYearsRows[seq(from=1, to=length(lastYearsRows)-1, by=2)], numericColumns], na.rm=TRUE) + newStatistics[1, ]
+      currentYearsTotals[2, colnames(subTables$Annually)[numericColumns]] <- 
+        colSums(subTables$Monthly[lastYearsRows[seq(from=2, to=length(lastYearsRows), by=2)], numericColumns], na.rm=TRUE) + newStatistics[2, ]
+      currentYearsTotals$blank <- c("Exports", "Imports")
+    }else{
+      currentYearsTotals[, colnames(subTables$Annually)[numericColumns]] <- colSums(subTables$Monthly[lastYearsRows, numericColumns], na.rm=TRUE) + newStatistics
+    }
+    
+    # Add a new totals to the annual table for this years data
     subTables$Annually <- rbind(subTables$Annually, currentYearsTotals)
   }
   
-  # Update the monthly table
-  names(newStatistics) <- colnames(subTables$Monthly)[3:nColumns] 
-  newStatistics$Year <- ifelse(month == "January", as.numeric(year), NA)
-  newStatistics$Month <- month
+  # Change the column names of the new statistics to match the sub tables
+  names(newStatistics) <- colnames(subTables$Monthly)[numericColumns]
+  
+  # Add a year column to new Statistics table
+  newStatistics$Year <- NA
+  
+  # Add in the current month
+  if(twoRows){
+    newStatistics[1, "Year"] <- month
+    newStatistics[, "Month"] <- c("Exports", "Imports")
+  }else{
+    newStatistics[1, monthColumn] <- month
+  }
+  
+  # If the new statistics are for January add the current year into the table
+  if(month == "January" && twoRows){
+    newStatistics <- rbind(NA, newStatistics)
+    newStatistics[1, "Year"] <- as.numeric(year)
+  }else if(month == "January"){
+    newStatistics$Year <- as.numeric(year)
+  }else{
+    newStatistics$Year <- NA
+  }
+  
+  # Add an empty row if December
   if(month == "December"){
     newStatistics <- rbind(newStatistics, NA)
   }
+  
+  # Update the monthly table
   subTables$Monthly <- rbind(subTables$Monthly, newStatistics)
   
   return(subTables)

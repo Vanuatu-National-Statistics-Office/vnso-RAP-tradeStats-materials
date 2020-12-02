@@ -864,11 +864,14 @@ tradebyModeOfTransport<- totalTransportExports + totalTransportImports
 ```
 
 ```{r insert balance of trade by Region into final formatted table}
+tradeByModeOfTransport <- data.frame(rbind(as.numeric(totalTransportExports), as.numeric(totalTransportImports)))
+colnames(tradeByModeOfTransport) <- c(unlist(columnCategories), "Total")
+
 # Extract the  sub tables from the formatted excel table
 tradeByModeOfTransportSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="10_Trade_Trspt", startRow=8, nColumns=8, numericColumns=3:8)
 
 # Update the sub tables
-totalExportsByHSCodeSubTables <- updateSubTablesByTime(totalExportsByHSCodeSubTables, month, year, totalExportsByHS/1000000)
+tradeByModeOfTransportSubTables <- updateSubTablesByTime(tradeByModeOfTransportSubTables, month, year, tradeByModeOfTransport/1000000)
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(totalExportsByHSCodeSubTables) == FALSE){
