@@ -58,6 +58,9 @@ tradeStatsNoDup$CP4 <- as.factor(tradeStats$CP4)
 # Convert the statistical value to numeric
 tradeStatsNoDup$Stat..Value <- as.numeric(tradeStats$Stat..Value)
 
+# Convert the Weight Net to numeric
+tradeStatsNoDup$Wgt..Net <- as.numeric(tradeStats$Wgt..Net)
+
 # Convert excel figures to dates
 tradeStatsNoDup$Reg..Date <- as.Date(as.numeric(tradeStats$Reg..Date), origin="1899-12-30") # For numeric dates excel sets origin to December 30, 1899 (https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r)
 
@@ -110,6 +113,7 @@ tradeStatsCommodities$Month<- format(tradeStatsCommodities$Reg..Date, format= "%
 tradeStatsCommodities$Day<- format(tradeStatsCommodities$Reg..Date, format= "%d")
 ```
 
+
 ## Merge Mode of Transport classifcations with cleaned data
 
 ```{r merge Mode of Transport classifcations with cleaned dataset}
@@ -135,6 +139,20 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMer
 # Check if any observations are missing
 searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code_2", column="HS.Section")
 ```
+
+## Merge HS4 classifcations with cleaned data
+
+```{r merge Mode of Transport classifcations with cleaned dataset}
+
+# Merge HS4 classifications with cleaned data
+tradeStatsFileMergeTransport <- file.path("..", "data", "open", "OPN_FINAL_ASY_HS4_31-01-20.xlsx") 
+hsClassifications <- read.xlsx(tradeStatsFileMergeTransport, sheet=1, skipEmptyRows=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, hsClassifications, by="HS.Code_4", all.x=TRUE)
+
+# Check if any observations are missing
+searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code_4", column="HS4_Commodities")
+```
+
 
 ## Merge Standard International Trade Classification (SITC) classifcations with cleaned data
 
@@ -189,19 +207,6 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMer
 searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code", column="TAR_ALL")
 ```
 
-## Merge Broad Economic Categories (BEC) with cleaned data
-
-```{r merge Broad Economic Categories (BEC) with cleaned dataset}
-
-# Merge Broad Economic Categories (BEC) classifications with cleaned data
-tradeStatsFileMergeBECDescriptions <- file.path("..", "data", "open", "OPN_FINAL_ASY_BECClassifications_31-01-20.xlsx")
-becDescriptions <- read.xlsx(tradeStatsFileMergeBECDescriptions, sheet=1, skipEmptyRows=TRUE)
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, becDescriptions, by="HS.Code_6", all.x=TRUE)
-
-# Check if any observations are missing
-searchForMissingObservations(tradeStatsCommoditiesMergedWithClassifications, by="HS.Code_6", column="BEC.Descriptions")
-```
-
 ## Processed data set stored
 
 ```{r Processed data set stored}
@@ -233,7 +238,7 @@ prettyTable(tradeBalance)
 # Extremely helpful resource for openxlsx here: https://rdrr.io/cran/openxlsx/
 
 # Note current year and month of data
-fileNameParts <- strsplit(tradeStatsFile, split="_")[[1]]
+fileNameParts <- strsplit(processedTradeStats, split="_")[[1]]
 date <- as.Date(strsplit(fileNameParts[length(fileNameParts)], split="\\.")[[1]][1], format="%d-%m-%y")
 month <- format(date, "%B")
 year <- format(date, "%Y")
@@ -435,30 +440,44 @@ columnCategories <- list(
   "Ornamental fish"=c("Ornamental fish"),
   "Shell buttons"=c("Shell buttons"),
   "Vanilla"=c("Vanilla"),
-  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal"),
-  "Other products"=c("Other products")
+  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal")
 )
+
+principleExports <- unique(processedTradeStats[, "Principle.Exports"])
+columnCategories[["Others products"]] <- principleExports[principleExports %in% unlist(columnCategories) == FALSE]
 
 # Build the table
 totalPrincipleExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(totalPrincipleExports)
 
+```
+
+
+```{r calculate principle reExports statistics with base R, eval=FALSE, echo=FALSE}
 # Calculate the principle Re-Exports 
 
 # Define the CP4 codes need for table
 codesCP4 <- c(3071)
 
 # Define the categories used for each column
-categoryColumn <- "Principle.Exports"
+categoryColumn <- "Principle.ReExports"
 columnCategories <- list(
   "Alcoholic Drinks"=c("Alcoholic Drinks"),
   "Tobacco and cigarettes"=c("Tobacco and cigarettes"),
-  "Fuel"=c("Fuel"),
-  "Other products"=c("Other products")
+  "Fuel"=c("Fuel")
 )
 
-# Build the table
-totalPrincipleReExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+principleReExports <- unique(processedTradeStats[, "Principle.ReExports"])
+columnCategories[["Others products"]] <- principleReExports[principleReExports %in% unlist(columnCategories) == FALSE]
 
+# Build the table
+principleReExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(principleReExports)
+
+
+```
+
+```{r calculate total principle exports statistics with base R, eval=FALSE, echo=FALSE}
 
 # Total Exports and Re-Exports
 columns <- unique(c(colnames(totalPrincipleExports), colnames(totalPrincipleReExports)))
@@ -587,6 +606,9 @@ columnCategories[["All Others: Exports"]] <- countries[countries %in% unlist(col
 
 # Build the table
 totalPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(totalPartnerCountryExports)
+
+
 
 # Calculate the Imports by Major Partner Countries
 
@@ -622,6 +644,9 @@ columnCategories[["All Others: Imports"]] <- countries[countries %in% unlist(col
 
 # Build the table
 totalPartnerCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(totalPartnerCountryImports)
+
+
 
 # Calculate the Balance of Trade by Major Partner Countries
 
@@ -661,7 +686,7 @@ columnCategories <- list(
 
 # Build the table
 totalPartnerRegionExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
-
+prettyTable(totalPartnerRegionExports)
 
 # Calculate the Imports by Region
 
@@ -681,6 +706,8 @@ columnCategories <- list(
 
 # Build the table
 totalPartnerRegionImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(totalPartnerRegionImports)
+
 
 # Calculate the Balance of Trade by Region
 
@@ -704,7 +731,7 @@ pictsBalance<- balanceOfTradeByRegion["Oceania"] - balanceOfTradeByMajorPartnerC
 ```
 
 
-## Trade by Mode of Transport 
+## Table 10: Trade by Mode of Transport 
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate Export Trade by Mode of Transport
@@ -717,7 +744,6 @@ categoryColumn <- "Mode.of.Transport"
 columnCategories <- list(
   "Air: Exports"=c("AIR"),
   "Water: Exports"=c("SEA"),
-  "Land: Exports"=c("LAND"),
   "Postal: Exports"=c("POSTAGE"),
   "Other: Exports"=c("OTHER")
 )
@@ -739,7 +765,6 @@ categoryColumn <- "Mode.of.Transport"
 columnCategories <- list(
   "Air: Imports"=c("AIR"),
   "Water: Imports"=c("SEA"),
-  "Land: Imports"=c("LAND"),
   "Postal: Imports"=c("POSTAGE"),
   "Other: Imports"=c("OTHER")
 )
@@ -761,7 +786,7 @@ prettyTable(tradebyModeOfTransport)
 
 ```
 
-## Trade by Trade Agreement
+## Table 11: Trade by Trade Agreement
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate Trade by Trade Agreement (whether the commodity complies with the trade agreement can only be confirmed by the receiving country hence only for imports)
@@ -778,7 +803,7 @@ msgDataFrame<- processedTradeStats[processedTradeStats$PRF == "MSG", ]
 
 ```
 
-## Exports by SITC 
+## Table 12: Exports by SITC 
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate Exports by SITC 
@@ -814,7 +839,7 @@ prettyTable(totalExportsbySITC)
 
 ```
 
-## Imports by SITC
+## Table 13: Imports by SITC
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
 # Calculate Exports by SITC 
@@ -850,16 +875,260 @@ prettyTable(totalImportsbySITC)
 
 ```
 
-##  Retained Imports Classified by Broad Economic Categories		
-```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
-# Calculate Export Trade by Mode of Transport
+## International National Merchandise Trade Report Highlights
 
+
+## National Sustainable Development Plan Indicators- Table  
+
+```{r calculate NSDP indicators and their Target value}
+
+## ECO 1.4.1 Value and volume of national trade/merchandise trade (use Exported Trade as proxy), Target by 2030 increase 20%
+
+totalExportsValue <- sum(processedTradeStats[processedTradeStats$CP4 %in% c(1000, 3071), "Stat..Value"], na.rm=TRUE)
+totalExportsVolume <- sum(processedTradeStats[processedTradeStats$CP4 %in% c(1000, 3071), "Wgt..Net"], na.rm=TRUE)
+
+# Insert values into table
+exportValueVolume <- data.frame("Value"=totalExportsValue, "Volume"=totalExportsVolume)
+prettyTable(exportValueVolume)
+
+# Calculate percentage increase of export value and volume since 2016
+
+
+
+## ECO 1.5.2 Trade by trade agreement (value), Target by 2020 exports increase 15% (we are only aware of imports, exports certified by receiving country, and we can give a proxy of exports of all commodities to MSG countries)
+
+# Create proxy for exports that are aligned to Trade by Trade agreements (only include exports not re-exports as under trade agreement have to be produced within the country)
+msgSubsetExports<- processedTradeStats[processedTradeStats$CP4 %in% c(1000), ]
+msgProxyValueExports <- sum(msgSubsetExports[msgSubsetExports$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS", "NEW CALEDONIA"), "Stat..Value"], na.rm=TRUE)
+
+# Imports aligned to MSG agreement
+msgValueImports <- sum(processedTradeStats[processedTradeStats$PRF %in% c("MSG"), "Stat..Value"], na.rm=TRUE)
+
+# Trade by Trade Agreement value approximation 
+tradeByTradeAgreementValue<- msgProxyValueExports + msgValueImports 
+
+# Insert values into table
+dataframeTradebyTradeAgreement <- data.frame("Trade by Trade Agreement Value"=tradeByTradeAgreementValue)
+prettyTable(dataframeTradebyTradeAgreement)
+
+# Calculate percentage increase of export and import value aligned to Trade Agreements since 2016
+
+
+
+
+# ECO 1.5.3 Balance of trade by major partner countries, Target by 2020 exports increase 20%
+
+# Use calculation from previous table and extract value
+balanceOfTradeMajorPartnerCountries<- balanceOfTradeByMajorPartnerCountries[ , 22]
+
+# Insert values into table
+dataframeBalanceOfTradeMajorPartnerCountries <- data.frame("Balance of Trade Major Partner Countries"=balanceOfTradeMajorPartnerCountries)
+prettyTable(dataframeBalanceOfTradeMajorPartnerCountries)
+
+# Calculate percentage increase of exports
+
+
+
+## ECO 1.6.2 Total estimated value of trade agreement as proportion of GDP, Target by 2030 increase 15%
+
+
+## ECO 1.7.1 Level of production of major commodities to include cocoa and copra, Target by 2030 increase 10-15%
+
+# Define the CP4 codes need for table
+codesCP4 <- c(1000)
+
+# Define the categories used for each column
+categoryColumn <- "Principle.Exports"
+columnCategories <- list(
+  "Cocoa"=c("Cocoa"),
+  "Coconut oil"=c("Coconut Oil"),
+  "Kava"=c("Kava")
+)
+
+# Build the table
+productionOfMajorCommodities <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(productionOfMajorCommodities)
+
+# Calculate percentage increase of production of major exports
+
+
+# `ECO4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports, Target by 2020 increase 15%
 
 
 ```
 
-```{r insert balance of trade by Region into final formatted table}
+```{r insert NSDP indicators into final formatted table}
 
 
 ```
+
+```{r insert automated text that states the growth rate needed for the policy objectives to meet their target indicators}
+
+
+```
+
+## Trade Balance by major partner countries- Dumbbell Chart
+
+```{r visualise trade balance by major partner countries}
+
+# Create Dumbbell chart to highlight balance of trade by exports and imports (both data-frames previously calculated)
+
+# Order Exports of major partner countries
+orderPartnerCountryExports<- totalPartnerCountryExports[, order(totalPartnerCountryExports)]
+dataframeOrderPartnerCountryExports <- data.frame("Partner Country Exports"=orderPartnerCountryExports)
+prettyTable(dataframeOrderPartnerCountryExports)
+
+# Order Imports of major partner countries
+orderPartnerCountryImports<- totalPartnerCountryImports[, order(totalPartnerCountryImports)]
+dataframeOrderPartnerCountryImports <- data.frame("Partner Country Exports"=orderPartnerCountryImports)
+prettyTable(dataframeOrderPartnerCountryImports)
+
+
+```
+
+```{r insert automated text that states the Trade balances between major countries, countries we did not export to from major partner countries}
+
+
+```
+
+## Trade Balance of Major Pacific Islands (excluding Fiji & New )- Bar Chart
+
+```{r visualise trade balance by pacific countries}
+
+# Define the CP4 codes need for table
+codesCP4 <- c(1000, 3071)
+
+# Define the categories used for each column
+categoryColumn <- "EXPORT.COUNTRY"
+columnCategories <- list(
+  "American Samoa: Exports"=c("AMERICAN SAMOA"),
+  "Cook Islands: Exports"=c("COOK ISLANDS"),
+  "Kiribati: Exports"=c("KIRIBATI"),
+  "Federated States of Micronesia: Exports"=c("FED. STATES OF MICRONESIA"),
+  "Marshall Islands: Exports"=c("MARSHALL ISLANDS"),
+  "Nauru: Exports"=c("NAURU"),
+  "Niue: Exports"=c("NIUE"),
+  "Palau: Exports"=c("PALAU"),
+  "Papua New Guinea: Exports"=c("PAPUA NEW GUINEA"),
+  "Samoa: Exports"=c("SAMOA"),
+  "Solomon Islands: Exports"=c("SOLOMON ISLANDS"),
+  "French Polynesia: Exports"=c("FRENCH POLYNESIA"),
+  "Tuvalu: Exports"=c("TUVALU"),
+  "Wallis and Futuna Islands: Exports"=c("WALLIS AND FUTUNA ISLANDS")
+)
+
+
+# Build the table
+totalPacificCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(totalPacificCountryExports)
+
+
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "IMPORT.COUNTRY"
+columnCategories <- list(
+  "American Samoa: Exports"=c("AMERICAN SAMOA"),
+  "Cook Islands: Exports"=c("COOK ISLANDS"),
+  "Kiribati: Exports"=c("KIRIBATI"),
+  "Federated States of Micronesia: Exports"=c("FED. STATES OF MICRONESIA"),
+  "Marshall Islands: Exports"=c("MARSHALL ISLANDS"),
+  "Nauru: Exports"=c("NAURU"),
+  "Niue: Exports"=c("NIUE"),
+  "Palau: Exports"=c("PALAU"),
+  "Papua New Guinea: Exports"=c("PAPUA NEW GUINEA"),
+  "Samoa: Exports"=c("SAMOA"),
+  "Solomon Islands: Exports"=c("SOLOMON ISLANDS"),
+  "French Polynesia: Exports"=c("FRENCH POLYNESIA"),
+  "Tuvalu: Exports"=c("TUVALU"),
+  "Wallis and Futuna Islands: Exports"=c("WALLIS AND FUTUNA ISLANDS")
+)
+
+# Build the table
+totalPacificCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(totalPacificCountryImports)
+
+
+# Calculate Trade Balance of Pacific Islands
+tradeBalancePacificIslands<- totalPacificCountryExports - totalPacificCountryImports
+prettyTable(tradeBalancePacificIslands)
+
+```
+
+```{r insert automated text highlighting trade balance; difference between value of imports and exports comparing this month to same month in previous year}
+
+
+```
+
+## Trade Balance of Emerging Markets (excluding Major Partner Countries)- Bar Chart (issue here is have to calculate top again, excluding the major-ask Joe)
+
+```{r visualise trade balance by Emerging Markets}
+
+# Define the CP4 codes need for table
+codesCP4 <- c(1000, 3071)
+
+# Define the categories used for each column
+categoryColumn <- "EXPORT.COUNTRY"
+columnCategories <- list(
+  "American Samoa: Exports"=c("AMERICAN SAMOA"),
+  "Cook Islands: Exports"=c("COOK ISLANDS"),
+  "Kiribati: Exports"=c("KIRIBATI"),
+  "Federated States of Micronesia: Exports"=c("FED. STATES OF MICRONESIA"),
+  "Marshall Islands: Exports"=c("MARSHALL ISLANDS"),
+  "Nauru: Exports"=c("NAURU"),
+  "Niue: Exports"=c("NIUE"),
+  "Palau: Exports"=c("PALAU"),
+  "Papua New Guinea: Exports"=c("PAPUA NEW GUINEA"),
+  "Samoa: Exports"=c("SAMOA"),
+  "Solomon Islands: Exports"=c("SOLOMON ISLANDS"),
+  "French Polynesia: Exports"=c("FRENCH POLYNESIA"),
+  "Tuvalu: Exports"=c("TUVALU"),
+  "Wallis and Futuna Islands: Exports"=c("WALLIS AND FUTUNA ISLANDS")
+)
+
+
+# Build the table
+totalPacificCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(totalPacificCountryExports)
+
+
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "IMPORT.COUNTRY"
+columnCategories <- list(
+  "American Samoa: Exports"=c("AMERICAN SAMOA"),
+  "Cook Islands: Exports"=c("COOK ISLANDS"),
+  "Kiribati: Exports"=c("KIRIBATI"),
+  "Federated States of Micronesia: Exports"=c("FED. STATES OF MICRONESIA"),
+  "Marshall Islands: Exports"=c("MARSHALL ISLANDS"),
+  "Nauru: Exports"=c("NAURU"),
+  "Niue: Exports"=c("NIUE"),
+  "Palau: Exports"=c("PALAU"),
+  "Papua New Guinea: Exports"=c("PAPUA NEW GUINEA"),
+  "Samoa: Exports"=c("SAMOA"),
+  "Solomon Islands: Exports"=c("SOLOMON ISLANDS"),
+  "French Polynesia: Exports"=c("FRENCH POLYNESIA"),
+  "Tuvalu: Exports"=c("TUVALU"),
+  "Wallis and Futuna Islands: Exports"=c("WALLIS AND FUTUNA ISLANDS")
+)
+
+# Build the table
+totalPacificCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+prettyTable(totalPacificCountryImports)
+
+
+# Calculate Trade Balance of Pacific Islands
+tradeBalancePacificIslands<- totalPacificCountryExports - totalPacificCountryImports
+prettyTable(tradeBalancePacificIslands)
+
+```
+
+```{r insert automated text highlighting trade balance; difference between value of imports and exports comparing this month to same month in previous year}
+
+
+```
+
