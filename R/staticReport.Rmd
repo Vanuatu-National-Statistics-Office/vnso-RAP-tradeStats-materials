@@ -871,7 +871,7 @@ colnames(tradeByModeOfTransport) <- c(unlist(columnCategories), "Total")
 tradeByModeOfTransportSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="10_Trade_Trspt", startRow=8, nColumns=8, numericColumns=3:8)
 
 # Update the sub tables
-tradeByModeOfTransportSubTables <- updateSubTablesByTime(tradeByModeOfTransportSubTables, month, year, tradeByModeOfTransport/1000000)
+tradeByModeOfTransportSubTables <- updateSubTablesByTime(tradeByModeOfTransportSubTables, month, year, tradeByModeOfTransport/1000000, monthColumn="Year")
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(tradeByModeOfTransportSubTables) == FALSE){
@@ -887,7 +887,7 @@ if(is.null(tradeByModeOfTransportSubTables) == FALSE){
 
 #Create subset of trade agreements separately then run the principle commodities 
 
-msgDataFrame<- processedTradeStats[processedTradeStats$PRF == "MSG", ]
+msgDataFrame <- processedTradeStats[processedTradeStats$PRF == "MSG", ]
 
 ```
 
