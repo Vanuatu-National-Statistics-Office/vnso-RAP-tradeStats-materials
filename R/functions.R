@@ -238,7 +238,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   finalWorkbook <- openxlsx::loadWorkbook(fileName)
 
   # Clear the current contents of the workbook
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=annualStartRow, x=matrix(NA, nrow=nRows+4, ncol=nColumns), colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=annualStartRow, x=matrix(NA, nrow=nRows+1+nrow(subTables$Notes), ncol=nColumns), colNames=FALSE)
   openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=seq_len(nColumns), rows=annualStartRow:notesStartRow)
   openxlsx::setRowHeights(finalWorkbook, sheet=sheet, rows=annualStartRow:notesStartRow, heights=14.5)
 
@@ -256,7 +256,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   default <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"),
                                    fontName="Times New Roman")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=seq_len(nColumns), 
-                     rows=annualStartRow:(notesStartRow+2), stack=FALSE)
+                     rows=annualStartRow:(notesStartRow+3), stack=FALSE)
 
   # Format the Monthly and Annually sub table names as bold
   bold <- openxlsx::createStyle(textDecoration="bold", halign="left")
