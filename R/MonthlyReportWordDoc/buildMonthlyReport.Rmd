@@ -82,6 +82,6 @@ world <- getMap(resolution="coarse")
 par(mar=c(0,0,0,0))
 
 # Plot the map
-plot(world, col="grey")
+plot(world, col=rgb(1,0,0, runif(length(world))))
 ```
 
