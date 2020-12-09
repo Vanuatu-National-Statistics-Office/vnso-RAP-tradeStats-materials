@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo=FALSE)
 # Load the required libraries
 library(knitr) # Creating documents
 library(flextable) # Nicely formatted tables
+library(rworldmap) # World map
 
 # Set the table formatting defaults
 set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
@@ -65,5 +66,22 @@ indicatorsTable <- set_table_properties(indicatorsTable, width=1, layout="autofi
 
 # Set the theme and print table
 theme_booktabs(indicatorsTable)
+```
+
+Automated text which states the growth rate that is needed for the policy objectives to meet their target indicators. If the country is on course to achieve the trade related NSDP goals.
+
+# Trade Balance by Major Partner Countries
+
+Automated text of grow of exports and imports over last 1, 5 and 10 years by major countries.
+
+```{r major partner country trade, warning=FALSE, fig.width=5.5, fig.height=2.5}
+# Get the polygons for the world
+world <- getMap(resolution="coarse")
+
+# Remove plotting margins
+par(mar=c(0,0,0,0))
+
+# Plot the map
+plot(world, col="grey")
 ```
 
