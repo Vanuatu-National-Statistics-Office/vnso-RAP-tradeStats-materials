@@ -18,11 +18,9 @@ secureDataFolder <- file.path(repository, "data", "secure")
 # Note the open data path
 openDataFolder <- file.path(repository, "data", "open")
 
-#### Import the latest month's data ####
-
 # Read in the raw trade data from secure folder of the repository 
 # Note that spaces in column names have been automatically replaced with "."s
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-03-20.xlsx")
 tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 
 #### Clean and process the latest month's data ####
@@ -52,6 +50,9 @@ tradeStatsNoBanknotes <- tradeStatsNoDup[tradeStatsNoDup$HS.Code != "49070010", 
 tradeStatsSubset <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$Type %in% c("EX / 1","EX / 3", "IM / 4", "IM / 7", "PC / 4"), ]
 tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
 
+# Print progress
+cat("Finished initial cleaning and processing of data.\n")
+
 #### Explore the extent of missing data ####
 
 # Count the number of missing values in each column
@@ -71,6 +72,9 @@ barplot(proportionMissing[order(proportionMissing)], las=2, ylim=c(0,1),
         main="Amount missing values in each column",
         ylab="Proportion")
 
+# Print progress
+cat("Finished exploring extent of missing data.\n")
+
 #### Extract the SITC and HS sub-codes ####
 
 # Extract the 6, 4, and 2 digit HS codes into separate columns
@@ -82,12 +86,18 @@ tradeStatsCommodities$HS.Code_2 <- extractCodeSubset(tradeStatsCommodities$HS.Co
 tradeStatsCommodities$SITC_3 <- extractCodeSubset(tradeStatsCommodities$SITC, nDigits=3)
 tradeStatsCommodities$SITC_1 <- extractCodeSubset(tradeStatsCommodities$SITC, nDigits=1)
 
+# Print progress
+cat("Added SITC and HS sub-codes into table.\n")
+
 #### Extract the Year, Month, and Day as separate columns ####
 
 # Create new columns for dates
 tradeStatsCommodities$Year <- format(tradeStatsCommodities$Reg..Date, format= "%Y")
 tradeStatsCommodities$Month <- format(tradeStatsCommodities$Reg..Date, format= "%B")
 tradeStatsCommodities$Day <- format(tradeStatsCommodities$Reg..Date, format= "%d")
+
+# Print progress
+cat("Added separate date elements.\n")
 
 #### Merge in classification tables ####
 
@@ -141,6 +151,9 @@ tradeStatsFileMergeBECDescriptions <- file.path(openDataFolder, "OPN_FINAL_ASY_B
 becDescriptions <- read.xlsx(tradeStatsFileMergeBECDescriptions, sheet=1, skipEmptyRows=TRUE)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, becDescriptions, by="HS.Code_6", all.x=TRUE)
 
+# Print progress
+cat("Finished merging in classification tables.\n")
+
 #### Check for missing observations after merging ####
 
 # Check each of the columns introduced by merging
@@ -157,10 +170,9 @@ if(is.null(infoAboutMissingObservations) == FALSE){
   warning(paste0(nrow(infoAboutMissingObservations), " observations were missing following the merging. Examine the infoAboutMissingObservations variable for more information."))
 }
 
-#### Finish and store processed data ####
-
-# Processed data set stored
-processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
-
 # Print progress
-cat("Finished processing the latest month's data.\n")
+cat("Finished checking for missing observations after merging.\n")
+
+#### Finish ####
+
+cat("Finished processing and cleaning latest month's data.\n")

@@ -1,5 +1,8 @@
 #### Preparation ####
 
+# Clear the environment
+rm(list = ls())
+
 # Load the required libraries
 library(knitr) # Nice tables
 library(kableExtra) # Extra nice tables
@@ -167,7 +170,7 @@ infoAboutMissingObservations <- searchForMissingObservations(
 
 # Check whether missing observations were present after merging
 if(is.null(infoAboutMissingObservations) == FALSE){
-  warning(paste0(nrow(infoAboutMissingObservations), " observations were missing following the merging. Examine the infoAboutMissingObservations variable for more information."))
+  warning(paste0(nrow(infoAboutMissingObservations), " observations were missing following the merging. Examine the \"infoAboutMissingObservations\" variable for more information."))
 }
 
 # Print progress
@@ -175,4 +178,8 @@ cat("Finished checking for missing observations after merging.\n")
 
 #### Finish ####
 
+# Make copy of latest month's processed data
+processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
+
+# Note progress
 cat("Finished processing and cleaning latest month's data.\n")
