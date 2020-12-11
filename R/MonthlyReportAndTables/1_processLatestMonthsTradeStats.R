@@ -176,6 +176,12 @@ if(is.null(infoAboutMissingObservations) == FALSE){
 # Print progress
 cat("Finished checking for missing observations after merging.\n")
 
+#### Check if any statistical values fall outside of expected boundaries ####
+
+# Load the summary statistics for the historic IMPORTS and EXPORTS data
+historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS-Year_summaryStats_02-10-20.csv"))
+historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS-Year_summaryStats_02-10-20.csv"))
+
 #### Finish ####
 
 # Make copy of latest month's processed data

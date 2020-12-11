@@ -147,9 +147,9 @@ exports <- exports[exports$Year >= 1999 & exports$Year <= 2019, ]
 
 ```{r store local copy, echo=FALSE, eval=FALSE}
 # Save the data as a standard csv
-write.table(exports, file=file.path("..", "data", "secure", "tradeStats_historic_EXPORTS_14-09-20.csv"),
+write.table(exports, file=file.path(repository, "data", "secure", "tradeStats_historic_EXPORTS_14-09-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
-write.table(imports, file=file.path("..", "data", "secure", "tradeStats_historic_IMPORTS_14-09-20.csv"),
+write.table(imports, file=file.path(repository, "data", "secure", "tradeStats_historic_IMPORTS_14-09-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
 ```
 
