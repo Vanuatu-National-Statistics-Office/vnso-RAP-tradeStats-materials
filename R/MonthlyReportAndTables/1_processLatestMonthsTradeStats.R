@@ -10,7 +10,7 @@ library(dplyr) # Manipulating data
 library(openxlsx) # Reading and editing excel formatted files
 
 # Note where VNSO code/data is on current computer
-repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "..")
+repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "..", "..")
 
 # Load the general R functions
 source(file.path(repository, "R", "functions.R"))
