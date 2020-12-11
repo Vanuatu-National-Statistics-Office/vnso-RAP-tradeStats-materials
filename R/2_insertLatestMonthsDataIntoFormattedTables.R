@@ -45,7 +45,7 @@ if(is.null(balanceOfTradeSubTables) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 1: Balance of Trade")
+cat("Finished formatting Table 1: Balance of Trade.\n")
 
 #### Table 2: Import by HS Code ####
 
@@ -96,7 +96,7 @@ if(is.null(importsByHSCodeSubTables) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 2: Import by HS Code")
+cat("Finished formatting Table 2: Import by HS Code.\n")
 
 #### Table 3: Export by HS Code ####
 
@@ -147,7 +147,7 @@ if(is.null(exportsByHSCodeSubTables) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 3: Export by HS Code")
+cat("Finished formatting Table 3: Export by HS Code.\n")
 
 #### Table 4: Re-Export by HS Code ####
 
@@ -198,7 +198,7 @@ if(is.null(reExportsByHSCodeSubTables) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 4: Re-Export by HS Code")
+cat("Finished formatting Table 4: Re-Export by HS Code.\n")
 
 #### Table 5: Total Exports by HS Code ####
 
@@ -219,7 +219,7 @@ if(is.null(totalExportsByHSCodeSubTables) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 5: Total Exports by HS Code")
+cat("Finished formatting Table 5: Total Exports by HS Code.\n")
 
 #### Table 6: Principle Exports ####
 
@@ -290,7 +290,7 @@ if(is.null(principleExportsTable) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 6: Principle Exports")
+cat("Finished formatting Table 6: Principle Exports.\n")
 
 #### Table 7: Principle Imports ####
 
@@ -374,7 +374,7 @@ if(is.null(principleExportsTable) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 7: Principle Imports")
+cat("Finished formatting Table 7: Principle Imports.\n")
 
 #### Table 8: Balance of Trade by Major Partner Countries ####
 
@@ -482,7 +482,7 @@ if(is.null(balanceOfTradeMajorTable) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 8: Balance of Trade by Major Partner Countries")
+cat("Finished formatting Table 8: Balance of Trade by Major Partner Countries.\n")
 
 #### Table 9: Balance of Trade by Region ####
 
@@ -568,7 +568,7 @@ if(is.null(balanceOfTradeRegionsTable) == FALSE){
 
 
 # Print progress
-cat("Finished formatting Table 9: Balance of Trade by Region")
+cat("Finished formatting Table 9: Balance of Trade by Region.\n")
 
 #### Table 10: Trade by Mode of Transport ####
 
@@ -627,7 +627,7 @@ if(is.null(tradeByModeOfTransportSubTables) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 10: Trade by Mode of Transport")
+cat("Finished formatting Table 10: Trade by Mode of Transport.\n")
 
 #### Table 11: Trade by Trade Agreement (INCOMPLETE) ####
 
@@ -682,7 +682,7 @@ if(is.null(totalExportsbySITCTable) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 12: Exports by SITC")
+cat("Finished formatting Table 12: Exports by SITC.\n")
 
 #### Table 13: Imports by SITC ####
 
@@ -730,7 +730,7 @@ if(is.null(totalImportsbySITCTable) == FALSE){
 }
 
 # Print progress
-cat("Finished formatting Table 13: Exports by SITC")
+cat("Finished formatting Table 13: Exports by SITC.\n")
 
 #### Finish ####
 
