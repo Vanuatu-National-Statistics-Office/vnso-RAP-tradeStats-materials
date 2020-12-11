@@ -612,10 +612,12 @@ calculateSummaryStatistics <- function(values){
   # Calculate median
   output["Median"] <- median(values, na.rm=TRUE)
   
-  # Calculate upper and lower 95% percentile bounds
-  quantiles <- quantile(values, probs=c(0.975, 0.025), na.rm=TRUE)
-  output["Upper-97.5"] <- quantiles[1]
-  output["Lower-2.5"] <- quantiles[2]
+  # Calculate upper and lower 95% and 99% percentile bounds
+  quantiles <- quantile(values, probs=c(0.99, 0.975, 0.025, 0.01), na.rm=TRUE)
+  output["Upper-99"] <- quantiles[1]
+  output["Upper-97.5"] <- quantiles[2]
+  output["Lower-2.5"] <- quantiles[3]
+  output["Lower-1"] <- quantiles[4]
   
   # Calculate the range of the data
   minMax <- range(values, na.rm=TRUE)
