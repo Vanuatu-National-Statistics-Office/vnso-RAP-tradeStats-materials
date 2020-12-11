@@ -508,7 +508,7 @@ overallTotal <- sum(c(as.numeric(totalPrincipleExports[1, ]), as.numeric(totalPr
 latestPrincipleExports <- c(NA, as.numeric(totalPrincipleExports[1, ]), NA, NA, as.numeric(totalPrincipleReExports[1, ]), NA, overallTotal)
 
 # Extract the table from the formatted excel sheet
-principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=5:31)
+principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=5:31, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 principleExportsTable <- removeEmptyColumnsAtEnd(principleExportsTable)
@@ -597,7 +597,7 @@ totalPrincipleImports <- buildRawSummaryTable(processedTradeStats, codesCP4, cat
 
 ```{r insert Principle Imports into final formatted table}
 # Extract the table from the formatted excel sheet
-principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=5:53)
+principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=5:53, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 principleImportsTable <- removeEmptyColumnsAtEnd(principleImportsTable)
@@ -707,7 +707,7 @@ majorPartnerCountryStatistics[seq(from=2, by=3, length.out=length(totalPartnerCo
 majorPartnerCountryStatistics[seq(from=3, by=3, length.out=length(balanceOfTradeByMajorPartnerCountries))] <- as.numeric(balanceOfTradeByMajorPartnerCountries)
 
 # Extract the table from the formatted excel sheet
-balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", rows=5:71)
+balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", rows=5:71, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 balanceOfTradeMajorTable <- removeEmptyColumnsAtEnd(balanceOfTradeMajorTable)
@@ -794,7 +794,7 @@ majorRegionStatistics[seq(from=3, by=3, length.out=length(balanceOfTradeByRegion
 majorRegionStatistics <- c(majorRegionStatistics, NA, as.numeric(pictsExports), as.numeric(pictsImports), as.numeric(pictsBalance))
 
 # Extract the table from the formatted excel sheet
-balanceOfTradeRegionsTable <- read.xlsx(finalWorkbookFileName, sheet="9_Trade_Reg", rows=5:30)
+balanceOfTradeRegionsTable <- read.xlsx(finalWorkbookFileName, sheet="9_Trade_Reg", rows=5:30, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 balanceOfTradeRegionsTable <- removeEmptyColumnsAtEnd(balanceOfTradeRegionsTable)
@@ -932,7 +932,7 @@ totalExportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, catego
 
 ```{r insert balance of trade by Region into final formatted table}
 # Extract the table from the formatted excel sheet
-totalExportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="12_X_SITC", rows=5:16)
+totalExportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="12_X_SITC", rows=5:16, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 totalExportsbySITCTable <- removeEmptyColumnsAtEnd(totalExportsbySITCTable)
@@ -983,7 +983,7 @@ totalImportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, catego
 
 ```{r insert balance of trade by Region into final formatted table}
 # Extract the table from the formatted excel sheet
-totalImportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="13_M_SITC", rows=5:16)
+totalImportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="13_M_SITC", rows=5:16, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 totalImportsbySITCTable <- removeEmptyColumnsAtEnd(totalImportsbySITCTable)
