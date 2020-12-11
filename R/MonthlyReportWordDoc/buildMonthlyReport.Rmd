@@ -1,0 +1,87 @@
+---
+title: "International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights"
+output: 
+  word_document:
+    reference_docx: styles_reference.docx
+---
+
+```{r setup, include=FALSE}
+# Set echo=FALSE as default for code cells
+knitr::opts_chunk$set(echo=FALSE)
+
+# Load the required libraries
+library(knitr) # Creating documents
+library(flextable) # Nicely formatted tables
+library(rworldmap) # World map
+
+# Set the table formatting defaults
+set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
+                       text.align="left", table.layout="fixed", theme_fun="theme_booktabs")
+```
+
+# National Sustainable Development Plan Indicators (NSDP)
+
+```{r NSDP indicators}
+# Create the NSDP table
+nsdpIndicators <- data.frame(
+  "Policy Objectives"=c("ECO 1.4: Increase trade and investment opportunities and reduce barriers, including through the use of Aid-for-Trade",
+                        "ECO 1.5: Increase access to markets for Vanuatu exports",
+                        "ECO 1.5: Increase access to markets for Vanuatu exports",
+                        "ECO 1.5: Increase access to markets for Vanuatu exports",
+                        "ECO 1.6: Require all new trade agreements to demonstrate tangible benefits in the national interest",
+                        "ECO 1.7: Stimulate economic diversification to spread the benefits of growth and increase economic stability"),
+  "SMART Indicators"=c("ECO 1.4.1 Value and volume of national trade/merchandise trade",
+                       "ECO 1.5.1 Benefits/value accrued through various trade agreements",
+                       "ECO 1.5.2 Trade by trade agreement (value)",
+                       "ECO 1.5.3 Balance of trade by major partner countries",
+                       "ECO 1.6.2 Total estimated value of trade agreement as proportion of GDP",
+                       "ECO 1.7.1 Level of production of major commodities to include cocoa and copra"),
+  "Indicator Value (Increased/Decreased)"=NA,
+  "Targets 2020"=c("By 2030 increase of 20%",
+                   "By 2020, exports increase by 20%",
+                   "By 2020, exports increase by 15%",
+                   "By 2020, exports increase by 20%",
+                   "By 2030 increase by 15%",
+                   "By 2030 increase 10-15% of the proportion"),
+  "Target Percentage (%)"=NA, 
+  check.names=FALSE, stringsAsFactors=FALSE)
+
+# Initiailise a flextable object for NSDP table
+indicatorsTable <- flextable(nsdpIndicators)
+
+# Add a header row and set background colour
+indicatorsTable <- add_header_row(indicatorsTable, top=TRUE, 
+                     values=c("NSDP Pillar 3: Economy Pillar\nECONOMY 1: A stable and prosperous economy, encouraging trade, investment and providing economic opportunities for all members of society throughout Vanuatu"), 
+                     colwidths=ncol(nsdpIndicators))
+indicatorsTable <- bg(indicatorsTable, bg="coral1", part="header")
+
+# Set the vertical alignment to top
+indicatorsTable <- valign(indicatorsTable, valign="top", part="all")
+
+# Merge repeated values in columns
+indicatorsTable <- merge_v(indicatorsTable)
+
+# Set table width to 100%
+indicatorsTable <- set_table_properties(indicatorsTable, width=1, layout="autofit")
+
+# Set the theme and print table
+theme_booktabs(indicatorsTable)
+```
+
+Automated text which states the growth rate that is needed for the policy objectives to meet their target indicators. If the country is on course to achieve the trade related NSDP goals.
+
+# Trade Balance by Major Partner Countries
+
+Automated text of grow of exports and imports over last 1, 5 and 10 years by major countries.
+
+```{r major partner country trade, warning=FALSE, fig.width=5.5, fig.height=2.5}
+# Get the polygons for the world
+world <- getMap(resolution="coarse")
+
+# Remove plotting margins
+par(mar=c(0,0,0,0))
+
+# Plot the map
+plot(world, col=rgb(1,0,0, runif(length(world))))
+```
+

@@ -14,4 +14,11 @@
 ## Dataset dictionary
 
 Datasets currently present in secure folder:
-- 
+
+- `OPN_FINAL_ASY_BECClassifications_31-01-20.xlsx` - **B**road **E**conomic **C**lassification (**BEC**) code classification table
+- `OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.xlsx` - **C**ountry **desc**ription (**C-desc**) code classification table for **EXPORTS**
+- `OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.xlsx` - **C**ountry **desc**ription (**C-desc**) code classification table for **IMPORTS**
+- `OPN_FINAL_ASY_HSCodeClassifications_31-01-20.xlsx` - **H**armonized **S**ystem (**HS**) code classification table
+- `OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.xlsx` - **M**ode **o**f **T**ransport (**MoT**) code classifications table
+- `OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx` - Principle commodeities list
+- `OPN_FINAL_ASY_SITCCodeClassifications_31-01-20.xlsx` - **S**tandard **I**nternational **T**rade **C**lassification (**SITC**) code classification table
