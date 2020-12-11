@@ -182,6 +182,38 @@ cat("Finished checking for missing observations after merging.\n")
 historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS-Year_summaryStats_02-10-20.csv"))
 historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS-Year_summaryStats_02-10-20.csv"))
 
+# Rename the columns
+colnames(historicImportsSummaryStats) <- paste0("IMPORTS.", colnames(historicImportsSummaryStats))
+colnames(historicExportsSummaryStats) <- paste0("EXPORTS.", colnames(historicExportsSummaryStats))
+
+# Select the latest year of data
+historicImportsSummaryStats <- historicImportsSummaryStats[historicImportsSummaryStats$Year == max(historicImportsSummaryStats$Year, na.rm=TRUE), ]
+historicExportsSummaryStats <- historicExportsSummaryStats[historicExportsSummaryStats$Year == max(historicExportsSummaryStats$Year, na.rm=TRUE), ]
+
+# Merge in the expected value boundaries
+tradeStatsWithBounds <- merge(tradeStatsCommoditiesMergedWithClassifications,
+                              historicImportsSummaryStats,
+                              by.x="HS.Code", by.y="IMPORTS.HS")
+tradeStatsWithBounds <- merge(tradeStatsWithBounds,
+                              historicExportsSummaryStats,
+                              by.x="HS.Code", by.y="EXPORTS.HS")
+
+# Check if any import statistics fall outside the expected boundaries
+outsideUnitValueBoundaries <- 
+  ifelse((tradeStatsWithBounds$CP4 %in% c(4000, 4071, 7100) & 
+           (tradeStatsWithBounds$Stat..Value < tradeStatsWithBounds$IMPORTS.UnitValue.Lower.2.5 | 
+            tradeStatsWithBounds$Stat..Value > tradeStatsWithBounds$IMPORTS.UnitValue.Upper.97.5)) |
+        (tradeStatsWithBounds$CP4 %in% c(1000) & 
+           (tradeStatsWithBounds$Stat..Value < tradeStatsWithBounds$EXPORTS.UnitValue.Lower.2.5 | 
+            tradeStatsWithBounds$Stat..Value > tradeStatsWithBounds$EXPORTS.UnitValue.Upper.97.5)), TRUE, FALSE)
+outsideValueBoundaries <- 
+  ifelse((tradeStatsWithBounds$CP4 %in% c(4000, 4071, 7100) & 
+            (tradeStatsWithBounds$Stat..Value < tradeStatsWithBounds$IMPORTS.Value.Lower.2.5 | 
+               tradeStatsWithBounds$Stat..Value > tradeStatsWithBounds$IMPORTS.Value.Upper.97.5)) |
+           (tradeStatsWithBounds$CP4 %in% c(1000) & 
+              (tradeStatsWithBounds$Stat..Value < tradeStatsWithBounds$EXPORTS.Value.Lower.2.5 | 
+                 tradeStatsWithBounds$Stat..Value > tradeStatsWithBounds$EXPORTS.Value.Upper.97.5)), TRUE, FALSE)
+
 #### Finish ####
 
 # Make copy of latest month's processed data
