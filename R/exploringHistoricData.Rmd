@@ -456,7 +456,7 @@ fig
 
 # Concluding remarks
 
-The histroci trades data provides a wealth of information that we can use to inform how we create the monthly trade statistics reports. We can see that the value of each commodity is highly skewed, making summary statistics like `median` and `percentiles` more appropriate. The value of each commodity is quite variable through time, it is potentially best to use last years data when defining the expected boundaries for each commodity.
+The historic trades data provides a wealth of information that we can use to inform how we create the monthly trade statistics reports. We can see that the value of each commodity is highly skewed, making summary statistics like `median` and `percentiles` more appropriate. The value of each commodity is quite variable through time, it is potentially best to use last years data when defining the expected boundaries for each commodity.
 
 We can quickly process the historic data, which has over a million rows using R and MySQL. We can use R to generate interactive visualisations that will help raise the value of these amazing data by make them more accessible.
 
