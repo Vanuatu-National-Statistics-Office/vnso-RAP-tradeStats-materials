@@ -624,3 +624,48 @@ calculateSummaryStatistics <- function(values){
   
   return(output)
 }
+
+checkCommodityValues <- function(tradeStats, expectedValueBoundariesForImports, expectedValueBoundariesForExports, 
+                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000)){
+  
+  # Convert the HS codes to numeric
+  tradeStats$HS.Code <- as.numeric(tradeStats$HS.Code)
+  
+  # Examine each of the values in trade stats table
+  outsideBoundaries <- sapply(seq_len(nrow(tradeStats)), 
+                              FUN=function(row, tradeStats, expectedValueBoundariesForImports, expectedValueBoundariesForExports,
+                                           importCP4s, exportCP4s){
+                                
+                                # Check if import or export
+                                import <- FALSE
+                                if(tradeStats[row, "CP4"] %in% importCP4s){
+                                  import <- TRUE
+                                }else if(tradeStats[row, "CP4"] %in% exportCP4s == FALSE){
+                                  return("CP4 not considered")
+                                }
+                                
+                                # Get the expected boundaries for current value
+                                boundaries <- NULL
+                                if(import){
+                                  boundaries <- expectedValueBoundariesForImports[expectedValueBoundariesForImports$HS == tradeStats[row, "HS.Code"], ]
+                                }else{
+                                  boundaries <- expectedValueBoundariesForExports[expectedValueBoundariesForExports$HS == tradeStats[row, "HS.Code"], ]
+                                }
+                                
+                                # CHeck if boundaries not available
+                                if(nrow(boundaries) == 0){
+                                  return("No boundaries available")
+                                }
+                                
+                                # Check if current value falls outside boundaries
+                                if(tradeStats[row, "Stat..Value"] < boundaries$Value.Lower.2.5){
+                                  return(paste0("LOW: ", boundaries$Value.Lower.2.5 - tradeStats[row, "Stat..Value"]))
+                                }else if(tradeStats[row, "Stat..Value"] > boundaries$Value.Upper.97.5){
+                                  return(paste0("HIGH: ", tradeStats[row, "Stat..Value"] - boundaries$Value.Upper.97.5))
+                                }else{
+                                  return("Within boundaries")
+                                }
+                              }, tradeStats, expectedValueBoundariesForImports, expectedValueBoundariesForExports, importCP4s, exportCP4s)
+  
+  return(outsideBoundaries)
+}
