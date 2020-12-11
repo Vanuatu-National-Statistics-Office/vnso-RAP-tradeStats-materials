@@ -645,7 +645,15 @@ cat("Finished formatting Table 10: Trade by Mode of Transport.\n")
 #### Table 11: Trade by Trade Agreement (INCOMPLETE) ####
 
 ## Getting latest statistics ##
-msgDataFrame <- processedTradeStats[processedTradeStats$PRF == "MSG", ]
+
+# Get the trade stats for the 
+tradeStatsForMSG <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
+
+# Aggregate the statistical value column by country and SITC (note import and export countries always appear to be equal)
+msgLatestStats <- aggregate(tradeStatsForMSG$Stat..Value, by=list(tradeStatsForMSG$SITC_1, 
+                                                                  tradeStatsForMSG$IMPORT.COUNTRY),
+                            FUN=sum, na.rm=TRUE)
+colnames(msgLatestStats) <- c("SITC_1", "COUNTRY", "Stat..Value")
 
 ## Formatting the table ##
 
