@@ -140,8 +140,6 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics, monthCo
     newStatistics[1, "Year"] <- as.numeric(year)
   }else if(month == "January"){
     newStatistics$Year <- as.numeric(year)
-  }else{
-    newStatistics$Year <- NA
   }
   
   # Add an empty row if December

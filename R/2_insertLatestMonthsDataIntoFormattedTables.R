@@ -44,6 +44,9 @@ if(is.null(balanceOfTradeSubTables) == FALSE){
   insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="1_BOT", subTables=balanceOfTradeSubTables, nRowsInHeader=5)
 }
 
+# Print progress
+cat("Finished formatting Table 1: Balance of Trade")
+
 #### Table 2: Import by HS Code ####
 
 ## Getting latest statistics ##
@@ -91,6 +94,9 @@ importsByHSCodeSubTables <- updateSubTablesByTime(importsByHSCodeSubTables, mont
 if(is.null(importsByHSCodeSubTables) == FALSE){
   insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="2_M", subTables=importsByHSCodeSubTables, nRowsInHeader=7)
 }
+
+# Print progress
+cat("Finished formatting Table 2: Import by HS Code")
 
 #### Table 3: Export by HS Code ####
 
@@ -140,6 +146,9 @@ if(is.null(exportsByHSCodeSubTables) == FALSE){
   insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="3_DX", subTables=exportsByHSCodeSubTables, nRowsInHeader=7)
 }
 
+# Print progress
+cat("Finished formatting Table 3: Export by HS Code")
+
 #### Table 4: Re-Export by HS Code ####
 
 ## Getting latest statistics ##
@@ -188,6 +197,9 @@ if(is.null(reExportsByHSCodeSubTables) == FALSE){
   insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="4_ReX", subTables=reExportsByHSCodeSubTables, nRowsInHeader=7)
 }
 
+# Print progress
+cat("Finished formatting Table 4: Re-Export by HS Code")
+
 #### Table 5: Total Exports by HS Code ####
 
 ## Getting latest statistics ##
@@ -205,6 +217,9 @@ totalExportsByHSCodeSubTables <- updateSubTablesByTime(totalExportsByHSCodeSubTa
 if(is.null(totalExportsByHSCodeSubTables) == FALSE){
   insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="5_TX", subTables=totalExportsByHSCodeSubTables, nRowsInHeader=7)
 }
+
+# Print progress
+cat("Finished formatting Table 5: Total Exports by HS Code")
 
 #### Table 6: Principle Exports ####
 
@@ -273,6 +288,9 @@ if(is.null(principleExportsTable) == FALSE){
                                                 tableNumber="6", tableName="PRINCIPLE EXPORTS", boldRows=c(6,22,24,29,31), nRowsInNotes=4,
                                                 numericColumns=2:ncol(principleExportsTable))
 }
+
+# Print progress
+cat("Finished formatting Table 6: Principle Exports")
 
 #### Table 7: Principle Imports ####
 
@@ -354,6 +372,9 @@ if(is.null(principleExportsTable) == FALSE){
                                                 tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
                                                 numericColumns=2:ncol(principleImportsTable))
 }
+
+# Print progress
+cat("Finished formatting Table 7: Principle Imports")
 
 #### Table 8: Balance of Trade by Major Partner Countries ####
 
@@ -460,6 +481,9 @@ if(is.null(balanceOfTradeMajorTable) == FALSE){
                                                 numericColumns=3:ncol(balanceOfTradeMajorTable))
 }
 
+# Print progress
+cat("Finished formatting Table 8: Balance of Trade by Major Partner Countries")
+
 #### Table 9: Balance of Trade by Region ####
 
 ## Getting latest statistics ##
@@ -542,6 +566,10 @@ if(is.null(balanceOfTradeRegionsTable) == FALSE){
                                                 numericColumns=3:ncol(balanceOfTradeRegionsTable))
 }
 
+
+# Print progress
+cat("Finished formatting Table 9: Balance of Trade by Region")
+
 #### Table 10: Trade by Mode of Transport ####
 
 ## Getting latest statistics ##
@@ -598,6 +626,9 @@ if(is.null(tradeByModeOfTransportSubTables) == FALSE){
   insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="10_Trade_Trspt", subTables=tradeByModeOfTransportSubTables, nRowsInHeader=8)
 }
 
+# Print progress
+cat("Finished formatting Table 10: Trade by Mode of Transport")
+
 #### Table 11: Trade by Trade Agreement (INCOMPLETE) ####
 
 ## Getting latest statistics ##
@@ -650,6 +681,9 @@ if(is.null(totalExportsbySITCTable) == FALSE){
                                                 numericColumns=3:ncol(totalExportsbySITCTable))
 }
 
+# Print progress
+cat("Finished formatting Table 12: Exports by SITC")
+
 #### Table 13: Imports by SITC ####
 
 ## Getting latest statistics ##
@@ -694,6 +728,9 @@ if(is.null(totalImportsbySITCTable) == FALSE){
                                                 tableNumber="13", tableName="IMPORTS BY SITC", boldRows=c(16), nRowsInNotes=2,
                                                 numericColumns=3:ncol(totalImportsbySITCTable))
 }
+
+# Print progress
+cat("Finished formatting Table 13: Exports by SITC")
 
 #### Finish ####
 
