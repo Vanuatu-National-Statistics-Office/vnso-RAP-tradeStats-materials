@@ -674,6 +674,9 @@ templateMSGTable[templateMSGTable == 0] <- NA
 # Write the MSG trade stats values from current month into table (note that no historic data in Table 11 - so all values are overwritten)
 openxlsx::writeData(finalWorkbook, sheet="11_TradeAg", startCol=2, startRow=3, x=templateMSGTable, colNames=FALSE)
 
+# Print progress
+cat("Finished updating values in Table 11: Trade by Trade Agreement.\n")
+
 #### Table 12: Exports by SITC  ####
 
 ## Getting latest statistics ##
