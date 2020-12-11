@@ -592,6 +592,7 @@ calculateSummaryStatistics <- function(values){
   
   # Create an output vector to store the summary statistics
   output <- c("Mean"=NA, "SD"=NA, "Median"=NA, "Lower-2.5"=NA, "Upper-97.5"=NA,
+              "Lower-1"=NA, "Upper-99"=NA,
               "Min"=NA, "Max"=NA, "Count"=NA, "CountMissing"=NA)
   
   # Count number of values and any missing data
@@ -612,7 +613,7 @@ calculateSummaryStatistics <- function(values){
   # Calculate median
   output["Median"] <- median(values, na.rm=TRUE)
   
-  # Calculate upper and lower 95% and 99% percentile bounds
+  # Calculate upper and lower 95% percentile bounds
   quantiles <- quantile(values, probs=c(0.99, 0.975, 0.025, 0.01), na.rm=TRUE)
   output["Upper-99"] <- quantiles[1]
   output["Upper-97.5"] <- quantiles[2]
@@ -626,7 +627,6 @@ calculateSummaryStatistics <- function(values){
   
   return(output)
 }
-
 checkCommodityValues <- function(tradeStats, expectedValueBoundariesForImports, expectedValueBoundariesForExports, 
                                  importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000)){
   

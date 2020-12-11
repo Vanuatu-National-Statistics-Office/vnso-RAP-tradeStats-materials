@@ -16,7 +16,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r preparation, include=FALSE}
-
 # Load the required libraries
 library(RMySQL) # Interactiing with MySQL from R
 library(knitr) # Nice tables
@@ -83,7 +82,6 @@ On our local MySQL database there are two tables:
 The imports data looks like this:
 
 ```{r quick look at historic imports data, echo=FALSE}
-
 # Extract a small subset of historic data
 historic_imports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_import_99_19 LIMIT 25")
 
@@ -96,7 +94,6 @@ And the exports data like this:
 <br>
 
 ```{r quick look at historic exportsdata, echo=FALSE}
-
 # Extract a small subset of historic data
 historic_exports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19 LIMIT 25")
 
@@ -147,9 +144,9 @@ exports <- exports[exports$Year >= 1999 & exports$Year <= 2019, ]
 
 ```{r store local copy, echo=FALSE, eval=FALSE}
 # Save the data as a standard csv
-write.table(exports, file=file.path(repository, "data", "secure", "tradeStats_historic_EXPORTS_14-09-20.csv"),
+write.table(exports, file=file.path("..", "data", "secure", "tradeStats_historic_EXPORTS_14-09-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
-write.table(imports, file=file.path(repository, "data", "secure", "tradeStats_historic_IMPORTS_14-09-20.csv"),
+write.table(imports, file=file.path("..", "data", "secure", "tradeStats_historic_IMPORTS_14-09-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
 ```
 
@@ -159,6 +156,7 @@ calculateSummaryStatistics <- function(values){
   
   # Create an output vector to store the summary statistics
   output <- c("Mean"=NA, "SD"=NA, "Median"=NA, "Lower-2.5"=NA, "Upper-97.5"=NA,
+              "Lower-1"=NA, "Upper-99"=NA,
               "Min"=NA, "Max"=NA, "Count"=NA, "CountMissing"=NA)
   
   # Count number of values and any missing data
@@ -180,9 +178,11 @@ calculateSummaryStatistics <- function(values){
   output["Median"] <- median(values, na.rm=TRUE)
   
   # Calculate upper and lower 95% percentile bounds
-  quantiles <- quantile(values, probs=c(0.975, 0.025), na.rm=TRUE)
-  output["Upper-97.5"] <- quantiles[1]
-  output["Lower-2.5"] <- quantiles[2]
+  quantiles <- quantile(values, probs=c(0.99, 0.975, 0.025, 0.01), na.rm=TRUE)
+  output["Upper-99"] <- quantiles[1]
+  output["Upper-97.5"] <- quantiles[2]
+  output["Lower-2.5"] <- quantiles[3]
+  output["Lower-1"] <- quantiles[4]
   
   # Calculate the range of the data
   minMax <- range(values, na.rm=TRUE)
@@ -226,7 +226,6 @@ write.table(exportsByHSCodeAndYear, file=file.path("..", "data", "secure", "expo
             sep=",", row.names=FALSE, quote=TRUE)
 write.table(exportsByHSCode, file=file.path("..", "data", "secure", "exports_HS_summaryStats_02-10-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
-
 write.table(importsByHSCodeAndYear, file=file.path("..", "data", "secure", "imports_HS-Year_summaryStats_02-10-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
 write.table(importsByHSCode, file=file.path("..", "data", "secure", "imports_HS_summaryStats_02-10-20.csv"),
@@ -236,7 +235,6 @@ write.table(importsByHSCode, file=file.path("..", "data", "secure", "imports_HS_
 ```{r read in locally stored summary statistics, echo=FALSE}
 exportsByHSCodeAndYear <- read.csv(file.path("..", "data", "secure", "exports_HS-Year_summaryStats_02-10-20.csv"))
 exportsByHSCode <- read.csv(file.path("..", "data", "secure", "exports_HS_summaryStats_02-10-20.csv"))
-
 importsByHSCodeAndYear <- read.csv(file.path("..", "data", "secure", "imports_HS-Year_summaryStats_02-10-20.csv"))
 importsByHSCode <- read.csv(file.path("..", "data", "secure", "imports_HS_summaryStats_02-10-20.csv"))
 ```
@@ -391,7 +389,6 @@ fig <- layout(fig, xaxis=list(title="Date"))
 
 # Set Y axis to logged and label
 fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Median unit value"))
-
 fig
 ```
 
@@ -450,13 +447,12 @@ fig <- layout(fig, xaxis=list(title="Date"))
 
 # Set Y axis to logged and label
 fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Median unit value"))
-
 fig
 ```
 
 # Concluding remarks
 
-The historic trades data provides a wealth of information that we can use to inform how we create the monthly trade statistics reports. We can see that the value of each commodity is highly skewed, making summary statistics like `median` and `percentiles` more appropriate. The value of each commodity is quite variable through time, it is potentially best to use last years data when defining the expected boundaries for each commodity.
+The histroci trades data provides a wealth of information that we can use to inform how we create the monthly trade statistics reports. We can see that the value of each commodity is highly skewed, making summary statistics like `median` and `percentiles` more appropriate. The value of each commodity is quite variable through time, it is potentially best to use last years data when defining the expected boundaries for each commodity.
 
 We can quickly process the historic data, which has over a million rows using R and MySQL. We can use R to generate interactive visualisations that will help raise the value of these amazing data by make them more accessible.
 
@@ -466,4 +462,3 @@ To wrap up, we can close our connection to the `MySQL` server using the followin
 ```{r warning=FALSE}
 dbDisconnect(conn=connection)
 ```
-
