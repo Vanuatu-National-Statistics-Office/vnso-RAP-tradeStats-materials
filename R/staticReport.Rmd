@@ -27,6 +27,12 @@ library(openxlsx) # Reading and editing excel formatted files
 
 # Load the general R functions
 source("functions.R")
+
+# Note the secure data path
+secureDataFolder <- file.path("..", "data", "secure")
+
+# Note the outputs folder
+outputsFolder <- file.path("..", "outputs")
 ```
 
 ## Importing data files
@@ -36,7 +42,7 @@ source("functions.R")
 # Read in the raw trade data from secure folder of the repository 
 
 # Note that spaces in column names have been automatically replaced with "."s
-tradeStatsFile <- file.path("..", "data", "secure", "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.xlsx")
 tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 
 ```
@@ -74,9 +80,7 @@ tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071
 # Count the number of missing values in each column
 numberMissing <- apply(tradeStatsCommodities, MARGIN=2,
                        FUN=function(columnValues){
-                        
                          return(sum(is.na(columnValues)))
-                              
                        })
 
 # Convert the counts to a proportion
@@ -238,11 +242,11 @@ month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formmatted tables
-finalWorkbookFileName <- file.path("..", "outputs", "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_ORIGINAL - Copy.xlsx")
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_ORIGINAL - Copy.xlsx")
 
 ## Updating the Annual and Monthly sub tables
 # Extract the balance of trade data and extract sub tables
-balanceOfTradeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="1_BOT", startRow=5)
+balanceOfTradeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="1_BOT", nColumns=7, startRow=5)
 
 # Update the sub tables for the balance of trade data
 balanceOfTradeSubTables <- updateSubTablesByTime(balanceOfTradeSubTables, month, year, tradeBalance/1000000)

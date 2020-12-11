@@ -499,17 +499,39 @@ calculateStatValueSum<- function(processedTradeStats, codes_CP4, categoryCol, ca
 #' 
 #' A function that searches column added after merging to identify if any values missing
 #' @param merged A data.frame resulting from a merge operation
-#' @param by The column used as common identifier in merge operation
-#' @param column A column that was pulled in during merge
-searchForMissingObservations <- function(merged, by, column){
+#' @param by A vector of columns used as common identifiers in merge operation. Note where multiple values are present, each should have corresponding value in \code{column}.
+#' @param column A vector of columns that were pulled in during merge
+#' @param printWarnings Boolean value to indicate whether or not to print warnings
+searchForMissingObservations <- function(merged, by, column, printWarnings=TRUE){
   
-  # Check if any NA values are present in column of interest
-  naIndices <- which(is.na(merged[, column]))
+  # Initialise a data.frame to store information about the missing observations
+  missingInfo <- data.frame("ClassificationValue"=NA, "ClassificationColumn"=NA, "MergedColumn"=NA)
+  row <- 0
   
-  # If NAs are present report the category they are present for
-  for(index in naIndices){
+  # Examine each of the columns of interest
+  for(columnIndex in seq_along(column)){
     
-    warning(paste0("No observation present in classification table for \"", merged[index, by]), "\" in ", by, "\n")
+    # Check if any NA values are present in column of interest
+    naIndices <- which(is.na(merged[, column[columnIndex]]))
+    
+    # If NAs are present report the category they are present for
+    for(naIndex in naIndices){
+      
+      # Store information about the current missing observation
+      row <- row + 1
+      missingInfo[row, ] <- c(merged[naIndex, by[columnIndex]], by[columnIndex], column[columnIndex])
+      
+      # Print warning if requested
+      if(printWarnings){
+        warning(paste0("No observation present in classification table for \"", merged[naIndex, by[columnIndex]]), "\" in ", by[columnIndex], "\n")
+      }
+    }
+  }
+  
+  if(row == 0){
+    return(NULL)
+  }else{
+    return(missingInfo)
   }
 }
 
