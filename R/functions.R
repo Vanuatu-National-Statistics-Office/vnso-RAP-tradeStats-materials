@@ -218,8 +218,11 @@ updateTableByCommodity <- function(structuredTable, month, year, newStatistics, 
 #' @param sheet A character string identifying the sheet to extract data from
 #' @param subTables A list with dataframes representing the Annual and Monthly sub tables
 #' @param nRowsInHeader The number of rows that make up the header of the formatted Balance of Trade table
+#' @param nRowsInNotes An integer indicating how many rows are in the notes section below the formatted table
+#' @param loadAndSave Boolean value indicating whether to load the full excel file and save any changes (default) or to make changes to an already loaded file
+#' @param finalWorkbook A loaded excel file, used if \code{loadAndSave == FALSE}
 #' @keywords openxlsx
-insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, nRowsInHeader){
+insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, nRowsInHeader, loadAndSave=TRUE, finalWorkbook=NULL){
 
   # Calculate the number of rows and columns taken up by each sub table
   nRowsInAnnual <- nrow(subTables$Annually)
@@ -233,7 +236,9 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   notesStartRow <- monthlyStartRow + nRowsInMonthly + 1
 
   # Load the final tables workbook for editing
-  finalWorkbook <- openxlsx::loadWorkbook(fileName)
+  if(loadAndSave){
+    finalWorkbook <- openxlsx::loadWorkbook(fileName)
+  }
 
   # Clear the current contents of the workbook
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=annualStartRow, x=matrix(NA, nrow=nRows+1+nrow(subTables$Notes), ncol=nColumns), colNames=FALSE)
@@ -286,7 +291,11 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
                      rows=(notesStartRow+nrow(subTables$Notes)):100, stack=FALSE)
 
   # Save the edited workbook as a new file
-  openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
+  if(loadAndSave){
+    openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
+  }else{
+    return(finalWorkbook)
+  }
 }
 
 #' Inserts updated table (time as columns) back into formatted excel sheet
@@ -300,8 +309,11 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
 #' @param tableName The name of table (all caps) - second cell in top row 
 #' @param boldRows A vector of numbers noting the rows in the formatted table that are formatted as bold
 #' @param nRowsInNotes An integer indicating how many rows are in the notes section below the formatted table
+#' @param loadAndSave Boolean value indicating whether to load the full excel file and save any changes (default) or to make changes to an already loaded file
+#' @param finalWorkbook A loaded excel file, used if \code{loadAndSave == FALSE}
 #' @keywords openxlsx
-insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table, year, tableNumber, tableName, boldRows, nRowsInNotes=4, numericColumns){
+insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table, year, tableNumber, tableName, boldRows, 
+                                                          nRowsInNotes=4, numericColumns, loadAndSave=TRUE, finalWorkbook=NULL){
   
   # Get the column names and dimensions
   colNames <- colnames(table)
@@ -324,7 +336,9 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
   }
 
   # Load the final tables workbook for editing
-  finalWorkbook <- openxlsx::loadWorkbook(fileName)
+  if(loadAndSave){
+    finalWorkbook <- openxlsx::loadWorkbook(fileName)
+  }
   
   # Clear the current contents of the workbook
   openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=1, x=matrix(NA, nrow=nRows+5, ncol=nColumns-numericColumns[1]), colNames=FALSE)
@@ -403,7 +417,11 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
                      rows=(nRows+5+1+nRowsInNotes+1):100, stack=FALSE)
   
   # Save the edited workbook as a new file
-  openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
+  if(loadAndSave){
+    openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
+  }else{
+    return(finalWorkbook)
+  }
 }
 
 #' Extract the subset codes from the original 8 digit HS codes or 6 digit SITC codes

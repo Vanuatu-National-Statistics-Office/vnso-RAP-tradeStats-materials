@@ -17,6 +17,9 @@ year <- format(date, "%Y")
 # Note the excel workbook containing the final formmatted tables
 finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_ORIGINAL - Copy.xlsx")
 
+# Load the excel file
+finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
+
 #### Table 1: Balance of Trade ####
 
 ## Getting latest statistics ##
@@ -41,7 +44,8 @@ balanceOfTradeSubTables <- updateSubTablesByTime(balanceOfTradeSubTables, month,
 
 # Editing the final formatted tables
 if(is.null(balanceOfTradeSubTables) == FALSE){
-  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="1_BOT", subTables=balanceOfTradeSubTables, nRowsInHeader=5)
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="1_BOT", subTables=balanceOfTradeSubTables, nRowsInHeader=5,
+                                         loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -92,7 +96,8 @@ importsByHSCodeSubTables <- updateSubTablesByTime(importsByHSCodeSubTables, mont
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(importsByHSCodeSubTables) == FALSE){
-  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="2_M", subTables=importsByHSCodeSubTables, nRowsInHeader=7)
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="2_M", subTables=importsByHSCodeSubTables, nRowsInHeader=7,
+                                         loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -143,7 +148,8 @@ exportsByHSCodeSubTables <- updateSubTablesByTime(exportsByHSCodeSubTables, mont
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(exportsByHSCodeSubTables) == FALSE){
-  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="3_DX", subTables=exportsByHSCodeSubTables, nRowsInHeader=7)
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="3_DX", subTables=exportsByHSCodeSubTables, nRowsInHeader=7,
+                                         loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -194,7 +200,8 @@ reExportsByHSCodeSubTables <- updateSubTablesByTime(reExportsByHSCodeSubTables, 
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(reExportsByHSCodeSubTables) == FALSE){
-  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="4_ReX", subTables=reExportsByHSCodeSubTables, nRowsInHeader=7)
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="4_ReX", subTables=reExportsByHSCodeSubTables, nRowsInHeader=7,
+                                         loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -215,7 +222,8 @@ totalExportsByHSCodeSubTables <- updateSubTablesByTime(totalExportsByHSCodeSubTa
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(totalExportsByHSCodeSubTables) == FALSE){
-  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="5_TX", subTables=totalExportsByHSCodeSubTables, nRowsInHeader=7)
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="5_TX", subTables=totalExportsByHSCodeSubTables, nRowsInHeader=7,
+                                         loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -284,9 +292,10 @@ principleExportsTable <- updateTableByCommodity(principleExportsTable, month, ye
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, year=year,
                                                 tableNumber="6", tableName="PRINCIPLE EXPORTS", boldRows=c(6,22,24,29,31), nRowsInNotes=4,
-                                                numericColumns=2:ncol(principleExportsTable))
+                                                numericColumns=2:ncol(principleExportsTable),
+                                                loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -368,9 +377,10 @@ principleImportsTable <- updateTableByCommodity(principleImportsTable, month, ye
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, year=year,
                                                 tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
-                                                numericColumns=2:ncol(principleImportsTable))
+                                                numericColumns=2:ncol(principleImportsTable),
+                                                loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -475,10 +485,11 @@ balanceOfTradeMajorTable <- updateTableByCommodity(balanceOfTradeMajorTable, mon
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(balanceOfTradeMajorTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="8_BOT_PC", table=balanceOfTradeMajorTable, year=year, 
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="8_BOT_PC", table=balanceOfTradeMajorTable, year=year, 
                                                 tableNumber="8", tableName="BALANCE OF TRADE BY MAJOR PARTNER COUNTRIES", 
                                                 boldRows=c(69, 70, 71), nRowsInNotes=2,
-                                                numericColumns=3:ncol(balanceOfTradeMajorTable))
+                                                numericColumns=3:ncol(balanceOfTradeMajorTable),
+                                                loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -560,10 +571,11 @@ balanceOfTradeRegionsTable <- updateTableByCommodity(balanceOfTradeRegionsTable,
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(balanceOfTradeRegionsTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="9_Trade_Reg", table=balanceOfTradeRegionsTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="9_Trade_Reg", table=balanceOfTradeRegionsTable, year=year,
                                                 tableNumber="9", tableName="TRADE BY REGION", 
                                                 boldRows=c(24, 25, 26), nRowsInNotes=2,
-                                                numericColumns=3:ncol(balanceOfTradeRegionsTable))
+                                                numericColumns=3:ncol(balanceOfTradeRegionsTable),
+                                                loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 
@@ -623,7 +635,8 @@ tradeByModeOfTransportSubTables <- updateSubTablesByTime(tradeByModeOfTransportS
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(tradeByModeOfTransportSubTables) == FALSE){
-  insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="10_Trade_Trspt", subTables=tradeByModeOfTransportSubTables, nRowsInHeader=8)
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="10_Trade_Trspt", subTables=tradeByModeOfTransportSubTables, 
+                                         nRowsInHeader=8, loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -676,9 +689,10 @@ totalExportsbySITCTable <- updateTableByCommodity(totalExportsbySITCTable, month
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(totalExportsbySITCTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="12_X_SITC", table=totalExportsbySITCTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="12_X_SITC", table=totalExportsbySITCTable, year=year,
                                                 tableNumber="12", tableName="EXPORTS BY SITC", boldRows=c(16), nRowsInNotes=3,
-                                                numericColumns=3:ncol(totalExportsbySITCTable))
+                                                numericColumns=3:ncol(totalExportsbySITCTable),
+                                                loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
@@ -724,15 +738,19 @@ totalImportsbySITCTable <- updateTableByCommodity(totalImportsbySITCTable, month
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(totalImportsbySITCTable) == FALSE){
-  insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="13_M_SITC", table=totalImportsbySITCTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="13_M_SITC", table=totalImportsbySITCTable, year=year,
                                                 tableNumber="13", tableName="IMPORTS BY SITC", boldRows=c(16), nRowsInNotes=2,
-                                                numericColumns=3:ncol(totalImportsbySITCTable))
+                                                numericColumns=3:ncol(totalImportsbySITCTable),
+                                                loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
-cat("Finished formatting Table 13: Exports by SITC.\n")
+cat("Finished formatting Table 13: Imports by SITC.\n")
 
 #### Finish ####
+
+# Save the changes to the excel file
+openxlsx::saveWorkbook(finalWorkbook, file=finalWorkbookFileName, overwrite=TRUE)
 
 # Print progress
 cat(paste0("Finished updated formatted excel tables in ", finalWorkbookFileName, ".\n"))
