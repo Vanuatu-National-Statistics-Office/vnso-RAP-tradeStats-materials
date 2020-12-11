@@ -655,7 +655,24 @@ msgLatestStats <- aggregate(tradeStatsForMSG$Stat..Value, by=list(tradeStatsForM
                             FUN=sum, na.rm=TRUE)
 colnames(msgLatestStats) <- c("SITC_1", "COUNTRY", "Stat..Value")
 
+# Create a table to store the data in
+templateMSGTable <- data.frame(matrix(nrow=10, ncol=length(unique(msgLatestStats$COUNTRY))))
+rownames(templateMSGTable) <- 0:9
+colnames(templateMSGTable) <- sort(unique(msgLatestStats$COUNTRY))
+
+# Fill in the values from this month
+for(row in seq_len(nrow(msgLatestStats))){
+  templateMSGTable[msgLatestStats[row, "SITC_1"], msgLatestStats[row, "COUNTRY"]] <- msgLatestStats[row, "Stat..Value"]
+}
+
+# Add total column
+templateMSGTable$Total <- rowSums(templateMSGTable, na.rm=TRUE)
+templateMSGTable[templateMSGTable == 0] <- NA
+
 ## Formatting the table ##
+
+# Write the MSG trade stats values from current month into table (note that no historic data in Table 11 - so all values are overwritten)
+openxlsx::writeData(finalWorkbook, sheet="11_TradeAg", startCol=2, startRow=3, x=templateMSGTable, colNames=FALSE)
 
 #### Table 12: Exports by SITC  ####
 
