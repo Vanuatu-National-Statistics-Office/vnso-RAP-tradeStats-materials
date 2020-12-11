@@ -886,18 +886,34 @@ if(is.null(tradeByModeOfTransportSubTables) == FALSE){
 ## Table 11: Trade by Trade Agreement
 ```{r calculate trade by mode of transport statistics with base R, eval=FALSE, echo=FALSE}
 
-# Calculate Trade by Trade Agreement (whether the commodity complies with the trade agreement can only be confirmed by the receiving country hence only for imports)
+# Get the trade stats for the 
+tradeStatsForMSG <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
 
+# Aggregate the statistical value column by country and SITC (note import and export countries always appear to be equal)
+msgLatestStats <- aggregate(tradeStatsForMSG$Stat..Value, by=list(tradeStatsForMSG$SITC_1, 
+                                                                  tradeStatsForMSG$IMPORT.COUNTRY),
+                            FUN=sum, na.rm=TRUE)
+colnames(msgLatestStats) <- c("SITC_1", "COUNTRY", "Stat..Value")
 
-#Create subset of trade agreements separately then run the principle commodities 
+# Create a table to store the data in
+templateMSGTable <- data.frame(matrix(nrow=10, ncol=length(unique(msgLatestStats$COUNTRY))))
+rownames(templateMSGTable) <- 0:9
+colnames(templateMSGTable) <- sort(unique(msgLatestStats$COUNTRY))
 
-msgDataFrame <- processedTradeStats[processedTradeStats$PRF == "MSG", ]
+# Fill in the values from this month
+for(row in seq_len(nrow(msgLatestStats))){
+  templateMSGTable[msgLatestStats[row, "SITC_1"], msgLatestStats[row, "COUNTRY"]] <- msgLatestStats[row, "Stat..Value"]
+}
 
+# Add total column
+templateMSGTable$Total <- rowSums(templateMSGTable, na.rm=TRUE)
+templateMSGTable[templateMSGTable == 0] <- NA
 ```
 
 ```{r insert balance of trade by Region into final formatted table}
-
-
+finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
+openxlsx::writeData(finalWorkbook, sheet="11_TradeAg", startCol=2, startRow=3, x=templateMSGTable, colNames=FALSE)
+openxlsx::saveWorkbook(finalWorkbook, file=finalWorkbookFileName, overwrite=TRUE)
 ```
 
 ## Table 12: Exports by SITC 
