@@ -45,9 +45,10 @@ data/secure/*
 # Ignore all data in archive
 archive/*
 
-# Ignore any Rmarkdown html/pdf reports
+# Ignore any Rmarkdown outputs
 *.html
 *.pdf
+*.pptx
 *.docx
 
 # Ignore files in the outputs folder for the moment
