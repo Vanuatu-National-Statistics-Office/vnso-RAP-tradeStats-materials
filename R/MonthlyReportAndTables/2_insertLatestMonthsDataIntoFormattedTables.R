@@ -15,10 +15,13 @@ month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formmatted tables
-finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_ORIGINAL - Copy.xlsx")
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-19_ORIGINAL - Copy.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
+
+# Print progress
+cat("Finished loading excel file with formatted tables.\n")
 
 #### Table 1: Balance of Trade ####
 
