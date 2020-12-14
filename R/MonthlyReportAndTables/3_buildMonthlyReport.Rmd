@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo=FALSE)
 library(knitr) # Creating documents
 library(flextable) # Nicely formatted tables
 library(rworldmap) # World map
+library(ggplot2) # Creating plots
 
 # Set the table formatting defaults
 set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
@@ -85,3 +86,40 @@ par(mar=c(0,0,0,0))
 plot(world, col=rgb(1,0,0, runif(length(world))))
 ```
 
+# Trade Balance of Top 5 Pacific Countries excluding Fiji
+
+```{r trade balance of top 5, fig.height=2.5}
+# Create some dummy data
+dummyData <- data.frame("TradeBalance"=c(rnorm(5, mean=1000, sd=100), rnorm(5, mean=1100, sd=100)), 
+                        "Country"=c("A", "B", "C", "D", "E"),
+                        "Type"=c(rep("Current", 5), rep("Previous", 5)))
+
+# Create a bar chart
+ggplot(data=dummyData, aes(x=Country, y=TradeBalance, fill=Type)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  theme_minimal() + 
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.title=element_blank()) + 
+  coord_cartesian(ylim=range(dummyData$TradeBalance))
+```
+
+Automated text to highlight trade balance; difference between value of imports and exports comparing this month to same month in previous year.
+
+# Trade Balance of New Emerging Markets
+
+```{r trade balance of new emerging markets, fig.height=2.5}
+# Create some dummy data
+dummyData <- data.frame("TradeBalance"=c(rnorm(5, mean=1000, sd=100), rnorm(5, mean=1100, sd=100)), 
+                        "Country"=c("A", "B", "C", "D", "E"),
+                        "Type"=c(rep("Current", 5), rep("Previous", 5)))
+
+# Create a bar chart
+ggplot(data=dummyData, aes(x=Country, y=TradeBalance, fill=Type)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  theme_minimal() + 
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.title=element_blank()) + 
+  coord_cartesian(ylim=range(dummyData$TradeBalance))
+```
+
+Automated text to highlight trade balance; difference between value of imports and exports comparing this month to same month in previous year.
