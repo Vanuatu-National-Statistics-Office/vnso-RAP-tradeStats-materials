@@ -182,11 +182,57 @@ cat("Finished checking for missing observations after merging.\n")
 historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
 historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
 
-# Check the values in latest month are within expected boundaries
-importsOutSideBounds <- checkCommodityValues(tradeStatsCommoditiesMergedWithClassifications, 
-                                             historicImportsSummaryStats, historicExportsSummaryStats,
-                                             importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000))
+# Pad the HS codes with zeros to make up to 8 digits
+padHSCode <- function(hsCode){
+  return(paste0(paste(rep(0, 8-nchar(hsCode)), collapse=""), hsCode))
+}
+historicImportsSummaryStats$HS <- sapply(historicImportsSummaryStats$HS, FUN=padHSCode)
+historicExportsSummaryStats$HS <- sapply(historicExportsSummaryStats$HS, FUN=padHSCode)
 
+# Combine the summary stats tables
+historicImportsSummaryStats$HSAndType <- paste0("IMPORT_", historicImportsSummaryStats$HS)
+historicExportsSummaryStats$HSAndType <- paste0("EXPORT_", historicExportsSummaryStats$HS)
+historicSummaryStats <- rbind(historicImportsSummaryStats, historicExportsSummaryStats)
+
+# Identify imports and exports and create
+tradeStatsCommoditiesMergedWithClassifications$Type <- "UNKNOWN"
+tradeStatsCommoditiesMergedWithClassifications$Type[tradeStatsCommoditiesMergedWithClassifications$CP4 %in% c(4000, 4071, 7100)] <- "IMPORT"
+tradeStatsCommoditiesMergedWithClassifications$Type[tradeStatsCommoditiesMergedWithClassifications$CP4 == 1000] <- "EXPORT"
+tradeStatsCommoditiesMergedWithClassifications$HSAndType <- paste0(tradeStatsCommoditiesMergedWithClassifications$Type, "_", tradeStatsCommoditiesMergedWithClassifications$HS.Code)
+
+# Get the expected distribution summary statistics for each commodity
+commoditiesWithExpectation <- merge(tradeStatsCommoditiesMergedWithClassifications[c("HSAndType", "HS.Code", "Type", "Reg..Date", 
+                                                                                     "CP4", "Itm.#", "Stat..Value")],
+                                    historicSummaryStats[, c("HSAndType", "Value.Median", "Value.Lower.2.5", "Value.Upper.97.5",
+                                                             "Value.Lower.1", "Value.Upper.99", "Value.Min", "Value.Max")],
+                                    by="HSAndType",
+                                    all.x=TRUE)
+
+# Check the values in latest month are within expected boundaries
+commoditiesWithExpectation$within95Bounds <- commoditiesWithExpectation$Stat..Value >= commoditiesWithExpectation$Value.Lower.2.5 &
+  commoditiesWithExpectation$Stat..Value <= commoditiesWithExpectation$Value.Upper.97.5
+commoditiesWithExpectation$within99Bounds <- commoditiesWithExpectation$Stat..Value >= commoditiesWithExpectation$Value.Lower.1 &
+  commoditiesWithExpectation$Stat..Value <= commoditiesWithExpectation$Value.Upper.99
+commoditiesWithExpectation$withinRange <- commoditiesWithExpectation$Stat..Value >= commoditiesWithExpectation$Value.Min &
+  commoditiesWithExpectation$Stat..Value <= commoditiesWithExpectation$Value.Max
+
+# Report whether values are within expectations
+boundariesNotAvailable <- which(is.na(commoditiesWithExpectation$Value.Median))
+if(length(boundariesNotAvailable) > 0){
+  warning(paste0(length(boundariesNotAvailable), " HS codes were not found in historic distribution summaries. Use \"View(commoditiesWithExpectation[bounadariesNotAvailable, ])\" for more information."))
+}
+notWithinPreviouslyObservedRange <- which(is.na(commoditiesWithExpectation$withinRange) == FALSE & commoditiesWithExpectation$withinRange == FALSE)
+if(length(notWithinPreviouslyObservedRange) > 0){
+  warning(paste0(length(notWithinPreviouslyObservedRange), " Statistical values were not within the previously observed range. Use \"View(commoditiesWithExpectation[notWithinPreviouslyObservedRange, ])\" for more information."))
+}
+notWithin99Bounds <- which(is.na(commoditiesWithExpectation$within99Bounds) == FALSE & commoditiesWithExpectation$within99Bounds == FALSE)
+if(length(notWithin99Bounds) > 0){
+  warning(paste0(length(notWithin99Bounds), " Statistical values were not within the 99% bounds of the previously observed range. Use \"View(commoditiesWithExpectation[notWithin99Bounds, ])\" for more information."))
+}
+notWithin95Bounds <- which(is.na(commoditiesWithExpectation$within95Bounds) == FALSE & commoditiesWithExpectation$within95Bounds == FALSE)
+if(length(notWithin95Bounds) > 0){
+  warning(paste0(length(notWithin95Bounds), " Statistical values were not within the 95% bounds of the previously observed range. Use \"View(commoditiesWithExpectation[notWithin95Bounds, ])\" for more information."))
+}
 
 #### Finish ####
 

@@ -627,6 +627,7 @@ calculateSummaryStatistics <- function(values){
   
   return(output)
 }
+
 checkCommodityValues <- function(tradeStats, expectedValueBoundariesForImports, expectedValueBoundariesForExports, 
                                  importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000)){
   
@@ -660,10 +661,10 @@ checkCommodityValues <- function(tradeStats, expectedValueBoundariesForImports, 
                                 }
                                 
                                 # Check if current value falls outside boundaries
-                                if(tradeStats[row, "Stat..Value"] < boundaries$Value.Lower.2.5){
-                                  return(paste0("LOW: ", boundaries$Value.Lower.2.5 - tradeStats[row, "Stat..Value"]))
-                                }else if(tradeStats[row, "Stat..Value"] > boundaries$Value.Upper.97.5){
-                                  return(paste0("HIGH: ", tradeStats[row, "Stat..Value"] - boundaries$Value.Upper.97.5))
+                                if(tradeStats[row, "Stat..Value"] < boundaries$Value.Lower.1){
+                                  return(paste0("LOW: ", boundaries$Value.Lower.1 - tradeStats[row, "Stat..Value"]))
+                                }else if(tradeStats[row, "Stat..Value"] > boundaries$Value.Upper.99){
+                                  return(paste0("HIGH: ", tradeStats[row, "Stat..Value"] - boundaries$Value.Upper.99))
                                 }else{
                                   return("Within boundaries")
                                 }
