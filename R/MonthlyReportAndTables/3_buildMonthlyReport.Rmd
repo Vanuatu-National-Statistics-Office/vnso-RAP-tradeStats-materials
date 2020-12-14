@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo=FALSE)
 library(knitr) # Creating documents
 library(flextable) # Nicely formatted tables
 library(rworldmap) # World map
+library(ggplot2) # Creating plots
 
 # Set the table formatting defaults
 set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
@@ -64,8 +65,11 @@ indicatorsTable <- merge_v(indicatorsTable)
 # Set table width to 100%
 indicatorsTable <- set_table_properties(indicatorsTable, width=1, layout="autofit")
 
-# Set the theme and print table
-theme_booktabs(indicatorsTable)
+# Set the theme
+indicatorsTable <- theme_booktabs(indicatorsTable)
+
+# Print table
+indicatorsTable
 ```
 
 Automated text which states the growth rate that is needed for the policy objectives to meet their target indicators. If the country is on course to achieve the trade related NSDP goals.
@@ -84,4 +88,169 @@ par(mar=c(0,0,0,0))
 # Plot the map
 plot(world, col=rgb(1,0,0, runif(length(world))))
 ```
+
+# Trade Balance of Top 5 Pacific Countries excluding Fiji
+
+```{r trade balance of top 5, fig.height=1.75}
+# Create some dummy data
+dummyData <- data.frame("TradeBalance"=c(rnorm(5, mean=1000, sd=100), rnorm(5, mean=1100, sd=100)), 
+                        "Country"=c("A", "B", "C", "D", "E"),
+                        "Type"=c(rep("Current", 5), rep("Previous", 5)))
+
+# Create a bar chart
+ggplot(data=dummyData, aes(x=Country, y=TradeBalance, fill=Type)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  theme_minimal() + 
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.title=element_blank()) + 
+  coord_cartesian(ylim=range(dummyData$TradeBalance))
+```
+
+Automated text to highlight trade balance; difference between value of imports and exports comparing this month to same month in previous year.
+
+# Trade Balance of New Emerging Markets
+
+```{r trade balance of new emerging markets, fig.height=1.75}
+# Create some dummy data
+dummyData <- data.frame("TradeBalance"=c(rnorm(5, mean=1000, sd=100), rnorm(5, mean=1100, sd=100)), 
+                        "Country"=c("A", "B", "C", "D", "E"),
+                        "Type"=c(rep("Current", 5), rep("Previous", 5)))
+
+# Create a bar chart
+ggplot(data=dummyData, aes(x=Country, y=TradeBalance, fill=Type)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  theme_minimal() + 
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.title=element_blank()) + 
+  coord_cartesian(ylim=range(dummyData$TradeBalance))
+```
+
+Automated text to highlight trade balance; difference between value of imports and exports comparing this month to same month in previous year.
+
+# Trade by Trade Agreement
+
+```{r trade by trade agreement, ft.align="left"}
+# Create the NSDP table
+tradeByTradeAgreement <- data.frame(
+  "SITC Description"=c("Food and live animals", "Beverages and tobacco", "Crude materials, inedible, except fuels", 
+                       "Mineral fuels, lubricants and related materials", "Animal and vegetable oils, fats and waxes", 
+                       "Chemicals and related products, not elsewhere specified", "Manufactured goods classified chiefly by material", 
+                       "Machinery and transport equipment", "Miscellaneous manufactured goods",
+                       "Commodities and transactions not classified elsewhere in SITC", "Grand Total"),
+  "FIJI"=NA, "PAPUA NEW GUINEA"=NA, "SOLOMON ISLANDS"=NA, "Total"=NA,
+  check.names=FALSE, stringsAsFactors=FALSE)
+
+# Initiailise a flextable object for NSDP table
+tradeByTradeTable <- flextable(tradeByTradeAgreement)
+
+# Add a header row and set background colour
+tradeByTradeTable <- add_header_row(tradeByTradeTable, top=TRUE, 
+                                  values=c("", "Mellanisain Spearhead Group (MSG)- Trade by Trade Agreement"), 
+                                  colwidths=c(1, 4))
+tradeByTradeTable <- bg(tradeByTradeTable, bg="coral1", part="header")
+
+# Set the vertical alignment to top
+tradeByTradeTable <- valign(tradeByTradeTable, valign="top", part="all")
+
+# Set table width to 100%
+tradeByTradeTable <- set_table_properties(tradeByTradeTable, width=1, layout="autofit")
+
+# Set the theme
+tradeByTradeTable <- theme_booktabs(tradeByTradeTable)
+
+# Set the cell padding
+tradeByTradeTable <- padding(tradeByTradeTable, padding.top=0.6, padding.bottom=0.6, part = "all")
+
+# Make the total row bold
+tradeByTradeTable <- bold(tradeByTradeTable, i=nrow(tradeByTradeAgreement))
+
+# Print table
+tradeByTradeTable
+```
+
+######### Page break
+
+## International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights
+
+# Principle Exports
+
+```{r principle exports through time, fig.height=1.75}
+dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
+                        Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
+                        Value=c(6.8, 15, 33, 42, 35, 4.2, 10, 29.5, 31, 25))
+
+# Create a line graph
+ggplot(data=dummyData, aes(x=Time, y=Value, group=Commodity)) +
+  geom_line(aes(color=Commodity), size=1.5) +
+  theme_minimal()
+```
+
+Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
+
+# Top 5 New Major Exports
+
+```{r new major exports, fig.height=1.75}
+# Create some dummy data
+dummyData <- data.frame("Value"=c(rnorm(5, mean=9000, sd=250), rnorm(5, mean=9500, sd=250)), 
+                        "Commodity"=c("A", "B", "C", "D", "E"),
+                        "Type"=c(rep("Previous", 5), rep("Current", 5)))
+
+# Create a bar chart
+ggplot(data=dummyData, aes(x=Commodity, y=Value, fill=Type)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  theme_minimal() + 
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.title=element_blank()) + 
+  coord_cartesian(ylim=range(dummyData$Value))
+```
+
+Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to last month.
+
+<br><br><br><br>
+
+<br><br><br><br>
+
+<br><br><br><br>
+
+# Principle Imports
+
+```{r principle imports through time, fig.height=1.75}
+dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
+                        Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
+                        Value=c(50, 76, 96, 65, 86, 30, 60, 45, 75, 80))
+
+# Create a line graph
+ggplot(data=dummyData, aes(x=Time, y=Value, group=Commodity)) +
+  geom_line(aes(color=Commodity), size=1.5) +
+  theme_minimal()
+```
+
+Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
+
+# Top 5 New Major Imports
+
+```{r new major imports, fig.height=1.75}
+# Create some dummy data
+dummyData <- data.frame("Value"=c(rnorm(5, mean=9000, sd=250), rnorm(5, mean=9500, sd=250)), 
+                        "Commodity"=c("A", "B", "C", "D", "E"),
+                        "Type"=c(rep("Previous", 5), rep("Current", 5)))
+
+# Create a bar chart
+ggplot(data=dummyData, aes(x=Commodity, y=Value, fill=Type)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  theme_minimal() + 
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.title=element_blank()) + 
+  coord_cartesian(ylim=range(dummyData$Value))
+```
+
+Automated text to say here where the principle imports are destined for, their weight and the unit value of the commodity and make a comparison to last month.
+
+# Concluding remarks
+
+This section not automated, instead analysis of the information in partnership with the Ministry of Trades.
+
+######### Page break
+
+## Methodology and meta-data
 

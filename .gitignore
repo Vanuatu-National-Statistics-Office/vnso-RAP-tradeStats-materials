@@ -51,6 +51,9 @@ archive/*
 *.pptx
 *.docx
 
+# Keep the monthly report styles template
+!R/MonthlyReportAndTables/styles_reference.docx
+
 # Ignore files in the outputs folder for the moment
 outputs/*
 
