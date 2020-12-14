@@ -176,6 +176,20 @@ if(is.null(infoAboutMissingObservations) == FALSE){
 # Print progress
 cat("Finished checking for missing observations after merging.\n")
 
+#### Check if any statistical values fall outside of expected boundaries ####
+
+# Load the summary statistics for the historic IMPORTS and EXPORTS data
+historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
+historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
+
+# Check the commodity values against expected values based on historic data
+commoditiesWithExpectations <- checkCommodityValues(tradeStatsCommoditiesMergedWithClassifications,  
+                                                    historicImportsSummaryStats, historicExportsSummaryStats,
+                                                    importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000), useUnitValue=FALSE)
+
+# Print progress
+cat("Finished checking whether commodity values fall outside of expectations based on historic data.\n")
+
 #### Finish ####
 
 # Make copy of latest month's processed data

@@ -582,3 +582,125 @@ removeEmptyColumnsAtEnd <- function(table){
   
   return(table)
 }
+
+#' Calculate range of summary statistics for distribution 
+#' 
+#' For values provided, calculates mean, median, standard deviation, 95\\% percentiles, count, range and number of NA values 
+#' @param values A numeric vector of values 
+#' @return Returns an numeric labeled vector containing the summary statistics
+calculateSummaryStatistics <- function(values){
+  
+  # Create an output vector to store the summary statistics
+  output <- c("Mean"=NA, "SD"=NA, "Median"=NA, "Lower-2.5"=NA, "Upper-97.5"=NA,
+              "Lower-1"=NA, "Upper-99"=NA,
+              "Min"=NA, "Max"=NA, "Count"=NA, "CountMissing"=NA)
+  
+  # Count number of values and any missing data
+  output["Count"] <- length(values)
+  output["CountMissing"] <- sum(is.na(values) | is.infinite(values) | is.nan(values))
+  
+  # Check if only missing available - if so stop and return empty summary statistics
+  if(output["CountMissing"] == output["Count"]){
+    return(output)
+  }
+  
+  # Calculate mean
+  output["Mean"] <- mean(values, na.rm=TRUE)
+  
+  # Calculate standard deviation
+  output["SD"] <- sd(values, na.rm=TRUE)
+  
+  # Calculate median
+  output["Median"] <- median(values, na.rm=TRUE)
+  
+  # Calculate upper and lower 95% percentile bounds
+  quantiles <- quantile(values, probs=c(0.99, 0.975, 0.025, 0.01), na.rm=TRUE)
+  output["Upper-99"] <- quantiles[1]
+  output["Upper-97.5"] <- quantiles[2]
+  output["Lower-2.5"] <- quantiles[3]
+  output["Lower-1"] <- quantiles[4]
+  
+  # Calculate the range of the data
+  minMax <- range(values, na.rm=TRUE)
+  output["Min"] <- minMax[1]
+  output["Max"] <- minMax[2]
+  
+  return(output)
+}
+
+#' Check whether commodity values fall outside of expectations base don historic data 
+#' 
+#' The range, 95% and 99% bounds were calculated using historic data. The current function checks the values of commodities in the latest month to see whether any fall outside of the historic range of 95% and 99% bounds. 
+#' @param tradeStats The process trade statistic values. Must include HS.Code, CP4 and Stat..Value columns.
+#' @param historicImportsSummaryStats Range of summary statistics generated for the Value and Unit Value of historic imported commodities. Must include HS, Value|UnitValue: "Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"
+#' @param historicExportsSummaryStats Range of summary statistics generated for the Value and Unit Value of historic exported commodities. Must include HS, Value|UnitValue: "Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"
+#' @param importCP4s CP4 codes that identify IMPORTS
+#' @param exportCP4s CP4 codes that identify EXPORTS
+#' @param useUnitValue Boolean value indicating whether to use range, 95% and 99% bounds of the Unit Value. Defaults to false and uses Value.
+#' @return Returns an numeric labeled vector containing the summary statistics
+checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, historicExportsSummaryStats,
+                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000), useUnitValue=FALSE){
+  
+  # Pad the HS codes with zeros to make up to 8 digits
+  padHSCode <- function(hsCode, length=8){
+    return(paste0(paste(rep(0, length-nchar(hsCode)), collapse=""), hsCode))
+  }
+  historicImportsSummaryStats$HS <- sapply(historicImportsSummaryStats$HS, FUN=padHSCode)
+  historicExportsSummaryStats$HS <- sapply(historicExportsSummaryStats$HS, FUN=padHSCode)
+  
+  # Combine the summary stats tables
+  historicImportsSummaryStats$HSAndType <- paste0("IMPORT_", historicImportsSummaryStats$HS)
+  historicExportsSummaryStats$HSAndType <- paste0("EXPORT_", historicExportsSummaryStats$HS)
+  historicSummaryStats <- rbind(historicImportsSummaryStats, historicExportsSummaryStats)
+  
+  # Identify imports and exports and create
+  tradeStats$Type <- "UNKNOWN"
+  tradeStats$Type[tradeStats$CP4 %in% importCP4s] <- "IMPORT"
+  tradeStats$Type[tradeStats$CP4 %in% exportCP4s] <- "EXPORT"
+  tradeStats$HSAndType <- paste0(tradeStats$Type, "_", tradeStats$HS.Code)
+  
+  # Note whether using unit value
+  summaryPrefix <- "Value."
+  if(useUnitValue){
+    summaryPrefix <- "UnitValue."
+  }
+  summaryColumnsOfInterest <- paste0(summaryPrefix, c("Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"))
+  
+  # Get the expected distribution summary statistics for each commodity
+  commoditiesWithExpectations <- merge(tradeStats[c("HSAndType", "HS.Code", "Type", "Reg..Date", 
+                                                   "CP4", "Itm.#", "Stat..Value")],
+                                       historicSummaryStats[, c("HSAndType", summaryColumnsOfInterest)],
+                                       by="HSAndType",
+                                       all.x=TRUE)
+  
+  # Check the values in latest month are within expected boundaries
+  commoditiesWithExpectations$within95Bounds <- 
+    commoditiesWithExpectations$Stat..Value >= commoditiesWithExpectations[, paste0(summaryPrefix, "Lower.2.5")] &
+    commoditiesWithExpectations$Stat..Value <= commoditiesWithExpectations[, paste0(summaryPrefix, "Upper.97.5")]
+  commoditiesWithExpectations$within99Bounds <- 
+    commoditiesWithExpectations$Stat..Value >= commoditiesWithExpectations[, paste0(summaryPrefix, "Lower.1")] &
+    commoditiesWithExpectations$Stat..Value <= commoditiesWithExpectations[, paste0(summaryPrefix, "Upper.99")]
+  commoditiesWithExpectations$withinRange <- 
+    commoditiesWithExpectations$Stat..Value >= commoditiesWithExpectations[, paste0(summaryPrefix, "Min")] &
+    commoditiesWithExpectations$Stat..Value <= commoditiesWithExpectations[, paste0(summaryPrefix, "Max")]
+  
+  # Report whether values are within expectations
+  boundariesNotAvailable <- which(is.na(commoditiesWithExpectations[, paste0(summaryPrefix, "Median")]))
+  if(length(boundariesNotAvailable) > 0){
+    warning(paste0(length(boundariesNotAvailable), " HS codes were not found in historic distribution summaries. Use \"View(commoditiesWithExpectations[bounadariesNotAvailable, ])\" for more information."))
+  }
+  notWithinPreviouslyObservedRange <- which(is.na(commoditiesWithExpectations$withinRange) == FALSE & commoditiesWithExpectations$withinRange == FALSE)
+  if(length(notWithinPreviouslyObservedRange) > 0){
+    warning(paste0(length(notWithinPreviouslyObservedRange), " Statistical values were not within the previously observed range. Use \"View(commoditiesWithExpectations[notWithinPreviouslyObservedRange, ])\" for more information."))
+  }
+  notWithin99Bounds <- which(is.na(commoditiesWithExpectations$within99Bounds) == FALSE & commoditiesWithExpectations$within99Bounds == FALSE)
+  if(length(notWithin99Bounds) > 0){
+    warning(paste0(length(notWithin99Bounds), " Statistical values were not within the 99% bounds of the previously observed range. Use \"View(commoditiesWithExpectations[notWithin99Bounds, ])\" for more information."))
+  }
+  notWithin95Bounds <- which(is.na(commoditiesWithExpectations$within95Bounds) == FALSE & commoditiesWithExpectations$within95Bounds == FALSE)
+  if(length(notWithin95Bounds) > 0){
+    warning(paste0(length(notWithin95Bounds), " Statistical values were not within the 95% bounds of the previously observed range. Use \"View(commoditiesWithExpectations[notWithin95Bounds, ])\" for more information."))
+  }
+  
+  return(commoditiesWithExpectations)
+}

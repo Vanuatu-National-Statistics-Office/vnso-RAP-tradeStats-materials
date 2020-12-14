@@ -16,7 +16,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r preparation, include=FALSE}
-
 # Load the required libraries
 library(RMySQL) # Interactiing with MySQL from R
 library(knitr) # Nice tables
@@ -83,7 +82,6 @@ On our local MySQL database there are two tables:
 The imports data looks like this:
 
 ```{r quick look at historic imports data, echo=FALSE}
-
 # Extract a small subset of historic data
 historic_imports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_import_99_19 LIMIT 25")
 
@@ -96,7 +94,6 @@ And the exports data like this:
 <br>
 
 ```{r quick look at historic exportsdata, echo=FALSE}
-
 # Extract a small subset of historic data
 historic_exports <- dbGetQuery(conn=connection, statement="SELECT * FROM historical_export_99_19 LIMIT 25")
 
@@ -159,6 +156,7 @@ calculateSummaryStatistics <- function(values){
   
   # Create an output vector to store the summary statistics
   output <- c("Mean"=NA, "SD"=NA, "Median"=NA, "Lower-2.5"=NA, "Upper-97.5"=NA,
+              "Lower-1"=NA, "Upper-99"=NA,
               "Min"=NA, "Max"=NA, "Count"=NA, "CountMissing"=NA)
   
   # Count number of values and any missing data
@@ -180,9 +178,11 @@ calculateSummaryStatistics <- function(values){
   output["Median"] <- median(values, na.rm=TRUE)
   
   # Calculate upper and lower 95% percentile bounds
-  quantiles <- quantile(values, probs=c(0.975, 0.025), na.rm=TRUE)
-  output["Upper-97.5"] <- quantiles[1]
-  output["Lower-2.5"] <- quantiles[2]
+  quantiles <- quantile(values, probs=c(0.99, 0.975, 0.025, 0.01), na.rm=TRUE)
+  output["Upper-99"] <- quantiles[1]
+  output["Upper-97.5"] <- quantiles[2]
+  output["Lower-2.5"] <- quantiles[3]
+  output["Lower-1"] <- quantiles[4]
   
   # Calculate the range of the data
   minMax <- range(values, na.rm=TRUE)
@@ -206,7 +206,7 @@ colnames(exportsByHSCodeAndYear)[1:2] <- c("HS", "Year")
 exportsByHSCode <- do.call(data.frame,
                                   aggregate(exports[, c("Value", "UnitValue")], by=list(exports$HS),
                                             FUN=calculateSummaryStatistics))
-colnames(exportsByHSCode)[1:2] <- c("HS")
+colnames(exportsByHSCode)[1] <- c("HS")
 
 # Generate summary statistics for IMPORTS by HS code and year
 importsByHSCodeAndYear <- do.call(data.frame,
@@ -218,15 +218,15 @@ colnames(importsByHSCodeAndYear)[1:2] <- c("HS", "Year")
 importsByHSCode <- do.call(data.frame,
                                   aggregate(imports[, c("Value", "UnitValue")], by=list(imports$HS),
                                             FUN=calculateSummaryStatistics))
-colnames(importsByHSCode)[1:2] <- c("HS")
+colnames(importsByHSCode)[1] <- c("HS")
 ```
 
 ```{r store local copy of summary statistics, echo=FALSE, eval=FALSE}
+# Write the tables to file
 write.table(exportsByHSCodeAndYear, file=file.path("..", "data", "secure", "exports_HS-Year_summaryStats_02-10-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
 write.table(exportsByHSCode, file=file.path("..", "data", "secure", "exports_HS_summaryStats_02-10-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
-
 write.table(importsByHSCodeAndYear, file=file.path("..", "data", "secure", "imports_HS-Year_summaryStats_02-10-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
 write.table(importsByHSCode, file=file.path("..", "data", "secure", "imports_HS_summaryStats_02-10-20.csv"),
@@ -236,7 +236,6 @@ write.table(importsByHSCode, file=file.path("..", "data", "secure", "imports_HS_
 ```{r read in locally stored summary statistics, echo=FALSE}
 exportsByHSCodeAndYear <- read.csv(file.path("..", "data", "secure", "exports_HS-Year_summaryStats_02-10-20.csv"))
 exportsByHSCode <- read.csv(file.path("..", "data", "secure", "exports_HS_summaryStats_02-10-20.csv"))
-
 importsByHSCodeAndYear <- read.csv(file.path("..", "data", "secure", "imports_HS-Year_summaryStats_02-10-20.csv"))
 importsByHSCode <- read.csv(file.path("..", "data", "secure", "imports_HS_summaryStats_02-10-20.csv"))
 ```
@@ -391,7 +390,6 @@ fig <- layout(fig, xaxis=list(title="Date"))
 
 # Set Y axis to logged and label
 fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Median unit value"))
-
 fig
 ```
 
@@ -450,7 +448,6 @@ fig <- layout(fig, xaxis=list(title="Date"))
 
 # Set Y axis to logged and label
 fig <- layout(fig, yaxis=list(type="log", tickformat="f", title="Median unit value"))
-
 fig
 ```
 
@@ -466,4 +463,3 @@ To wrap up, we can close our connection to the `MySQL` server using the followin
 ```{r warning=FALSE}
 dbDisconnect(conn=connection)
 ```
-
