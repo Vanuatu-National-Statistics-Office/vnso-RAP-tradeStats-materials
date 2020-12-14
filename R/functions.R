@@ -628,7 +628,17 @@ calculateSummaryStatistics <- function(values){
   return(output)
 }
 
-checkCommodityValues <- function(tradeStats,  historicImportsSummaryStats, historicExportsSummaryStats,
+#' Check whether commodity values fall outside of expectations base don historic data 
+#' 
+#' The range, 95% and 99% bounds were calculated using historic data. The current function checks the values of commodities in the latest month to see whether any fall outside of the historic range of 95% and 99% bounds. 
+#' @param tradeStats The process trade statistic values. Must include HS.Code, CP4 and Stat..Value columns.
+#' @param historicImportsSummaryStats Range of summary statistics generated for the Value and Unit Value of historic imported commodities. Must include HS, Value|UnitValue: "Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"
+#' @param historicExportsSummaryStats Range of summary statistics generated for the Value and Unit Value of historic exported commodities. Must include HS, Value|UnitValue: "Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"
+#' @param importCP4s CP4 codes that identify IMPORTS
+#' @param exportCP4s CP4 codes that identify EXPORTS
+#' @param useUnitValue Boolean value indicating whether to use range, 95% and 99% bounds of the Unit Value. Defaults to false and uses Value.
+#' @return Returns an numeric labeled vector containing the summary statistics
+checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, historicExportsSummaryStats,
                                  importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000), useUnitValue=FALSE){
   
   # Pad the HS codes with zeros to make up to 8 digits
@@ -667,7 +677,7 @@ checkCommodityValues <- function(tradeStats,  historicImportsSummaryStats, histo
   commoditiesWithExpectations$within95Bounds <- 
     commoditiesWithExpectations$Stat..Value >= commoditiesWithExpectations[, paste0(summaryPrefix, "Lower.2.5")] &
     commoditiesWithExpectations$Stat..Value <= commoditiesWithExpectations[, paste0(summaryPrefix, "Upper.97.5")]
-  commoditiesWithExpectation$within99Bounds <- 
+  commoditiesWithExpectations$within99Bounds <- 
     commoditiesWithExpectations$Stat..Value >= commoditiesWithExpectations[, paste0(summaryPrefix, "Lower.1")] &
     commoditiesWithExpectations$Stat..Value <= commoditiesWithExpectations[, paste0(summaryPrefix, "Upper.99")]
   commoditiesWithExpectations$withinRange <- 
