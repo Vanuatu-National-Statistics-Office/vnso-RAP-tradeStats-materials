@@ -168,4 +168,89 @@ tradeByTradeTable <- bold(tradeByTradeTable, i=nrow(tradeByTradeAgreement))
 tradeByTradeTable
 ```
 
-Hwree does this text land?
+######### Page break
+
+## International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights
+
+# Principle Exports
+
+```{r principle exports through time, fig.height=1.75}
+dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
+                        Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
+                        Value=c(6.8, 15, 33, 42, 35, 4.2, 10, 29.5, 31, 25))
+
+# Create a line graph
+ggplot(data=dummyData, aes(x=Time, y=Value, group=Commodity)) +
+  geom_line(aes(color=Commodity), size=1.5) +
+  theme_minimal()
+```
+
+Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
+
+# Top 5 New Major Exports
+
+```{r new major exports, fig.height=1.75}
+# Create some dummy data
+dummyData <- data.frame("Value"=c(rnorm(5, mean=9000, sd=250), rnorm(5, mean=9500, sd=250)), 
+                        "Commodity"=c("A", "B", "C", "D", "E"),
+                        "Type"=c(rep("Previous", 5), rep("Current", 5)))
+
+# Create a bar chart
+ggplot(data=dummyData, aes(x=Commodity, y=Value, fill=Type)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  theme_minimal() + 
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.title=element_blank()) + 
+  coord_cartesian(ylim=range(dummyData$Value))
+```
+
+Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to last month.
+
+<br><br><br><br>
+
+<br><br><br><br>
+
+<br><br><br><br>
+
+# Principle Imports
+
+```{r principle imports through time, fig.height=1.75}
+dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
+                        Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
+                        Value=c(50, 76, 96, 65, 86, 30, 60, 45, 75, 80))
+
+# Create a line graph
+ggplot(data=dummyData, aes(x=Time, y=Value, group=Commodity)) +
+  geom_line(aes(color=Commodity), size=1.5) +
+  theme_minimal()
+```
+
+Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
+
+# Top 5 New Major Imports
+
+```{r new major imports, fig.height=1.75}
+# Create some dummy data
+dummyData <- data.frame("Value"=c(rnorm(5, mean=9000, sd=250), rnorm(5, mean=9500, sd=250)), 
+                        "Commodity"=c("A", "B", "C", "D", "E"),
+                        "Type"=c(rep("Previous", 5), rep("Current", 5)))
+
+# Create a bar chart
+ggplot(data=dummyData, aes(x=Commodity, y=Value, fill=Type)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) +
+  theme_minimal() + 
+  scale_fill_brewer(palette="Blues") +
+  theme(legend.title=element_blank()) + 
+  coord_cartesian(ylim=range(dummyData$Value))
+```
+
+Automated text to say here where the principle imports are destined for, their weight and the unit value of the commodity and make a comparison to last month.
+
+# Concluding remarks
+
+This section not automated, instead analysis of the information in partnership with the Ministry of Trades.
+
+######### Page break
+
+## Methodology and meta-data
+
