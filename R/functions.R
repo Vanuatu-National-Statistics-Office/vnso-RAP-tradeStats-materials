@@ -628,47 +628,69 @@ calculateSummaryStatistics <- function(values){
   return(output)
 }
 
-checkCommodityValues <- function(tradeStats, expectedValueBoundariesForImports, expectedValueBoundariesForExports, 
-                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000)){
+checkCommodityValues <- function(tradeStats,  historicImportsSummaryStats, historicExportsSummaryStats,
+                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000), useUnitValue=FALSE){
   
-  # Convert the HS codes to numeric
-  tradeStats$HS.Code <- as.numeric(tradeStats$HS.Code)
+  # Pad the HS codes with zeros to make up to 8 digits
+  padHSCode <- function(hsCode, length=8){
+    return(paste0(paste(rep(0, length-nchar(hsCode)), collapse=""), hsCode))
+  }
+  historicImportsSummaryStats$HS <- sapply(historicImportsSummaryStats$HS, FUN=padHSCode)
+  historicExportsSummaryStats$HS <- sapply(historicExportsSummaryStats$HS, FUN=padHSCode)
   
-  # Examine each of the values in trade stats table
-  outsideBoundaries <- sapply(seq_len(nrow(tradeStats)), 
-                              FUN=function(row, tradeStats, expectedValueBoundariesForImports, expectedValueBoundariesForExports,
-                                           importCP4s, exportCP4s){
-                                
-                                # Check if import or export
-                                import <- FALSE
-                                if(tradeStats[row, "CP4"] %in% importCP4s){
-                                  import <- TRUE
-                                }else if(tradeStats[row, "CP4"] %in% exportCP4s == FALSE){
-                                  return("CP4 not considered")
-                                }
-                                
-                                # Get the expected boundaries for current value
-                                boundaries <- NULL
-                                if(import){
-                                  boundaries <- expectedValueBoundariesForImports[expectedValueBoundariesForImports$HS == tradeStats[row, "HS.Code"], ]
-                                }else{
-                                  boundaries <- expectedValueBoundariesForExports[expectedValueBoundariesForExports$HS == tradeStats[row, "HS.Code"], ]
-                                }
-                                
-                                # CHeck if boundaries not available
-                                if(nrow(boundaries) == 0){
-                                  return("No boundaries available")
-                                }
-                                
-                                # Check if current value falls outside boundaries
-                                if(tradeStats[row, "Stat..Value"] < boundaries$Value.Lower.1){
-                                  return(paste0("LOW: ", boundaries$Value.Lower.1 - tradeStats[row, "Stat..Value"]))
-                                }else if(tradeStats[row, "Stat..Value"] > boundaries$Value.Upper.99){
-                                  return(paste0("HIGH: ", tradeStats[row, "Stat..Value"] - boundaries$Value.Upper.99))
-                                }else{
-                                  return("Within boundaries")
-                                }
-                              }, tradeStats, expectedValueBoundariesForImports, expectedValueBoundariesForExports, importCP4s, exportCP4s)
+  # Combine the summary stats tables
+  historicImportsSummaryStats$HSAndType <- paste0("IMPORT_", historicImportsSummaryStats$HS)
+  historicExportsSummaryStats$HSAndType <- paste0("EXPORT_", historicExportsSummaryStats$HS)
+  historicSummaryStats <- rbind(historicImportsSummaryStats, historicExportsSummaryStats)
   
-  return(outsideBoundaries)
+  # Identify imports and exports and create
+  tradeStats$Type <- "UNKNOWN"
+  tradeStats$Type[tradeStats$CP4 %in% importCP4s] <- "IMPORT"
+  tradeStats$Type[tradeStats$CP4 %in% exportCP4s] <- "EXPORT"
+  tradeStats$HSAndType <- paste0(tradeStats$Type, "_", tradeStats$HS.Code)
+  
+  # Note whether using unit value
+  summaryPrefix <- "Value."
+  if(useUnitValue){
+    summaryPrefix <- "UnitValue."
+  }
+  summaryColumnsOfInterest <- paste0(summaryPrefix, c("Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"))
+  
+  # Get the expected distribution summary statistics for each commodity
+  commoditiesWithExpectations <- merge(tradeStats[c("HSAndType", "HS.Code", "Type", "Reg..Date", 
+                                                   "CP4", "Itm.#", "Stat..Value")],
+                                       historicSummaryStats[, c("HSAndType", summaryColumnsOfInterest)],
+                                       by="HSAndType",
+                                       all.x=TRUE)
+  
+  # Check the values in latest month are within expected boundaries
+  commoditiesWithExpectations$within95Bounds <- 
+    commoditiesWithExpectations$Stat..Value >= commoditiesWithExpectations[, paste0(summaryPrefix, "Lower.2.5")] &
+    commoditiesWithExpectations$Stat..Value <= commoditiesWithExpectations[, paste0(summaryPrefix, "Upper.97.5")]
+  commoditiesWithExpectation$within99Bounds <- 
+    commoditiesWithExpectations$Stat..Value >= commoditiesWithExpectations[, paste0(summaryPrefix, "Lower.1")] &
+    commoditiesWithExpectations$Stat..Value <= commoditiesWithExpectations[, paste0(summaryPrefix, "Upper.99")]
+  commoditiesWithExpectations$withinRange <- 
+    commoditiesWithExpectations$Stat..Value >= commoditiesWithExpectations[, paste0(summaryPrefix, "Min")] &
+    commoditiesWithExpectations$Stat..Value <= commoditiesWithExpectations[, paste0(summaryPrefix, "Max")]
+  
+  # Report whether values are within expectations
+  boundariesNotAvailable <- which(is.na(commoditiesWithExpectations[, paste0(summaryPrefix, "Median")]))
+  if(length(boundariesNotAvailable) > 0){
+    warning(paste0(length(boundariesNotAvailable), " HS codes were not found in historic distribution summaries. Use \"View(commoditiesWithExpectations[bounadariesNotAvailable, ])\" for more information."))
+  }
+  notWithinPreviouslyObservedRange <- which(is.na(commoditiesWithExpectations$withinRange) == FALSE & commoditiesWithExpectations$withinRange == FALSE)
+  if(length(notWithinPreviouslyObservedRange) > 0){
+    warning(paste0(length(notWithinPreviouslyObservedRange), " Statistical values were not within the previously observed range. Use \"View(commoditiesWithExpectations[notWithinPreviouslyObservedRange, ])\" for more information."))
+  }
+  notWithin99Bounds <- which(is.na(commoditiesWithExpectations$within99Bounds) == FALSE & commoditiesWithExpectations$within99Bounds == FALSE)
+  if(length(notWithin99Bounds) > 0){
+    warning(paste0(length(notWithin99Bounds), " Statistical values were not within the 99% bounds of the previously observed range. Use \"View(commoditiesWithExpectations[notWithin99Bounds, ])\" for more information."))
+  }
+  notWithin95Bounds <- which(is.na(commoditiesWithExpectations$within95Bounds) == FALSE & commoditiesWithExpectations$within95Bounds == FALSE)
+  if(length(notWithin95Bounds) > 0){
+    warning(paste0(length(notWithin95Bounds), " Statistical values were not within the 95% bounds of the previously observed range. Use \"View(commoditiesWithExpectations[notWithin95Bounds, ])\" for more information."))
+  }
+  
+  return(commoditiesWithExpectations)
 }
