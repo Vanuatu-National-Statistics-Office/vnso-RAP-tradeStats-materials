@@ -206,7 +206,7 @@ colnames(exportsByHSCodeAndYear)[1:2] <- c("HS", "Year")
 exportsByHSCode <- do.call(data.frame,
                                   aggregate(exports[, c("Value", "UnitValue")], by=list(exports$HS),
                                             FUN=calculateSummaryStatistics))
-colnames(exportsByHSCode)[1:2] <- c("HS")
+colnames(exportsByHSCode)[1] <- c("HS")
 
 # Generate summary statistics for IMPORTS by HS code and year
 importsByHSCodeAndYear <- do.call(data.frame,
@@ -218,10 +218,11 @@ colnames(importsByHSCodeAndYear)[1:2] <- c("HS", "Year")
 importsByHSCode <- do.call(data.frame,
                                   aggregate(imports[, c("Value", "UnitValue")], by=list(imports$HS),
                                             FUN=calculateSummaryStatistics))
-colnames(importsByHSCode)[1:2] <- c("HS")
+colnames(importsByHSCode)[1] <- c("HS")
 ```
 
 ```{r store local copy of summary statistics, echo=FALSE, eval=FALSE}
+# Write the tables to file
 write.table(exportsByHSCodeAndYear, file=file.path("..", "data", "secure", "exports_HS-Year_summaryStats_02-10-20.csv"),
             sep=",", row.names=FALSE, quote=TRUE)
 write.table(exportsByHSCode, file=file.path("..", "data", "secure", "exports_HS_summaryStats_02-10-20.csv"),
