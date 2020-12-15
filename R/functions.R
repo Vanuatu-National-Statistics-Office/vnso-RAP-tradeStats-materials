@@ -687,19 +687,19 @@ checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, histor
   # Report whether values are within expectations
   boundariesNotAvailable <- which(is.na(commoditiesWithExpectations[, paste0(summaryPrefix, "Median")]))
   if(length(boundariesNotAvailable) > 0){
-    warning(paste0(length(boundariesNotAvailable), " HS codes were not found in historic distribution summaries. Use \"View(commoditiesWithExpectations[bounadariesNotAvailable, ])\" for more information."))
+    warning(paste0(length(boundariesNotAvailable), " HS codes were not found in historic distribution summaries. Investigate these commodities further with the following code:\n\tView(commoditiesWithExpectations[is.na(commoditiesWithExpectations$withinRange), ])"))
   }
   notWithinPreviouslyObservedRange <- which(is.na(commoditiesWithExpectations$withinRange) == FALSE & commoditiesWithExpectations$withinRange == FALSE)
   if(length(notWithinPreviouslyObservedRange) > 0){
-    warning(paste0(length(notWithinPreviouslyObservedRange), " Statistical values were not within the previously observed range. Use \"View(commoditiesWithExpectations[notWithinPreviouslyObservedRange, ])\" for more information."))
+    warning(paste0(length(notWithinPreviouslyObservedRange), " Statistical values were not within the previously observed range. Investigate these commodities further with the following code:\n\tView(commoditiesWithExpectations[is.na(commoditiesWithExpectations$withinRange) == FALSE & commoditiesWithExpectations$withinRange == FALSE, ])"))
   }
   notWithin99Bounds <- which(is.na(commoditiesWithExpectations$within99Bounds) == FALSE & commoditiesWithExpectations$within99Bounds == FALSE)
   if(length(notWithin99Bounds) > 0){
-    warning(paste0(length(notWithin99Bounds), " Statistical values were not within the 99% bounds of the previously observed range. Use \"View(commoditiesWithExpectations[notWithin99Bounds, ])\" for more information."))
+    warning(paste0(length(notWithin99Bounds), " Statistical values were not within the 99% bounds of the previously observed range. Investigate these commodities further with the following code:\n\tView(commoditiesWithExpectations[is.na(commoditiesWithExpectations$within99Bounds) == FALSE & commoditiesWithExpectations$within99Bounds == FALSE, ])"))
   }
   notWithin95Bounds <- which(is.na(commoditiesWithExpectations$within95Bounds) == FALSE & commoditiesWithExpectations$within95Bounds == FALSE)
   if(length(notWithin95Bounds) > 0){
-    warning(paste0(length(notWithin95Bounds), " Statistical values were not within the 95% bounds of the previously observed range. Use \"View(commoditiesWithExpectations[notWithin95Bounds, ])\" for more information."))
+    warning(paste0(length(notWithin95Bounds), " Statistical values were not within the 95% bounds of the previously observed range. Investigate these commodities further with the following code:\n\tView(commoditiesWithExpectations[is.na(commoditiesWithExpectations$within95Bounds) == FALSE & commoditiesWithExpectations$within95Bounds == FALSE, ])"))
   }
   
   return(commoditiesWithExpectations)
