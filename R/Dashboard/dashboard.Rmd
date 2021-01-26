@@ -1,0 +1,91 @@
+---
+title: "VNSO Trade Statistics dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    social: menu
+    source_code: embed
+    logo: logos/VNSO_logo_resized.svg # Note I resized to 48 pixels high to match banner height
+    favicon: logos/favicon.ico
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+# Load required libraries
+library(flexdashboard) # Dashboard layout
+library(shiny) # Interactive elements
+```
+
+Sidebar {.sidebar}
+=======================================================================
+
+### cran.rstudio.com
+
+The streaming data is a 1-week-delayed livestream of download
+logs from  cran.rstudio.com. The server code for that service is at [jcheng5/cransim](https://github.com/jcheng5/cransim).
+
+
+```{r}
+# Rate at which to flag high download traffic
+sliderInput("rateThreshold", "Warn when rate exceeds:",
+            min = 0, max = 50, value = 3, step = 0.1
+)
+
+# Maximum number of raw data rows to keep
+numericInput("maxrows", "Recent downloads window:", 50)
+```
+
+
+Dashboard
+=======================================================================
+
+Row
+-----------------------------------------------------------------------
+
+### Downloads per sec (last 5 min) {.value-box}
+
+```{r}
+renderValueBox({
+  valueBox(value = 5674, icon = "fa-area-chart")
+})
+```
+
+### Total downloads {.value-box}
+
+```{r}
+renderValueBox({
+  valueBox(value = 10, icon = "fa-download")
+})
+```
+
+### Unique users {.value-box}
+
+```{r}
+renderValueBox({
+  valueBox(value = 234, icon = "fa-users")
+})
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Popularity by package (last 5 min) {data-width=700}
+
+```{r}
+
+```
+
+### Percent of downloads (last 5 min) {data-width=340}
+
+```{r}
+
+```
+
+Recent Downloads
+=======================================================================
+
+### Recent Downlads
+
+```{r}
+
+```
