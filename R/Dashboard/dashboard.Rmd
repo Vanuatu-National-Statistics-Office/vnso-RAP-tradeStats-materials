@@ -16,8 +16,11 @@ library(flexdashboard) # Dashboard layout
 library(shiny) # Interactive elements
 ```
 
-Sidebar {.sidebar}
+Dashboard
 =======================================================================
+
+Sidebar {.sidebar}
+-----------------------------------------------------------------------
 
 ### cran.rstudio.com
 
@@ -26,18 +29,8 @@ logs from  cran.rstudio.com. The server code for that service is at [jcheng5/cra
 
 
 ```{r}
-# Rate at which to flag high download traffic
-sliderInput("rateThreshold", "Warn when rate exceeds:",
-            min = 0, max = 50, value = 3, step = 0.1
-)
 
-# Maximum number of raw data rows to keep
-numericInput("maxrows", "Recent downloads window:", 50)
 ```
-
-
-Dashboard
-=======================================================================
 
 Row
 -----------------------------------------------------------------------
