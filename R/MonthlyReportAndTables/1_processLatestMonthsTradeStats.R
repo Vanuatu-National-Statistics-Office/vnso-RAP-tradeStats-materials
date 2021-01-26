@@ -4,8 +4,6 @@
 rm(list = ls())
 
 # Load the required libraries
-library(knitr) # Nice tables
-library(kableExtra) # Extra nice tables
 library(dplyr) # Manipulating data
 library(openxlsx) # Reading and editing excel formatted files
 
