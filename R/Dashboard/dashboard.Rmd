@@ -14,28 +14,19 @@ runtime: shiny
 # Load required libraries
 library(flexdashboard) # Dashboard layout
 library(shiny) # Interactive elements
+library(openxlsx) # REading excel files
+
+# Note the repository location
+repository <- file.path("..", "..")
 ```
 
-Dashboard
+Summary
 =======================================================================
-
-Sidebar {.sidebar}
------------------------------------------------------------------------
-
-### cran.rstudio.com
-
-The streaming data is a 1-week-delayed livestream of download
-logs from  cran.rstudio.com. The server code for that service is at [jcheng5/cransim](https://github.com/jcheng5/cransim).
-
-
-```{r}
-
-```
 
 Row
 -----------------------------------------------------------------------
 
-### Downloads per sec (last 5 min) {.value-box}
+### Total exports in Jan 2020 {.value-box}
 
 ```{r}
 renderValueBox({
@@ -43,7 +34,7 @@ renderValueBox({
 })
 ```
 
-### Total downloads {.value-box}
+### Total imports in Jan 2020 {.value-box}
 
 ```{r}
 renderValueBox({
@@ -51,7 +42,7 @@ renderValueBox({
 })
 ```
 
-### Unique users {.value-box}
+### Trade balance in Jan 2020 {.value-box}
 
 ```{r}
 renderValueBox({
@@ -62,23 +53,99 @@ renderValueBox({
 Row
 -----------------------------------------------------------------------
 
-### Popularity by package (last 5 min) {data-width=700}
+### Imports/exports through time {data-width=700}
 
 ```{r}
 
 ```
 
-### Percent of downloads (last 5 min) {data-width=340}
+### Growth in imports/exports {data-width=340}
 
 ```{r}
 
 ```
 
-Recent Downloads
+Countries
 =======================================================================
 
-### Recent Downlads
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+### Select country of interest
+  
+Select a country from the list below to update the charts and tables on the right.
+
+```{r}
+countries <- read.csv("https://raw.githubusercontent.com/umpirsky/country-list/master/data/en_US/country.csv")[, 2]
+
+selectInput("country", label = "Select country:",
+            choices = countries, selected = "Vanuatu")
+```
+
+Row
+-----------------------------------------------------------------------
+
+### World map - imports/exports by country {data-width=700}
 
 ```{r}
 
 ```
+
+### Imports/exports over time {data-width=340}
+
+```{r}
+
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Top 10 trade commodities
+
+```{r}
+
+```
+
+Commodities
+=======================================================================
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+### Select commodity of interest
+  
+Select a commodity from the list below to update the charts and tables on the right.
+
+```{r}
+principleCommodities <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx"))
+
+selectInput("type", label = "Select import or export:",
+            choices = c("Import", "Export"), selected = "Import")
+
+selectedType <- reactive({input$type})
+commodities <- reactive({
+  if(selectedType() == "Import"){
+    return(principleCommodities$Principle.Imports)
+  }else{
+    return(principleCommodities$Principle.Exports)
+  }
+})
+
+renderUI({
+   selectInput("commodity", label = "Select commodity:",
+            choices = commodities()) 
+})
+```
+
+Row
+-----------------------------------------------------------------------
+
+Row
+-----------------------------------------------------------------------
+
+FAQs
+=======================================================================
+
+Data
+=======================================================================
+
