@@ -1,28 +1,453 @@
 ---
-title: "Untitled"
-output: html_document
+title: "Trade Statistics"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+    social: [ "twitter", "facebook", "menu"]
+    source_code: embed
+    runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(flexdashboard)
+library(knitr)
+library(DT)
+library(rpivotTable)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(openintro)
+library(highcharter)
+library(ggvis)
+library(gganimate)
+library(shiny)
+library(RMySQL)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+trades <- read.csv("c:/RTraining/Trade/data/secure/trades.csv")
+topten <- read.csv("c:/RTraining/Trade/data/secure/tab.csv")
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+mydb <- dbConnect(MySQL(), user='root', password='', dbname='trade', host='localhost')
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+mycolors <- c("blue", "#FFC125", "darkgreen", "darkorange")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Dashboard
+=====================================
+
+Row
+-------------------------------------
+
+### Goods Import/Export Analysis
+
+```{r}
+valueBox(paste("Current Month"),
+         color = "warning")
+```
+
+### Total Current Month Import )
+
+```{r}
+rs4 = dbSendQuery(mydb, "SELECT sum(`Stat..Value`) as TotalImport_current from curtrade WHERE curtrade.CP4 = '4000' or curtrade.CP4 = '4071'  or curtrade.CP4 = '7100'")
+    
+    tab4 <- fetch(rs4, n=-1)
+    import_cur <- ceiling(tab4$TotalImport_current/1000000)
+
+valueBox(import_cur,
+         icon = 'fa-arrow-left',
+         color = "blue")
+
+```
+
+### Total Current Month Export
+
+```{r}
+
+rs3 = dbSendQuery(mydb, "SELECT sum(`Stat..Value`) as TotalExport_current from curtrade WHERE curtrade.CP4 = '1000' or curtrade.CP4 = '1021' or curtrade.CP4 = '1022' or curtrade.CP4 = '3071'")
+    
+    tab3 <- fetch(rs3, n=-1)
+    
+    export_cur <- ceiling(tab3$TotalExport_current/1000000)
+    
+    valueBox(export_cur,
+         icon = 'fa-arrow-right',
+         color = "green")
+
+
+```
+
+### Current Month Trade Balance
+
+```{r}
+
+tradebalance_cur <- export_cur - import_cur
+
+valueBox(tradebalance_cur,
+         icon = 'fa-balance-scale',
+         color = "red")
+```
+
+Row
+-------------------------------------
+
+### Services Import/Export Analysis
+
+```{r}
+valueBox(paste("2019"),
+         color = "warning")
+```
+
+### Total Services Export (2019 )
+
+```{r}
+
+service_export = dbSendQuery(mydb, "SELECT ServiceExport FROM tblservices WHERE Year ='2019'")
+    
+    servicesExport <- fetch(service_export, n=-1)
+    serviceExport <- ceiling(servicesExport$ServiceExport)
+
+
+valueBox(serviceExport,
+         icon = 'fa-arrow-left',
+         color = "blue")
+```
+
+### Total Services Import (2019)
+
+```{r}
+service_import = dbSendQuery(mydb, "SELECT ServiceImport FROM tblservices WHERE Year ='2019'")
+    
+    servicesImport <- fetch(service_import, n=-1)
+    serviceImport <- ceiling(servicesImport$ServiceImport)
+
+valueBox(serviceImport,
+         icon = 'fa-arrow-right',
+         color = "green")
+```
+
+### Services Trade Balance (2019)
+
+```{r}
+
+serviceBalance <- serviceExport - serviceImport
+
+valueBox(serviceBalance,
+         icon = 'fa-balance-scale',
+         color = "red")
+```
+
+
+Row
+-------------------------------
+
+### Goods Export by Year
+
+```{r}
+p1 <- trades %>%
+         group_by(Year) %>%
+         summarise(Export = sum(Export_mil)) %>%
+         plot_ly(x = ~Year,
+                 y = ~Export,
+                 color = "blue",
+                 type = 'bar') %>%
+layout(xaxis = list(title = "Year"),
+yaxis = list(title = 'Export'))
+p1
+```
+
+### Goods Import by Year
+
+```{r}
+p2 <- trades %>%
+         group_by(Year) %>%
+         summarise(Import = sum(Import_mil)) %>%
+         plot_ly(x = ~Year,
+                 y = ~Import,
+                 color = "green",
+                 type = 'bar') %>%
+layout(xaxis = list(title = "Year"),
+yaxis = list(title = 'Import'))
+p2
+```
+
+### Goods Trade Balance by Year
+
+```{r}
+p3 <- trades %>%
+         group_by(Year) %>%
+         summarise(Balance = sum(TradeDef_mil)) %>%
+         plot_ly(x = ~Year,
+                 y = ~Balance,
+                 color = "red",
+                 type = 'bar') %>%
+layout(xaxis = list(title = "Year"),
+yaxis = list(title = 'Balance'))
+p3
+```
+
+Row
+------------------------------------
+
+### Services Export by Year
+
+```{r}
+s2 <- trades %>%
+         group_by(Year) %>%
+         summarise(Export = sum(Service_exp)) %>%
+         plot_ly(x = ~Year,
+                 y = ~Export,
+                 color = "green",
+                 type = 'bar') %>%
+layout(xaxis = list(title = "Year"),
+yaxis = list(title = 'Export'))
+s2
+```
+
+### Services Import by Year
+
+```{r}
+s1 <- trades %>%
+         group_by(Year) %>%
+         summarise(Import = sum(Service_imp)) %>%
+         plot_ly(x = ~Year,
+                 y = ~Import,
+                 color = "blue",
+                 type = 'bar') %>%
+layout(xaxis = list(title = "Year"),
+yaxis = list(title = 'Import'))
+s1
+```
+
+### Services Trade Balance by Year
+
+```{r}
+s3 <- trades %>%
+         group_by(Year) %>%
+         summarise(Balance = sum(Service_bal)) %>%
+         plot_ly(x = ~Year,
+                 y = ~Balance,
+                 color = "red",
+                 type = 'bar') %>%
+layout(xaxis = list(title = "Year"),
+yaxis = list(title = 'Balance'))
+s3
+```
+
+Row
+---------------------------------
+### Trade Trends in line graphs
+
+```{r}
+goodsExp <- dbSendQuery(mydb, "SELECT Year(Date) as Year, round(sum(Value)/1000000) as Totex FROM `historical_export_99_19` Where `Procedure`   = '1000' or `procedure` = '1021' or `Procedure` = '1022' or `Procedure` = '3071' Group By Year")
+    goodsExport <- fetch(goodsExp, n=-1)
+
+goodsImp <- dbSendQuery(mydb, "SELECT Year(Date) as Year, round(sum(Value)/1000000) as Totim FROM `historical_import_99_19` Where `Procedure`   = '4000' or `procedure` = '4021' or `Procedure` = '7100' Group By Year")
+    goodsImport <- fetch(goodsImp, n=-1)
+    
+trade_combine_summary <- merge(goodsExport, goodsImport, by="Year" )
+    trade_combine_summary$tbalance <- trade_combine_summary$Totex - trade_combine_summary$Totim  
+
+```
+
+
+
+
+
+Row
+--------------------------------
+### Trade Activities with 10 top countries
+
+
+```{r}
+
+imp <- read.csv("c:/RTraining/Trade/data/secure/country_year_import.csv")
+
+imp %>% 
+  mutate_if(is.factor, as.character)%>%
+  mutate_if(is.integer, as.numeric) -> imp 
+
+imp_formatted <- imp %>%
+  group_by(Year) %>%
+  mutate(rank = rank(-Value_mill),
+         Value_rel = Value_mill/Value_mill[rank==1],
+         Value_lbl = paste0(" ",round(Value_mill))) %>%
+  group_by(CTY_Name) %>% 
+  filter(rank <=10) %>%
+  ungroup()
+
+anim_imp <- ggplot(imp_formatted, aes(rank, group = CTY_Name, 
+                                  fill = as.factor(CTY_Name), color = as.factor(CTY_Name))) +
+  geom_tile(aes(y = Value_mill/2,
+                height = Value_mill,
+                width = 0.9), alpha = 0.8, color = NA) +
+  geom_text(aes(y = 0, label = paste(CTY_Name, " ")), vjust = 0.2, hjust = 1) +
+  geom_text(aes(y=Value_mill,label = Value_lbl, hjust=0)) +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_reverse() +
+  guides(color = FALSE, fill = FALSE) +
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_line( size=.1, color="grey" ),
+        panel.grid.minor.x = element_line( size=.1, color="grey" ),
+        plot.title=element_text(size=25, hjust=0.5, face="bold", colour="grey", vjust=-1),
+        plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"),
+        plot.caption =element_text(size=8, hjust=0.5, face="italic", color="grey"),
+        plot.background=element_blank(),
+        plot.margin = margin(2,2, 2, 4, "cm")) +
+  transition_states(Year, transition_length = 4, state_length = 1, wrap = FALSE) +
+  view_follow(fixed_x = TRUE)  +
+  labs(title = 'Import per Year : {closest_state}',  
+       subtitle  =  "Top 10 Countries Vanuatu has imported from",
+       caption  = "Import Value in Billions of Vatu | Data Source: Asycuda")
+
+animate(anim_imp, 200)
+```
+
+### Top 10 Export Countries
+
+```{r}
+exp <- read.csv("c:/RTraining/Trade/data/secure/country_year_export.csv")
+
+exp %>% 
+  mutate_if(is.factor, as.character)%>%
+  mutate_if(is.integer, as.numeric) -> exp 
+
+exp_formatted <- exp %>%
+  group_by(Year) %>%
+  mutate(rank = rank(-Value_mill),
+         Value_rel = Value_mill/Value_mill[rank==1],
+         Value_lbl = paste0(" ",round(Value_mill))) %>%
+  group_by(CTY_Name) %>% 
+  filter(rank <=10) %>%
+  ungroup()
+
+
+anim_exp <- ggplot(exp_formatted, aes(rank, group = CTY_Name, 
+                                      fill = as.factor(CTY_Name), color = as.factor(CTY_Name))) +
+  geom_tile(aes(y = Value_mill/2,
+                height = Value_mill,
+                width = 0.9), alpha = 0.8, color = NA) +
+  geom_text(aes(y = 0, label = paste(CTY_Name, " ")), vjust = 0.2, hjust = 1) +
+  geom_text(aes(y=Value_mill,label = Value_lbl, hjust=0)) +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_reverse() +
+  guides(color = FALSE, fill = FALSE) +
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_line( size=.1, color="grey" ),
+        panel.grid.minor.x = element_line( size=.1, color="grey" ),
+        plot.title=element_text(size=25, hjust=0.5, face="bold", colour="grey", vjust=-1),
+        plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"),
+        plot.caption =element_text(size=8, hjust=0.5, face="italic", color="grey"),
+        plot.background=element_blank(),
+        plot.margin = margin(2,2, 2, 4, "cm")) +
+  transition_states(Year, transition_length = 4, state_length = 1, wrap = FALSE) +
+  view_follow(fixed_x = TRUE)  +
+  labs(title = 'Export per Year : {closest_state}',  
+       subtitle  =  "Top 10 Countries Vanuatu has exported to",
+       caption  = "Export Value in Billions of Vatu | Data Source: Asycuda") 
+
+animate(anim_exp, 200)
+```
+
+Trade Trends by Countries
+========================================
+
+
+Row
+----------------------------------------
+
+Column {data-width=200 .sidebar}
+----------------------------------------
+
+```{r}
+country = dbSendQuery(mydb, "SELECT CNTY_CODE, CNTY_DESCR FROM tblcountry")
+cnty <- fetch(country, n=-1)
+
+selectInput(inputId = "selectedCountry", label = "Select Country", choices = cnty$CNTY_DESCR)
+
+```
+
+Column
+------------------------------------
+## Selected Country Trend
+
+```{r}
+
+
+```
+
+
+Export Trends by Commodities
+========================================
+
+
+Row
+----------------------------------------
+
+Column {data-width=200 .sidebar}
+----------------------------------------
+
+```{r}
+comm = dbSendQuery(mydb, "SELECT Principle_Exports FROM tarif_r GROUP BY Principle_Exports")
+pExport <- fetch(comm, n=-1)
+
+selectInput(inputId = "selectedPrincipleExport", label = "Select Principle Export", choices = pExport$Principle_Exports)
+
+```
+
+
+
+
+
+Import Trends by Goods
+========================================
+
+
+Row
+----------------------------------------
+
+Column {data-width=200 .sidebar}
+----------------------------------------
+
+
+Download dataset 
+========================================
+
+
+Row
+----------------------------------------
+
+Column {data-width=200 .sidebar}
+----------------------------------------
+
+
+
+
