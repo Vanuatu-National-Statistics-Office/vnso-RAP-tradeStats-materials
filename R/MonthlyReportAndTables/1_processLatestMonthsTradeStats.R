@@ -9,6 +9,7 @@ library(openxlsx) # Reading and editing excel formatted files
 
 # Note where VNSO code/data is on current computer
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "..", "..")
+setwd(repository) # Required for file.choose() function
 
 # Load the general R functions
 source(file.path(repository, "R", "functions.R"))
@@ -21,7 +22,9 @@ openDataFolder <- file.path(repository, "data", "open")
 
 # Read in the raw trade data from secure folder of the repository 
 # Note that spaces in column names have been automatically replaced with "."s
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-02-20.xlsx")
+#tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-02-20.xlsx")
+tradeStatsFile <- choose.files(default="SEC_PROC_ASY_RawDataAndReferenceTables_31-02-20.xlsx", multi=FALSE,
+                               caption="Select raw trade statistics data for the latest month (should be in data/secure/ folder)")
 tradeStats <- read.xlsx(tradeStatsFile, sheet=1, skipEmptyRows=TRUE)
 
 #### Clean and process the latest month's data ####
@@ -72,6 +75,11 @@ par(mar=c(10, 4, 4, 1))
 barplot(proportionMissing[order(proportionMissing)], las=2, ylim=c(0,1),
         main="Amount missing values in each column",
         ylab="Proportion")
+
+## TO DO ##
+# Add in an check to see whether non-PRF columns have proportion more than 0.1
+# Identify where the missing data are to enable follow up later
+# Row and column of missing observations
 
 # Print progress
 cat("Finished exploring extent of missing data.\n")
@@ -170,6 +178,10 @@ infoAboutMissingObservations <- searchForMissingObservations(
 if(is.null(infoAboutMissingObservations) == FALSE){
   warning(paste0(nrow(infoAboutMissingObservations), " observations were missing following the merging. Examine the \"infoAboutMissingObservations\" variable for more information."))
 }
+
+## TO DO ##
+# Look into why the number of observations has increased here
+
 
 # Print progress
 cat("Finished checking for missing observations after merging.\n")
