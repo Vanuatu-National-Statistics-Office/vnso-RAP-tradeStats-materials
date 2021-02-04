@@ -8,7 +8,6 @@ output:
     source_code: embed
     runtime: shiny
     favicon: favicon.ico
-    
 params:
     useSQL: FALSE # Select whether to load data from SQL server
     startDate: !r as.Date("2019-01-01") # Start date for latest month (YYYY-dd-mm)
