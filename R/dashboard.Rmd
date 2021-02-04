@@ -220,6 +220,7 @@ trades %>%
   summarise(Export = sum(Export_mil),
             Import = sum(Import_mil),
             Balance = sum(TradeDef_mil), .groups="keep") %>%
+  ungroup() %>%
   
   plot_ly(x = ~Year,
           y = ~Export,
@@ -252,6 +253,7 @@ trades %>%
   summarise(Export = sum(Service_exp),
             Import = sum(Service_imp),
             Balance = sum(Service_bal), .groups="keep") %>%
+  ungroup() %>%
   
   plot_ly(x = ~Year,
           y = ~Export,
@@ -272,6 +274,7 @@ trades %>%
   
   layout(xaxis = list(title = "Year"), yaxis = list(title = 'Value'))
 ```
+
 
 Row
 ---------------------------------
@@ -482,7 +485,6 @@ if(params$useSQL){
 }
 
 selectInput(inputId = "selectedPrincipleExport", label = "Select Principle Export", choices = pExport)
-
 ```
 
 
