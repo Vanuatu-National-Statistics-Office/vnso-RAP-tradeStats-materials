@@ -11,8 +11,8 @@ output:
     
 params:
     useSQL: FALSE # Select whether to load data from SQL server
-    startDate: "2019-01-01" # Start date for latest month (YYYY-dd-mm)
-    endDate: "2019-01-31" # End date for latest month (YYYY-dd-mm)
+    startDate: !r as.Date("2019-01-01") # Start date for latest month (YYYY-dd-mm)
+    endDate: !r as.Date("2019-01-31") # End date for latest month (YYYY-dd-mm)
 ---
 
 ```{r setup, include=FALSE}
@@ -38,10 +38,6 @@ repository <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
 
 # Define color palette
 myColors <- c("blue", "#FFC125", "darkgreen", "darkorange")
-
-# Convert the latest month dates to dates
-params$startDate <- as.Date(params$startDate)
-params$endDate <- as.Date(params$endDate)
 ```
 
 
@@ -50,8 +46,8 @@ params$endDate <- as.Date(params$endDate)
 # Load data
 trades <- read.csv(file.path(repository, "data", "secure", "trades.csv")) # Note that csv files need more informative names
 topten <- read.csv(file.path(repository, "data", "secure", "tab.csv")) # Variables need more informative names
-imp <- read.csv(file.path("data", "secure", "country_year_import.csv")) # I don't have access to this file
-exp <- read.csv(file.path("data", "secure", "country_year_export.csv")) # I don't have access to this file
+imp <- read.csv(file.path(repository, "data", "secure", "country_year_import.csv")) # I don't have access to this file
+exp <- read.csv(file.path(repository, "data", "secure", "country_year_export.csv")) # I don't have access to this file
 
 # Connect to local SQL database if requested
 mydb <- NULL
@@ -225,8 +221,8 @@ trades %>%
   plot_ly(x = ~Year,
           y = ~Export,
           color = "blue",
-          type = 'scatter', 
-          mode = 'lines+markers',
+          type = "scatter",
+          mode = "lines+markers",
           name = "Export") %>%
   
   add_trace(x = ~Year,
@@ -257,8 +253,8 @@ trades %>%
   plot_ly(x = ~Year,
           y = ~Export,
           color = "blue",
-          type = 'scatter', 
-          mode = 'lines+markers',
+          type = "scatter", 
+          mode = "lines+markers",
           name = "Export") %>%
   
   add_trace(x = ~Year,
@@ -449,7 +445,7 @@ if(params$useSQL){
   countries <- read.csv("https://raw.githubusercontent.com/umpirsky/country-list/master/data/en_US/country.csv")[, 2]
 }
 
-selectInput(inputId = "selectedCountry", label = "Select Country", choices = countries$CNTY_DESCR)
+selectInput(inputId = "selectedCountry", label = "Select Country", choices = countries)
 
 ```
 
