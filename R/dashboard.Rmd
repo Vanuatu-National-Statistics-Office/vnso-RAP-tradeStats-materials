@@ -158,7 +158,7 @@ valueBox(paste(format(params$endDate, "%Y")),
 
 ### Total Services Export (`r format(params$endDate, "%Y")`)
 
-```{r total export value box}
+```{r total services export value box}
 serviceExport <- NULL
 if(params$useSQL){
   
@@ -178,7 +178,7 @@ valueBox(serviceExport,
 
 ### Total Services Import (2019)
 
-```{r total import value box}
+```{r total services import value box}
 serviceImport <- NULL
 if(params$useSQL){
   service_import = dbSendQuery(mydb, "SELECT ServiceImport FROM tblservices WHERE Year ='2019'")
@@ -196,7 +196,7 @@ valueBox(serviceImport,
 
 ### Services Trade Balance (2019)
 
-```{r total balance value box}
+```{r total services balance value box}
 
 serviceBalance <- serviceExport - serviceImport
 
@@ -243,7 +243,7 @@ Row
 
 ### Services Export/Import/Balance by Year
 
-```{r}
+```{r services exports/imports/balance by year interactive plot}
 trades %>%
   group_by(Year) %>%
   summarise(Export = sum(Service_exp),
@@ -436,7 +436,7 @@ Row
 Column {data-width=200 .sidebar}
 ----------------------------------------
 
-```{r}
+```{r user input to select country}
 countries <- NULL
 if(params$useSQL){
   country = dbSendQuery(mydb, "SELECT CNTY_CODE, CNTY_DESCR FROM tblcountry")
@@ -469,7 +469,7 @@ Row
 Column {data-width=200 .sidebar}
 ----------------------------------------
 
-```{r}
+```{r user input to select export commodity}
 pExport <- NULL
 if(params$useSQL){
   comm = dbSendQuery(mydb, "SELECT Principle_Exports FROM tarif_r GROUP BY Principle_Exports")
