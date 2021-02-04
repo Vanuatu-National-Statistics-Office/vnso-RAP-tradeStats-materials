@@ -478,7 +478,7 @@ if(params$useSQL){
   comm = dbSendQuery(mydb, "SELECT Principle_Exports FROM tarif_r GROUP BY Principle_Exports")
   pExport <- fetch(comm, n=-1)$Principle_Exports
 }else{
-  pExport <- principleCOmmodities$Principle.Exports
+  pExport <- principleCommodities$Principle.Export
 }
 
 selectInput(inputId = "selectedPrincipleExport", label = "Select Principle Export", choices = pExport)
