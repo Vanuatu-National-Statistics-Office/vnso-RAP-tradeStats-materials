@@ -34,7 +34,10 @@ library(lubridate) # Working with dates
 library(openxlsx) # Read excel formatted files
 
 # Note repository location
-repository <- dirname(dirname(rstudioapi::getSourceEditorContext()$path))
+# Note that when wanting to run individual code chunks (during development) set 
+# current working directory to script location:
+#  Click "Session" in top menu bar -> "Set Working Directory" -> "To Source File Location"
+repository <- dirname(getwd()) 
 
 # Define color palette
 myColors <- c("blue", "#FFC125", "darkgreen", "darkorange")
