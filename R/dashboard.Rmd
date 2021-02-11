@@ -9,7 +9,7 @@ output:
     runtime: shiny
     favicon: favicon.ico
 params:
-    useSQL: FALSE # Select whether to load data from SQL server
+    useSQL: TRUE # Select whether to load data from SQL server
     startDate: !r as.Date("2019-01-01") # Start date for latest month (YYYY-dd-mm)
     endDate: !r as.Date("2019-01-31") # End date for latest month (YYYY-dd-mm)
 ---
@@ -189,6 +189,7 @@ if(params$useSQL){
   servicesImport <- fetch(service_import, n=-1)
   serviceImport <- ceiling(servicesImport$ServiceImport)
 }else{
+  service_import <- read.cs
   serviceImport <- sum(historicImports[historicImports$Year == format(params$endDate, "%Y"), "Value"], na.rm=TRUE)
 }
 
@@ -460,6 +461,14 @@ Column
 ## Selected Country Trend
 
 ```{r}
+
+selectedCountryExports <- reactive({
+  fetch(dbSendQuery(mydb, "SELECT Year, Value FROM top10 ORDER BY Year WHERE AlphOrder = ", input$selectedCountry))
+  
+  head(selectedCountryExports)
+  
+})
+
 
 
 ```
