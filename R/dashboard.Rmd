@@ -462,11 +462,14 @@ Column
 
 ```{r}
 
-selectedCountryExports <- reactive({
-  fetch(dbSendQuery(mydb, "SELECT Year, Value FROM top10 GROUP BY Year WHERE AlphOrder = ", input$selectedCountry))
+reactive({
   
+  # Get the top 10 exports for the selected country
+  selectedCountryExports <- dbSendQuery(mydb, paste0("SELECT Year, Value FROM top10 GROUP BY Year WHERE AlphOrder = ", input$selectedCountry))
+  top10_exports_for_selected_country <- fetch()
+  
+  # Take a look at the table
   head(selectedCountryExports)
-  
 })
 
 
