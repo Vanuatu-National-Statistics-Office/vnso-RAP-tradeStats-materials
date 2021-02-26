@@ -83,11 +83,11 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
 #' @keywords openxlsx
 updateSubTablesByTime <- function(subTables, month, year, newStatistics, monthColumn="Month", numericColumns=3:ncol(subTables$Annually)){
 
-  # Check if data have already been inserted into sub tables
-  latestYearInSubTables <- max(subTables$Monthly$Year, na.rm=TRUE)
-  months <- subTables$Monthly$Month[is.na(subTables$Monthly$Month) == FALSE]
+  # Check if data have already been inserted into sub tables - suppressing warnings here as could be co-ercing months into numbers (Table 10 for example)
+  latestYearInSubTables <- max(suppressWarnings(as.numeric(subTables$Annually$Year)), na.rm=TRUE)
+  months <- subTables$Monthly[, monthColumn][is.na(subTables$Monthly[, monthColumn]) == FALSE]
   latestMonth <- months[length(months)]
-  if(latestYearInSubTables == (as.numeric(year)-1) && latestMonth == month){
+  if(latestYearInSubTables == (as.numeric(year)-1) && latestMonth == month || latestYearInSubTables == as.numeric(year)){
     warning("Sub tables already contain data for specified month.")
     return(NULL)
   }
