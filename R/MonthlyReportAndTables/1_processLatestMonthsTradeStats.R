@@ -63,26 +63,25 @@ cat("Finished initial cleaning and processing of data.\n")
 #### Explore the extent of missing data ####
 
 # Count the number of missing values in each column
-numberMissing <- apply(tradeStatsCommodities, MARGIN=2,
-                       FUN=function(columnValues){
-                         return(sum(is.na(columnValues)))
-                       })
-
-# Convert the counts to a proportion
-proportionMissing <- numberMissing / nrow(tradeStatsCommodities)
-
-# Set the plotting margins
-par(mar=c(10, 4, 4, 1))
-
-# Plot the proportion missing in each column
-barplot(proportionMissing[order(proportionMissing)], las=2, ylim=c(0,1),
-        main="Amount missing values in each column",
-        ylab="Proportion")
+proportionMissing <- sapply(colnames(tradeStatsCommodities), 
+                           FUN=function(column, data, nRows, threshold = 0.1){
+                             
+                             # Count the number of NAs in current column
+                             naCount <- sum(is.na(data[, column]))
+                         
+                             # Convert to a proportion
+                             naProportion <- naCount / nRows
+                             
+                             # Check if proportion of NAs exceeds threshold
+                             if(naProportion > threshold){
+                               warning(paste0("The number of NAs (", naCount, ") in the \"", column, "\" column exceeds the threshold  (", threshold, ") for the proportion of NAs in a column"))
+                             }
+                         
+                             return(naProportion)
+                           }, tradeStatsCommodities, nrow(tradeStatsCommodities))
 
 ## TO DO ##
-# Add in an check to see whether non-PRF columns have proportion more than 0.1
-# Identify where the missing data are to enable follow up later
-# Row and column of missing observations
+# Colour missing values in the original CSV (note is.na(dataframe) returns matrix of TRUE/FALSE corresponding to values in dataframe)
 
 # Print progress
 cat("Finished exploring extent of missing data.\n")
