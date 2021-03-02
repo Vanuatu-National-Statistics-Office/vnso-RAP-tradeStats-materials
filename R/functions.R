@@ -83,12 +83,15 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
 #' @keywords openxlsx
 updateSubTablesByTime <- function(subTables, month, year, newStatistics, monthColumn="Month", numericColumns=3:ncol(subTables$Annually)){
 
-  # Check if data have already been inserted into sub tables - suppressing warnings here as could be co-ercing months into numbers (Table 10 for example)
+  # Get the month and year of the expected latest data
   latestYearInSubTables <- max(suppressWarnings(as.numeric(subTables$Annually$Year)), na.rm=TRUE)
   months <- subTables$Monthly[, monthColumn][is.na(subTables$Monthly[, monthColumn]) == FALSE]
-  latestMonth <- months[length(months)]
-  if(latestYearInSubTables == (as.numeric(year)-1) && latestMonth == month || latestYearInSubTables == as.numeric(year)){
-    warning("Sub tables already contain data for specified month.")
+  expectedMonth <- month.name[(which(month.name == months[length(months)]) %% 12) + 1]
+  expectedYear <- latestYearInSubTables + 1
+  
+  # Check if month and year of latest data are expected
+  if(expectedYear != year || expectedMonth != month){
+    warning(paste0("The data provided to input into the subtables aren't for the expected month. Expecting data for ", expectedMonth, " ", expectedYear, "."))
     return(NULL)
   }
 
@@ -164,13 +167,18 @@ updateSubTablesByTime <- function(subTables, month, year, newStatistics, monthCo
 #' @keywords openxlsx
 updateTableByCommodity <- function(structuredTable, month, year, newStatistics, numericColumns=NULL){
   
-  # Check if data have already been inserted into sub tables
+  # Get the month and year of the expected latest data
   colNames <- colnames(structuredTable)
-  if((as.numeric(year) - 1) %in% colNames && grepl(colNames[length(colNames)], pattern=substr(month, 1, 3))){
-    warning("Table already contains data for specified month.")
+  latestYear <- max(suppressWarnings(as.numeric(colNames)), na.rm=TRUE)
+  expectedMonth <- month.abb[(which(month.abb == colNames[length(colNames)]) %% 12) + 1]
+  expectedYear <- latestYear + 1
+  
+  # Check if month and year of latest data are expected
+  if(expectedYear != year || expectedMonth != month){
+    warning(paste0("The data provided to input into the subtables aren't for the expected month. Expecting data for ", expectedMonth, " ", expectedYear, "."))
     return(NULL)
   }
-  
+
   # Check the class of the new statistics to add
   if(class(newStatistics) == "data.frame"){
     newStatistics <- as.numeric(newStatistics[1, ])
