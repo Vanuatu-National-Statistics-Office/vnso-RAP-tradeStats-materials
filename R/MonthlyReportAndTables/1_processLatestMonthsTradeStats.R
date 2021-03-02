@@ -54,6 +54,9 @@ tradeStatsNoBanknotes <- tradeStatsNoDup[tradeStatsNoDup$HS.Code != "49070010", 
 tradeStatsSubset <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$Type %in% c("EX / 1","EX / 3", "IM / 4", "IM / 7", "PC / 4"), ]
 tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
 
+# Replace Null/NA/empty values
+tradeStatsCommodities[tradeStatsCommodities %in% c("", "Null", "null")] <- NA
+
 # Print progress
 cat("Finished initial cleaning and processing of data.\n")
 
