@@ -1,0 +1,61 @@
+---
+title: "Testing connection to MySQL"
+output: 
+  flexdashboard::flex_dashboard:
+    source_code: embed
+    runtime: shiny
+    orientation: rows
+    vertical_layout: scroll
+    
+params:
+    mySQLPass: "ThisIsNotMyPassword" # Select whether to load data from SQL server
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard) # BUilding the dashboard
+library(shiny) # Adding interactive elements for user input
+library(RMySQL) # Interacting with local MySQL server
+library(DBI) # Used by RMySQL
+
+# Connect to MySQL server
+connection <- dbConnect(
+      drv = MySQL(),
+      user = 'root', 
+      password = params$mySQLPass,
+      dbname = 'sakila',
+      host = 'localhost')
+```
+
+Trade Trends by Countries
+========================================
+
+Inputs {data-width=200 .sidebar}
+----------------------------------------
+
+```{r user input}
+
+numericInput("nrows", "Enter the number of rows to display:", 5)
+
+```
+
+Column
+------------------------------------
+
+```{r get data based on user input}
+
+# Select data from MySQL server
+actorInfo <- reactive({
+  dbGetQuery(connection, paste0("SELECT * FROM actor LIMIT ", input$nrows, ";"))
+})
+```
+
+```{r show data}
+# View the actor data
+renderTable({
+  actorInfo()
+})
+```
+
+```{r close RMySQL connection on exit}
+reactive({on.exit(dbDisconnect(connection), add = TRUE)})
+```
