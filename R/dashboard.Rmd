@@ -464,7 +464,7 @@ Column
 
 selection <- reactive({
 dbGetQuery(mydb, paste0(
-      "SELECT Year, Value_mill FROM tab WHERE AlphOrder = '", input$select,"'"))
+      "SELECT Year, Value_mill FROM tab WHERE AlphOrder = ", input$alphaOrder))
   
 })
 
