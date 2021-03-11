@@ -71,6 +71,8 @@ numericInput("nrows", "Enter the number of rows to display:", 5)
 Column
 ------------------------------------
 
+Below should a simple table giving details of actors (taken from the `actor` table in the [`sakila`](https://dev.mysql.com/doc/sakila/en/) database that comes with every MySQL download). The number of rows in the table should be equal to the value set in the sidebar on the left (`r reactive({input$nrows})`). The number of rows in the table should react to how this value is changed.
+
 ```{r get data based on user input}
 
 # Select data from MySQL server
