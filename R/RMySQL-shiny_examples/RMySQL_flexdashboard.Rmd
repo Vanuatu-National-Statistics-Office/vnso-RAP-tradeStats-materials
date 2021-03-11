@@ -4,32 +4,62 @@ output:
   flexdashboard::flex_dashboard:
     source_code: embed
     runtime: shiny
-    orientation: rows
+    orientation: columns
     vertical_layout: scroll
-    
-params:
-    mySQLPass: "ThisIsNotMyPassword" # Select whether to load data from SQL server
 ---
 
 ```{r setup, include=FALSE}
+# Load libraries
 library(flexdashboard) # BUilding the dashboard
 library(shiny) # Adding interactive elements for user input
 library(RMySQL) # Interacting with local MySQL server
 library(DBI) # Used by RMySQL
 
-# Connect to MySQL server
-connection <- dbConnect(
+# Get MySQL password
+sqlPassword <- Sys.getenv("MYSQLPASS") # I have stored as environmental variable
+```
+
+```{r define functions to interact with MySQL server}
+
+connect <- function(password){
+  
+  # Connect to MySQL server
+  connection <- dbConnect(
       drv = MySQL(),
       user = 'root', 
-      password = params$mySQLPass,
+      password = password,
       dbname = 'sakila',
       host = 'localhost')
+  
+  return(connection)
+}
+
+disconnect <- function(connection){
+  dbDisconnect(connection)
+}
+
+sendMySQLQuery <- function(query, password){
+  
+  # Connecting/disconnecting for each query because shiny was breaking after 16 connections made (see question here: https://stackoverflow.com/questions/33885400/rmysql-internal-error-in-rs-dbi-getconnection-corrupt-connection-handle)
+  
+  # Connect to MySQL server
+  connection <- connect(password)
+  
+  # Send query to MySQL database
+  result <- dbGetQuery(connection, query)
+  
+  # Disconnect from MySQL server
+  disconnect(connection)
+  
+  return(result)
+}
 ```
+
 
 Trade Trends by Countries
 ========================================
 
-Inputs {data-width=200 .sidebar}
+Inputs {.sidebar}
 ----------------------------------------
 
 ```{r user input}
@@ -45,7 +75,9 @@ Column
 
 # Select data from MySQL server
 actorInfo <- reactive({
-  dbGetQuery(connection, paste0("SELECT * FROM actor LIMIT ", input$nrows, ";"))
+  
+  sendMySQLQuery(paste0("SELECT * FROM actor LIMIT ", input$nrows, ";"),
+                 password = sqlPassword)
 })
 ```
 
@@ -54,8 +86,4 @@ actorInfo <- reactive({
 renderTable({
   actorInfo()
 })
-```
-
-```{r close RMySQL connection on exit}
-reactive({on.exit(dbDisconnect(connection), add = TRUE)})
 ```
