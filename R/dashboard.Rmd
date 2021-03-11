@@ -433,7 +433,7 @@ anim_exp <- ggplot(exp_formatted,
 animate(anim_exp, 200)
 ```
 
-Trade Trends by Countries
+Export trend by Commodity
 ========================================
 
 
@@ -446,37 +446,44 @@ Column {data-width=200 .sidebar}
 ```{r user input to select country}
 countries <- NULL
 if(params$useSQL){
-  country = dbSendQuery(mydb, "SELECT CNTY_CODE, CNTY_DESCR FROM tblcountry")
-  countries <- fetch(country, n=-1)$CNTY_DESCR
+  alph = dbSendQuery(mydb, "SELECT AlphOrder FROM top10 GROUP BY AlphOrder")
+  alphaOrder <- fetch(alph, n=-1)$AlphOrder
 }else{
-  countries <- read.csv("https://raw.githubusercontent.com/umpirsky/country-list/master/data/en_US/country.csv")[, 2]
+  alphaOrder <- read.csv("https://raw.githubusercontent.com/umpirsky/country-list/master/data/en_US/country.csv")[, 2]
 }
 
-selectInput(inputId = "selectedCountry", label = "Select Country", choices = countries)
+selectInput(inputId = "alphaOrder", label = "Select Alpha Group", choices = alphaOrder)
 
 ```
 
 Column
 ------------------------------------
-## Selected Country Trend
+## Trade Trends by Commodities
 
 ```{r}
 
-reactive({
+selection <- reactive({
+dbGetQuery(mydb, paste0(
+      "SELECT Year, Value_mill FROM tab WHERE AlphOrder = ", input$alphaOrder))
   
-  # Get the top 10 exports for the selected country
-  selectedCountryExports <- dbSendQuery(mydb, paste0("SELECT Year, Value FROM top10 GROUP BY Year WHERE AlphOrder = ", input$selectedCountry))
-
-  # Take a look at the table
-  head(selectedCountryExports)
 })
 
-
+renderPlotly({
+  ggplot(selection(), aes(x=Year, y=Value_mill, colour = Value_mill)) +
+      geom_line() +
+      geom_point() +
+      geom_smooth()
+})
 
 ```
 
 
-Export Trends by Commodities
+
+
+
+
+
+Trade trend by country
 ========================================
 
 
