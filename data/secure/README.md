@@ -26,4 +26,10 @@ exploring-historic-data
 
 - `tradeStats_historic_IMPORTS_14-09-20.csv` - trade statistics data for all **IMPORTS** into Vanuatu from 1999 to 2019
 - `tradeStats_historic_EXPORTS_14-09-20.csv` - trade statistics data for all **EXPORTS** into Vanuatu from 1999 to 2019
-master
+- `country_export.csv` - SQL dump for dashboard
+- `country_year_export.csv` - SQL dump for dashboard
+- `country_year_import.csv` - SQL dump for dashboard
+- `curtrade.csv` - SQL dump for dashboard
+- `tab.csv` - SQL dump for dashboard
+- `tblservices.csv` - SQL dump for dashboard
+- `trades.csv` - SQL dump for dashboard
