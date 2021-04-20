@@ -8,6 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+# Load libraries
 library(flexdashboard)
 library(tidyverse)
 library(DT)
@@ -17,16 +18,18 @@ library(plotly)
 library(knitr)
 library(shiny)
 
+# Note repository location
+repository <- dirname(getwd()) # Note that to run code inline you'll need to set session working directory to source file location using Session in toolbar above
 ```
 
 ```{r Load files}
-toptenexport <- read.csv("C:/DataViz/Trades/data/secure/tab.csv")
-countryYearExport <- read.csv("C:/DataViz/Trades/data/secure/country_export.csv")
-curtrade <- read.csv("C:/DataViz/Trades/data/secure/curtrade.csv")
-exp <- read.csv("C:/DataViz/Trades/data/secure/country_year_export.csv")
-imp <- read.csv("C:/DataViz/Trades/data/secure/country_year_import.csv")
-services <- read.csv("C:/DataViz/Trades/data/secure/tblservices.csv")
-trades <- read.csv("C:/DataViz/Trades/data/secure/trades.csv")
+toptenexport <- read.csv(file.path(repository, "data", "secure", "tab.csv"))
+countryYearExport <- read.csv(file.path(repository, "data", "secure", "country_export.csv"))
+curtrade <- read.csv(file.path(repository, "data", "secure", "curtrade.csv"))
+exp <- read.csv(file.path(repository, "data", "secure", "country_year_export.csv"))
+imp <- read.csv(file.path(repository, "data", "secure", "country_year_import.csv"))
+services <- read.csv(file.path(repository, "data", "secure", "tblservices.csv"))
+trades <- read.csv(file.path(repository, "data", "secure", "trades.csv"))
 
 ```
 
