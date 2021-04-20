@@ -189,7 +189,7 @@ Column {data-width=350}
 
 ### Trade Import Activities with 10 top countries overtime
 
-```{r animated graphic for top 10 countries by year for imports}
+```{r animated graphic for top 10 countries by year for imports, eval=FALSE}
 
 imp %>% 
   mutate_if(is.factor, as.character) %>%
@@ -251,7 +251,7 @@ animate(anim_imp, 200)
 
 ### Trade Export Activities with 10 top countries overtime
 
-```{r animated graphic for top 10 countries by year for exports}
+```{r animated graphic for top 10 countries by year for exports, eval=FALSE}
 exp %>% 
   mutate_if(is.factor, as.character)%>%
   mutate_if(is.integer, as.numeric) -> exp 
@@ -317,7 +317,10 @@ GBChoices <- as.list(names(startData))
 names(GBChoices) <- paste(names(startData),map(startData,~length(unique(.x))))
 
 updateData <- reactive(
-  startData %>% group_by(!!! rlang::syms(input$GB)) %>% summarise_if(is.numeric,sum,na.rm=T))
+  startData %>% 
+    group_by_(input$GB) %>% 
+    summarise_if(is.numeric, sum, na.rm=T)
+  )
 ```
 
 
@@ -327,7 +330,10 @@ CEChoices <- as.list(names(countryExport))
 names(CEChoices) <- paste(names(countryExport),map(countryExport,~length(unique(.x))))
 
 updateCountryExport <- reactive(
-  countryExport %>% group_by(!!! rlang::syms(input$CE)) %>% summarise_if(is.numeric,sum,na.rm=T))
+  countryExport %>%
+    group_by(input$CE) %>% 
+    summarise_if(is.numeric,sum,na.rm=T)
+  )
 ```
 
 
@@ -337,8 +343,8 @@ Export by Commodity
 Column {.sidebar}
 ------------------------------------------------------------------
 ```{r}
-selectInput(inputId = "GB",label = "Group By",choices = GBChoices)
-selectInput(inputId = "Metric",label = "Metric",choices = names(select_if(startData,is.numeric)))
+selectInput(inputId = "GB", label = "Group By", choices = GBChoices)
+selectInput(inputId = "Metric", label = "Metric", choices = names(select_if(startData,is.numeric)))
 ```
 
 Column 
@@ -347,9 +353,9 @@ Column
 ### Bar Plot of the selected commodity
 ```{r}
 renderPlot({
- updateData() %>% 
-  ggplot(aes(x=!! rlang::sym(input$GB),y=!! rlang::sym(input$Metric),fill=!! rlang::sym(input$GB))) +
-  geom_col()
+  updateData() %>%
+    ggplot(aes_string(x=input$GB, y=input$Metric, fill=input$GB)) +
+      geom_col()
 })
 ```
 
@@ -383,7 +389,7 @@ column
 ```{r}
 renderPlot({
  updateCountryExport() %>% 
-  ggplot(aes(x=!! rlang::sym(input$CE),y=!! rlang::sym(input$Metric_two),fill=!! rlang::sym(input$CE))) +
+  ggplot(aes_string(x=input$CE,y=input$Metric_two,fill=input$CE)) +
   geom_col()
 })
 ```
