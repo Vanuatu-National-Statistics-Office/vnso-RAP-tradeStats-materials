@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: scroll
-    runtime: shiny
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -237,7 +237,7 @@ anim_imp <- ggplot(imp_formatted,
         plot.background=element_blank(),
         plot.margin = margin(2,2, 2, 4, "cm")) +
   
-  transition_states(Year, transition_length = 4, state_length = 1, wrap = FALSE) +
+  transition_states(Year, transition_length = 2, state_length = 1, wrap = FALSE) +
   
   view_follow(fixed_x = TRUE)  +
   
@@ -245,7 +245,7 @@ anim_imp <- ggplot(imp_formatted,
        subtitle  =  "Top 10 Countries Vanuatu has imported from",
        caption  = "Import Value in Billions of Vatu | Data Source: Asycuda")
 
-animate(anim_imp, 200)
+animate(anim_imp, nframes = 100, fps = 5)
 ```
 
 
@@ -307,33 +307,7 @@ anim_exp <- ggplot(exp_formatted,
        subtitle  =  "Top 10 Countries Vanuatu has exported to",
        caption  = "Export Value in Billions of Vatu | Data Source: Asycuda") 
 
-animate(anim_exp, 200)
-```
-
-
-```{r Export by commodities}
-startData <- toptenexport
-GBChoices <- as.list(names(startData))
-names(GBChoices) <- paste(names(startData),map(startData,~length(unique(.x))))
-
-updateData <- reactive(
-  startData %>% 
-    group_by_(input$GB) %>% 
-    summarise_if(is.numeric, sum, na.rm=T)
-  )
-```
-
-
-```{r Expot by countries}
-countryExport <- countryYearExport
-CEChoices <- as.list(names(countryExport))
-names(CEChoices) <- paste(names(countryExport),map(countryExport,~length(unique(.x))))
-
-updateCountryExport <- reactive(
-  countryExport %>%
-    group_by_(input$CE) %>% 
-    summarise_if(is.numeric,sum,na.rm=T)
-  )
+animate(anim_imp, nframes = 100, fps = 5)
 ```
 
 
@@ -343,8 +317,18 @@ Export by Commodity
 Column {.sidebar}
 ------------------------------------------------------------------
 ```{r}
-selectInput(inputId = "GB", label = "Group By", choices = GBChoices)
-selectInput(inputId = "Metric", label = "Metric", choices = names(select_if(startData,is.numeric)))
+startData <- toptenexport
+GBChoices <- as.list(names(startData))
+names(GBChoices) <- paste(names(startData),map(startData,~length(unique(.x))))
+
+selectInput(inputId = "GB", label = "Group By", choices = GBChoices, selected = "Year 19")
+selectInput(inputId = "Metric", label = "Metric", choices = names(select_if(startData,is.numeric)), selected = "Year")
+
+updateData <- reactive(
+  startData %>% 
+    group_by_(input$GB) %>% 
+    summarise_if(is.numeric, sum, na.rm=T)
+  )
 ```
 
 Column 
@@ -354,8 +338,8 @@ Column
 ```{r}
 renderPlot({
   updateData() %>%
-    ggplot(aes_string(x=input$GB, y=input$Metric, fill=input$GB)) +
-      geom_col()
+  ggplot(aes_string(x=input$GB, y=input$Metric, fill=input$GB)) +
+  geom_col()
 })
 ```
 
@@ -379,8 +363,18 @@ Export by Country
 Column {.sidebar}
 ------------------------------------------------------------------
 ```{r}
-selectInput(inputId = "CE",label = "Group By",choices = CEChoices)
-selectInput(inputId = "Metric_two",label = "Metric",choices = names(select_if(countryExport,is.numeric)))
+countryExport <- countryYearExport
+CEChoices <- as.list(names(countryExport))
+names(CEChoices) <- paste(names(countryExport),map(countryExport,~length(unique(.x))))
+
+selectInput(inputId = "CE",label = "Group By",choices = CEChoices, selected = "Year 19")
+selectInput(inputId = "Metric_two",label = "Metric",choices = names(select_if(countryExport,is.numeric)), selected = "Year")
+
+updateCountryExport <- reactive(
+  countryExport %>%
+    group_by_(input$CE) %>% 
+    summarise_if(is.numeric,sum,na.rm=T)
+  )
 ```
 
 column
