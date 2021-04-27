@@ -55,7 +55,7 @@ tradeStatsNoDup$HS.Code <- as.character(tradeStatsNoDup$HS.Code)
 tradeStatsNoBanknotes <- tradeStatsNoDup[tradeStatsNoDup$HS.Code != "49070010", ]
 
 # Create subset for Export and Import commodities 
-tradeStatsSubset <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$Type %in% c( "IM / 4", "IM / 7", "PC / 4"), ]
+tradeStatsSubset <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$Type %in% c("EX / 1","EX / 3", "IM / 4", "IM / 7", "PC / 4"), ]
 tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
 
 # Print progress
@@ -208,6 +208,9 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 
 # Make copy of latest month's processed data
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
+
+# Create csv of last months processed data
+write.csv(processedTradeStats, "OUT_PROC_ASY_ProcessedRawData_31-01-20.csv")
 
 # Note progress
 cat("Finished processing and cleaning latest month's data.\n")

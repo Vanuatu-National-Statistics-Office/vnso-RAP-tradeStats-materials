@@ -14,10 +14,8 @@ date <- max(processedTradeStats$Reg..Date, na.rm=TRUE)
 month <- format(date, "%B")
 year <- format(date, "%Y")
 
-# Note the excel workbook containing the final formmatted tables
-#finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-19_WORKING.xlsx")
-finalWorkbookFileName <- choose.files(default="SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-19_WORKING.xlsx", multi=FALSE,
-                                      caption="Select the output excel file containing the formatted tables to be edited (should be in outputs folder)")
+# Note the excel workbook containing the final formatted tables
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-19_WORKING.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
