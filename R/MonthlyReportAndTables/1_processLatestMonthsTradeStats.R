@@ -148,7 +148,7 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMer
 # Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
 tradeStatsFileMergeCountryDesExports <- file.path(openDataFolder, "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.csv") 
 countryDescriptionExports <- read.csv(tradeStatsFileMergeCountryDesExports)
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionExports, by="CE/CD", all.x=TRUE)
+tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionExports, by="CE.CD", all.x=TRUE)
 
 ## PRINCIPLE COMMODITIES ##
 
