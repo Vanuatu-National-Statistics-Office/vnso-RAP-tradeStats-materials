@@ -23,7 +23,7 @@ tradeStats <- read.csv(tradeStatsFile, check.names = FALSE)
 tradeStats <- tradeStats[tradeStats$Office != "Office", ]
 
 # Note the date column as dates
-tradeStats$`Reg..Date` <- as.Date(tradeStats$`Reg..Date`, format = "%d/%m/%Y")
+tradeStats$`Reg. Date` <- as.Date(tradeStats$`Reg. Date`, format = "%d/%m/%Y")
 
 # Remove empty columns
 emptyColumns <- apply(tradeStats, MARGIN = 2,
