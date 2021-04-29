@@ -21,35 +21,36 @@ openDataFolder <- file.path(repository, "data", "open")
 
 # Read in the raw trade data from secure folder of the repository 
 tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.csv")
-tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA")) #replace blank cells with missing values-NA
+tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
 #### Clean and process the latest month's data ####
 
-## Initial re-formatting of the data
-
-# Explore summary statistics
-str(tradeStats)
-summary(tradeStats)
+# Initial re-formatting of the data
 
 # Remove the repeated header row from the trade statistics data
 tradeStatsNoRepeatedHeader <- tradeStats[tradeStats$Office != "Office", ]
 
+# Remove blank columns
+emptyColumns <- apply(tradeStatsNoRepeatedHeader, MARGIN = 2, FUN = function(column){
+  return(sum(is.na(column)) == length(column))
+})
+tradeStatsNoBlankCols <- tradeStatsNoRepeatedHeader[, emptyColumns == FALSE]
+
 # Remove duplicated rows from the trade statistics data
-duplicatedRows <- duplicated(tradeStatsNoRepeatedHeader) 
-tradeStatsNoDup <- tradeStatsNoRepeatedHeader[duplicatedRows == FALSE, ]
+duplicatedRows <- duplicated(tradeStatsNoBlankCols) 
+tradeStatsNoDup <- tradeStatsNoBlankCols[duplicatedRows == FALSE, ]
 
 # Convert the statistical value to numeric
-tradeStatsNoDup$Stat..Value <- as.numeric(tradeStatsNoDup$Stat..Value)
+tradeStatsNoDup$Stat..Value <- as.numeric(gsub(",", "", tradeStatsNoDup$Stat..Value))
 
 # Convert excel figures to dates
-tradeStatsNoDup$Reg..Date <- as.Date(as.numeric(tradeStatsNoDup$Reg..Date), origin="1899-12-30") # For numeric dates excel sets origin to December 30, 1899 (https://stackoverflow.com/questions/43230470/how-to-convert-excel-date-format-to-proper-date-in-r)
-tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, format = "%m/%d/%Y")
+tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, format = "%d/%m/%Y")
 
 # Convert SITC to character
-tradeStatsNoDup$SITC <- as.character(tradeStatsNoDup$SITC)
+tradeStatsNoDup$SITC <- sapply(tradeStatsNoDup$SITC, FUN=padWithZeros, "SITC")
 
 # Convert HS.Code to character
-tradeStatsNoDup$HS.Code <- as.character(tradeStatsNoDup$HS.Code)
+tradeStatsNoDup$HS.Code <- sapply(tradeStatsNoDup$HS.Code, FUN=padWithZeros, "HS")
 
 # Exclude banknotes from exports
 tradeStatsNoBanknotes <- tradeStatsNoDup[tradeStatsNoDup$HS.Code != "49070010", ]
@@ -75,15 +76,11 @@ proportionMissing <- numberMissing / nrow(tradeStatsCommodities)
 # Set the plotting margins
 par(mar=c(10, 4, 4, 1))
 
-# Plot the proportion missing in each column
-barplot(proportionMissing[order(proportionMissing)], las=2, ylim=c(0,1),
-        main="Amount missing values in each column",
-        ylab="Proportion")
-
-## TO DO ##
-# Add in an check to see whether non-PRF columns have proportion more than 0.1
-# Identify where the missing data are to enable follow up later
-# Row and column of missing observations
+# Check for columns with high amounts of NA values
+colsWithManyMissingValues <- names(proportionMissing)[proportionMissing > 0.1]
+for(column in colsWithManyMissingValues){
+  warning(paste0("Large amounts of missing data identified in \"", column, "\" column. Use View(tradeStatsCommodities[is.na(tradeStatsCommodities[, \"",  column, "\"]) to view."))
+}
 
 # Print progress
 cat("Finished exploring extent of missing data.\n")
@@ -117,8 +114,9 @@ cat("Added separate date elements.\n")
 ## MODE OF TRANSPORT ##
 
 # Merge Mode of Transport classifications with cleaned data
-tradeStatsFileMergeTransport <- file.path(openDataFolder, "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.csv") 
+tradeStatsFileMergeTransport <- file.path(openDataFolder, "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.csv")
 modeOfTransport <- read.csv(tradeStatsFileMergeTransport)
+colnames(modeOfTransport)[1] <- "Office"
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, modeOfTransport, by="Office", all.x=TRUE)
 
 ## HARMONISED SYSTEM (HS) CODES ##
@@ -126,6 +124,7 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, m
 # Merge Harmonised System (HS) Code classifications with cleaned data
 tradeStatsFileMergeHSCode <- file.path(openDataFolder, "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.csv") 
 hsDescription <- read.csv(tradeStatsFileMergeHSCode)
+colnames(hsDescription)[1] <- "HS.Code_2"
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, hsDescription, by="HS.Code_2", all.x=TRUE)
 
 ## STANDARD INTERNATIONAL TRADE CLASSIFICATION (SITC) CODES ##
@@ -133,7 +132,7 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMer
 # Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
 tradeStatsFileMergeSITCCode <- file.path(openDataFolder, "OPN_FINAL_ASY_SITCCodeClassifications_31-01-20.csv") 
 sitcDescription <- read.csv(tradeStatsFileMergeSITCCode)
-colnames(sitcDescription)[2] <- "SITC_description"
+colnames(sitcDescription) <- c("SITC_1", "SITC.description")
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, sitcDescription, by="SITC_1", all.x=TRUE)
 
 ## COUNTRY DESCRIPTIONS OF IMPORTS ##
@@ -155,6 +154,7 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMer
 # Merge Principle Commodity Classifications of Exports and Imports with cleaned data
 tradeStatsFileMergePrincipleCommdityClass <- file.path(openDataFolder, "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.csv") 
 principleCommodityClassification <- read.csv(tradeStatsFileMergePrincipleCommdityClass)
+colnames(principleCommodityClassification)[1] <- "HS.Code"
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, principleCommodityClassification, by="HS.Code", all.x=TRUE)
 
 ## BROAD ECONOMIC CATEGORIES (BEC) ##
@@ -174,8 +174,8 @@ cat("Finished merging in classification tables.\n")
 # and column is a vector of columns that were imported during the merging (one for each merge only)
 infoAboutMissingObservations <- searchForMissingObservations(
   tradeStatsCommoditiesMergedWithClassifications, 
-  by=c("Office", "HS.Code_2", "SITC_1", "CO", "CE/CD", "HS.Code", "HS.Code_6"), 
-  column=c("Mode.of.Transport", "HS.Section", "SITC_description", "IMPORT.REG#", "EXPORT.REG#", "TAR_ALL", "BEC.Descriptions"),
+  by=c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6"), 
+  column=c("Mode.of.Transport", "HS.Section", "SITC.description", "IMPORT.REG.", "EXPORT.REG.", "TAR_ALL", "BEC.Descriptions"),
   printWarnings=FALSE)
 
 # Check whether missing observations were present after merging
@@ -199,7 +199,9 @@ historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_
 # Check the commodity values against expected values based on historic data
 commoditiesWithExpectations <- checkCommodityValues(tradeStatsCommoditiesMergedWithClassifications,  
                                                     historicImportsSummaryStats, historicExportsSummaryStats,
-                                                    importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000, 3071), useUnitValue=FALSE)
+                                                    importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000, 3071), useUnitValue=FALSE,
+                                                    columnsOfInterest = c("HS.Code", "Type", "Reg..Date", 
+                                                                          "CP4", "Itm.."))
 
 # Print progress
 cat("Finished checking whether commodity values fall outside of expectations based on historic data.\n")
