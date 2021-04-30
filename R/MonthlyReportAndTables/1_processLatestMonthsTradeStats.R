@@ -204,6 +204,7 @@ commoditiesWithExpectations <- checkCommodityValues(tradeStatsCommoditiesMergedW
 # Print progress
 cat("Finished checking whether commodity values fall outside of expectations based on historic data.\n")
 
+
 #### Finish ####
 
 # Make copy of latest month's processed data
