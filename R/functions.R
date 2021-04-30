@@ -1,3 +1,44 @@
+
+#' Pad the SITC or HS code values with zeros
+#'
+#' Pads SITC or HS values with leading/lagging zeros to conform with classification standards. Add zeros to left of HS code to make them 8 digits. Adds zeros to HS codes to match 5 digit format 000.00.
+#' @param code A value representing an HS or SITC code
+#' @param type The type of codes ("SITC" or "HS") in values. Defaults to "HS"
+#' @return A character string of the code padded with zeros
+padWithZeros <- function(code, type = "HS"){
+  
+  # Skip NA values
+  if(is.na(code)){
+    return(code)
+  }
+  
+  # Convert the code to a character string
+  code <- as.character(code)
+
+  # Handle HS codes
+  if(type == "HS"){
+    
+    code <- paste0(paste(rep(0, 8 - nchar(code)), collapse = ""), code)
+
+  # Handle SITC codes
+  }else if(type == "SITC"){
+
+    partsOfCode <- strsplit(code, split = "\\.")[[1]]
+
+    if(length(partsOfCode) == 2 && nchar(partsOfCode) <= 3 && nchar(partsOfCode[2]) <= 2){
+      code <- paste0(paste(rep(0, 3 - nchar(partsOfCode[1])), collapse = ""), partsOfCode[1], ".", 
+                            partsOfCode[2], paste0(rep(0, 3 - nchar(partsOfCode[1])), collapse = ""))
+    }else{
+      warning(paste0("Format of current SITC code (", code, ") isn't in the expected form: 000.00. Code will remain unchanged."))
+    }
+    
+  }else{
+    warning(paste0("Code type provided (", type, ") is not recognised. Should be one of c(\"SITC\" or \"HS\"). Code will remain unchanged."))
+  }
+  
+  return(code)
+}
+
 #' Use \code{kableExtra} package to create nice scrollable table in Rmarkdown
 #'
 #' A function to change the alpha value (transparency) of colours that are defined as strings.
@@ -448,6 +489,12 @@ extractCodeSubset <- function(codes, nDigits){
   subsettedCodes <- sapply(codes, 
                            FUN=function(code, nDigits){
                              
+                             # Check for NA values
+                             if(is.na(code)){
+                               warning(paste0("Skipping NA value when extract subset of code."))
+                               return(NA)
+                             }
+                             
                              # Check if the number of digits we want to select is less than or equal 8
                              if(nDigits > nchar(code)){
                                warning(paste0("The number of digits (", nDigits, ") to extract was more than the length of the code (", code, ") provided"))
@@ -516,26 +563,39 @@ calculateStatValueSum<- function(processedTradeStats, codes_CP4, categoryCol, ca
 #' A function that searches column added after merging to identify if any values missing
 #' @param merged A data.frame resulting from a merge operation
 #' @param by A vector of columns used as common identifiers in merge operation. Note where multiple values are present, each should have corresponding value in \code{column}.
-#' @param column A vector of columns that were pulled in during merge
+#' @param columns A vector of columns that were pulled in during merge
 #' @param printWarnings Boolean value to indicate whether or not to print warnings
-searchForMissingObservations <- function(merged, by, column, printWarnings=TRUE){
+searchForMissingObservations <- function(merged, by, columns, printWarnings=TRUE){
+  
+  # Check that by and columns are the same length
+  if(length(by) != length(columns)){
+    stop("Number of values in \"by\" and \"columns\" parameters don't match. For each column provided in \"by\" parameter a paired column (that was pulled in during merge) should be provided.")
+  }
   
   # Initialise a data.frame to store information about the missing observations
   missingInfo <- data.frame("ClassificationValue"=NA, "ClassificationColumn"=NA, "MergedColumn"=NA)
   row <- 0
   
   # Examine each of the columns of interest
-  for(columnIndex in seq_along(column)){
+  for(columnIndex in seq_along(columns)){
+    
+    # Skip if column names provided for by and matched columns are not present
+    if(columns[columnIndex] %in% colnames(merged) == FALSE){
+      stop(paste0("Column name provided in \"columns\" parameter (", columns[columnIndex], ") not present in table"))
+    }
+    if(by[columnIndex] %in% colnames(merged) == FALSE){
+      stop(paste0("Column name provided in \"by\" parameter (", by[columnIndex], ") not present in table"))
+    }
     
     # Check if any NA values are present in column of interest
-    naIndices <- which(is.na(merged[, column[columnIndex]]))
+    naIndices <- which(is.na(merged[, columns[columnIndex]]))
     
     # If NAs are present report the category they are present for
     for(naIndex in naIndices){
       
       # Store information about the current missing observation
       row <- row + 1
-      missingInfo[row, ] <- c(merged[naIndex, by[columnIndex]], by[columnIndex], column[columnIndex])
+      missingInfo[row, ] <- c(merged[naIndex, by[columnIndex]], by[columnIndex], columns[columnIndex])
       
       # Print warning if requested
       if(printWarnings){
@@ -637,9 +697,12 @@ calculateSummaryStatistics <- function(values){
 #' @param importCP4s CP4 codes that identify IMPORTS
 #' @param exportCP4s CP4 codes that identify EXPORTS
 #' @param useUnitValue Boolean value indicating whether to use range, 95% and 99% bounds of the Unit Value. Defaults to false and uses Value.
+#' @param columsnOfInterest A vector of columns of interest to include in summary statistics table (merge by) to go alongside "Stat..Value" column
 #' @return Returns an numeric labeled vector containing the summary statistics
 checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, historicExportsSummaryStats,
-                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000), useUnitValue=FALSE){
+                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000), useUnitValue=FALSE,
+                                 columnsOfInterest=c("HS.Code", "Type", "Reg..Date", 
+                                                     "CP4", "Itm..")){
   
   # Pad the HS codes with zeros to make up to 8 digits
   padHSCode <- function(hsCode, length=8){
@@ -667,8 +730,7 @@ checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, histor
   summaryColumnsOfInterest <- paste0(summaryPrefix, c("Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"))
   
   # Get the expected distribution summary statistics for each commodity
-  commoditiesWithExpectations <- merge(tradeStats[c("HSAndType", "HS.Code", "Type", "Reg..Date", 
-                                                   "CP4", "Itm.#", "Stat..Value")],
+  commoditiesWithExpectations <- merge(tradeStats[, c("HSAndType", columnsOfInterest, "Stat..Value")],
                                        historicSummaryStats[, c("HSAndType", summaryColumnsOfInterest)],
                                        by="HSAndType",
                                        all.x=TRUE)
