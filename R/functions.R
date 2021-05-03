@@ -1,7 +1,7 @@
 
 #' Pad the SITC or HS code values with zeros
 #'
-#' Pads SITC or HS values with leading/lagging zeros to conform with classification standards. Add zeros to left of HS code to make them 8 digits. Adds zeros to HS codes to match 5 digit format 000.00.
+#' Pads SITC or HS values with leading/lagging zeros to conform with classification standards. Add zeros to left of HS code to make them 8 digits. Adds zeros to SITC codes to match 5 digit format 000.00.
 #' @param code A value representing an HS or SITC code
 #' @param type The type of codes ("SITC" or "HS") in values. Defaults to "HS"
 #' @return A character string of the code padded with zeros

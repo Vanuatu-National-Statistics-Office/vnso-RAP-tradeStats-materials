@@ -142,13 +142,47 @@ exportsJanuary2017 <- sum(exports2017Commodities[exports2017Commodities$Month ==
 exportsJanuary2020 <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE)
 percentageChangeJanuaryExports<- (exportsJanuary2020/exportsJanuary2017)*100 # needs to be 120% to meet Target
 
+
 # ECO 1.5.2 Calculate Target: trade by trade agreement (value)- 2020 exports increase by 15%
+importsAndExports2019File <- file.path(secureDataFolder,"SEC_PROC_ASY_RawDataAndReferenceTables_CompleteImportExport2019.csv")
+importsAndExports2019 <- read.csv(importsAndExports2019File)
+importsAndExports2019Commodities <- importsAndExports2019[importsAndExports2019$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
+
+tradeStatsForMSG2019 <- importsAndExports2019Commodities[is.na(importsAndExports2019Commodities$PRF) == FALSE & importsAndExports2019Commodities$PRF == "MSG", ]
+
+
+msgProxyExportValue2019 <- importsAndExports2019Commodities[importsAndExports2019Commodities$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ] #need to exclude re-exports from this calculation
+
+
+msgImportValue<- sum(tradeStatsForMSG$Stat..Value)
+msgProxyExportValue <- sum(processedTradeStats[processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
+msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
+
+
+
+
+
+
+totalMonthlyValueByMonthAndExport <- importsAndExports2017Commodities %>%
+  group_by(Month, Procedure) %>%
+  summarise(total = sum(Value))
+
+exports2017Commodities <- totalMonthlyValueByMonthAndExport[totalMonthlyValueByMonthAndExport$Procedure %in% c(1000), ]
+
+exportsJanuary2017 <- sum(exports2017Commodities[exports2017Commodities$Month == 1, "total"], na.rm=TRUE)
+exportsJanuary2020 <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE)
+percentageChangeJanuaryExports<- (exportsJanuary2020/exportsJanuary2017)*100 # needs to be 120% to meet Target
 
 
 
 
 
 # ECO 1.5.3 Calculate Target: balance of trade by major partner countries- 2020 exports increase by 20%
+
+
+
+
+
 
 # ECO 1.6.2 Calculate Target: total estimated value of trade agreement as proportion of GDP- 2030 increase by 15%
 
