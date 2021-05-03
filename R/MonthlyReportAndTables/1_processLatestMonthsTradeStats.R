@@ -144,6 +144,7 @@ tradeStatsFileMergeCountryDesImports <- file.path(openDataFolder, "OPN_FINAL_ASY
 countryDescriptionImports <- read.csv(tradeStatsFileMergeCountryDesImports)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionImports, by="CO", all.x=TRUE)
 
+
 ## COUNTRY DESCRIPTIONS OF EXPORTS ##
 
 # Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
