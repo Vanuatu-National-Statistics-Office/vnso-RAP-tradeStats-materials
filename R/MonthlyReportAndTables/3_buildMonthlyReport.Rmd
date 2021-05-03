@@ -150,13 +150,8 @@ importsAndExports2019Commodities <- importsAndExports2019[importsAndExports2019$
 
 tradeStatsForMSG2019 <- importsAndExports2019Commodities[is.na(importsAndExports2019Commodities$PRF) == FALSE & importsAndExports2019Commodities$PRF == "MSG", ]
 
+msgProxyExportValue2019 <- importsAndExports2019Commodities[importsAndExports2019Commodities$CE.CD %in% c("FJ", "NC", "PG", "SB"), ] #need to exclude re-exports from this calculation
 
-msgProxyExportValue2019 <- importsAndExports2019Commodities[importsAndExports2019Commodities$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ] #need to exclude re-exports from this calculation
-
-
-msgImportValue<- sum(tradeStatsForMSG$Stat..Value)
-msgProxyExportValue <- sum(processedTradeStats[processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
-msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
 
 
 
