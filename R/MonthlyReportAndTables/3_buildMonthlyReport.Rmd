@@ -6,16 +6,16 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-# Set echo=FALSE as default for code cells
+## Set echo=FALSE as default for code cells
 knitr::opts_chunk$set(echo=FALSE)
 
-# Load the required libraries
+## Load the required libraries
 library(knitr) # Creating documents
 library(flextable) # Nicely formatted tables
 library(rworldmap) # World map
 library(ggplot2) # Creating plots
 
-# Set the table formatting defaults
+## Set the table formatting defaults
 set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
                        text.align="left", table.layout="fixed", theme_fun="theme_booktabs")
 ```
@@ -24,16 +24,25 @@ set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="b
 
 ```{r NSDP indicators}
 
-# Calculate Proxy for ECO 1.4.1 Value of international trade/merchandise trade (NSDP indicator is for national)
+## ECO 1.4.1 Value and volume of national trade/merchandise trade
+## Proxy calculated: Value of international export trade/merchandise trade 
 exports <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE) 
 
-# Calculate Proxy for ECO 1.5.2 Trade by trade agreement (all exports included to MSG countries)
+# ECO 1.5.2 Trade by trade agreement (value)
+## Proxy calculated: Trade by trade agreement, all exports included to MSG countries
+
+# Calculate value of all international trade that registered under a trade agreement (only imports registered) 
 tradeStatsForMSG <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
 msgImportValue<- sum(tradeStatsForMSG$Stat..Value)
-msgProxyExportValue <- sum(processedTradeStats[processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
+
+# Calculate value of exports that are destined to countries that have signed trade agreement (MSG)
+msgProxyExportValue <- sum(processedTradeStats[processedTradeStats$CP4 == 1000 & processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
+
+# Proxy indicator for NSDP indicator ECO 1.5.2
 msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
 
-# Calculate ECO 1.5.3 Balance of Trade by major partner countries 
+
+## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
 codesCP4 <- c(1000, 3071) # Define the CP4 codes need for Exports table 
 
 # Define the categories used for each column
@@ -102,12 +111,22 @@ colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTrad
                                                             return(strsplit(colName, split=":")[[1]][1])
                                                           })
 
-# Calculate Proxy for ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP (all exports included to MSG countries, and GDP taken from 2018)
+# Indicator for NSDP ECO 1.5.2
+aggregatedBalanceOfTradeByMajorPartnerCountries<- sum(balanceOfTradeByMajorPartnerCountries$Total)
+
+
+## ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP
+## Proxy calculated: Total estimated value of trade agreement as a proportion of GDP (all exports included to MSG countries, and GDP taken from 2018) 
+
+# Read in the data from the open folder of the repository 
 grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
 timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
-mostRecentGrossDomesticProduct<- timeSeriesGrossDomesticProduct[13, 2] 
+
+# Proxy indicator for NSDP ECO 1.6.2
+mostRecentGrossDomesticProduct<- timeSeriesGrossDomesticProduct[13, 2] #identify 2018 GDP
 tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
 
+## 
 # Calculate proxy for ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra (only produce exported)
 codesCP4 <- c(1000) # CP4 code for exports
 
