@@ -26,8 +26,6 @@ set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="b
 
 # Calculate Proxy for ECO 1.4.1 Value of international trade/merchandise trade (NSDP indicator is for national)
 exports <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE) 
-reExports <- sum(processedTradeStats[processedTradeStats$CP4 == 3071, "Stat..Value"], na.rm=TRUE)
-imports <- sum(processedTradeStats[processedTradeStats$CP4 %in% c(4000, 4071, 7100), "Stat..Value"], na.rm=TRUE)
 
 # Calculate Proxy for ECO 1.5.2 Trade by trade agreement (all exports included to MSG countries)
 tradeStatsForMSG <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
@@ -104,9 +102,9 @@ colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTrad
                                                             return(strsplit(colName, split=":")[[1]][1])
                                                           })
 
-# Calculate Proxy for ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP
-grossDomesticProductFile <- file.path(openDataFolder, "GrossDomesticProduct_2006-2018.xlsx")
-timeSeriesGrossDomesticProduct <- read.xlsx(grossDomesticProductFile, sheet=1, skipEmptyRows=TRUE)
+# Calculate Proxy for ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP (all exports included to MSG countries, and GDP taken from 2018)
+grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
+timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
 mostRecentGrossDomesticProduct<- timeSeriesGrossDomesticProduct[13, 2] 
 tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
 
@@ -130,8 +128,25 @@ columnCategories <- list(
 totalPrincipleExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # ECO 1.4.1 Calculate Target: value and volume of international trade/merchandise trade (proxy- NSDP indicator is for national)- 2030 increase of 20%
+importsAndExports2017File <- file.path(secureDataFolder,"SEC_PROC_ASY_RawDataAndReferenceTables_CompleteImportExport2017.csv")
+importsAndExports2017 <- read.csv(importsAndExports2017File)
+importsAndExports2017Commodities <- importsAndExports2017[importsAndExports2017$Procedure %in% c(1000, 3071, 4000, 4071, 7100), ]
+
+totalMonthlyValueByMonthAndExport <- importsAndExports2017Commodities %>%
+  group_by(Month, Procedure) %>%
+  summarise(total = sum(Value))
+
+exports2017Commodities <- totalMonthlyValueByMonthAndExport[totalMonthlyValueByMonthAndExport$Procedure %in% c(1000), ]
+
+exportsJanuary2017 <- sum(exports2017Commodities[exports2017Commodities$Month == 1, "total"], na.rm=TRUE)
+exportsJanuary2020 <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE)
+percentageChangeJanuaryExports<- (exportsJanuary2020/exportsJanuary2017)*100 # needs to be 120% to meet Target
 
 # ECO 1.5.2 Calculate Target: trade by trade agreement (value)- 2020 exports increase by 15%
+
+
+
+
 
 # ECO 1.5.3 Calculate Target: balance of trade by major partner countries- 2020 exports increase by 20%
 

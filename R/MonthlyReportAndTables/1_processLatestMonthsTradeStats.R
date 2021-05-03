@@ -217,5 +217,5 @@ processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 write.csv(processedTradeStats, "OUT_PROC_ASY_ProcessedRawData_31-01-20.csv")
 
 # Note progress
->>>>>>> 1382eda972ccb65df8de2c7dee3d3a3fb7470a0a
+
 cat("Finished processing and cleaning latest month's data.\n")
