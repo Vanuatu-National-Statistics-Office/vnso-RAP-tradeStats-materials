@@ -24,6 +24,8 @@ set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="b
 
 ```{r NSDP indicators}
 
+### Calculating NSDP Indicators 
+
 ## ECO 1.4.1 Value and volume of national trade/merchandise trade
 ## Proxy calculated: Value of international export trade/merchandise trade 
 exports <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE) 
@@ -35,12 +37,12 @@ exports <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value
 tradeStatsForMSG <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
 msgImportValue<- sum(tradeStatsForMSG$Stat..Value)
 
-# Calculate value of exports that are destined to countries that have signed trade agreement (MSG)
+# Calculate estimated value of exports that are destined to countries that have signed trade agreement (MSG)
 msgProxyExportValue <- sum(processedTradeStats[processedTradeStats$CP4 == 1000 & processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
 
 # Proxy indicator for NSDP indicator ECO 1.5.2
 msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
-
+msgTradeAgreementProxyDataFrame <- data.frame("TradeAgreementEstimate"= msgTradeAgreementProxyValue)
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
 codesCP4 <- c(1000, 3071) # Define the CP4 codes need for Exports table 
@@ -111,7 +113,7 @@ colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTrad
                                                             return(strsplit(colName, split=":")[[1]][1])
                                                           })
 
-# Indicator for NSDP ECO 1.5.2
+# Indicator for NSDP ECO 1.5.3
 aggregatedBalanceOfTradeByMajorPartnerCountries<- sum(balanceOfTradeByMajorPartnerCountries$Total)
 
 
@@ -126,8 +128,9 @@ timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
 mostRecentGrossDomesticProduct<- timeSeriesGrossDomesticProduct[13, 2] #identify 2018 GDP
 tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
 
-## 
-# Calculate proxy for ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra (only produce exported)
+
+## Calculate ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra
+## Proxy calculated: Level of production of major exported commodities to including beef, cocoa, coconut oil, coffee, copra, fish tuna, kava and wood 
 codesCP4 <- c(1000) # CP4 code for exports
 
 # Define the categories used for each column
@@ -146,49 +149,50 @@ columnCategories <- list(
 # Build the table
 totalPrincipleExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-# ECO 1.4.1 Calculate Target: value and volume of international trade/merchandise trade (proxy- NSDP indicator is for national)- 2030 increase of 20%
-importsAndExports2017File <- file.path(secureDataFolder,"SEC_PROC_ASY_RawDataAndReferenceTables_CompleteImportExport2017.csv")
-importsAndExports2017 <- read.csv(importsAndExports2017File)
-importsAndExports2017Commodities <- importsAndExports2017[importsAndExports2017$Procedure %in% c(1000, 3071, 4000, 4071, 7100), ]
+# Proxy indicator for NSDP ECO 1.7.1
+aggregatedTtotalPrincipleExports<- sum(totalPrincipleExports$Total)
 
-totalMonthlyValueByMonthAndExport <- importsAndExports2017Commodities %>%
+
+### Calculating Progress Against NSDP Indicator Targets
+
+## ECO 1.4.1, proxy calculated: Value of international export trade/merchandise trade- 2030 increase of 20%
+
+# Read in the data from the secure folder of the repository. Need to calculate Baseline indicators, NSDP launched in 2017, therefore use 2016 data
+exportSummaryFile <- file.path(secureDataFolder,"exports_HS_summaryStats_02-10-20.csv")
+exportSummarySummaryStats <- read.csv(exportSummaryFile)
+
+# Calculate value of exports by month
+exports2016Commodities <- exportSummarySummaryStats[exportSummarySummaryStats$Procedure == 1000 & exportSummarySummaryStats$Year == "2016", ]
+totalMonthlyValueByMonthAndExport <- exports2016Commodities %>%
   group_by(Month, Procedure) %>%
   summarise(total = sum(Value))
 
-exports2017Commodities <- totalMonthlyValueByMonthAndExport[totalMonthlyValueByMonthAndExport$Procedure %in% c(1000), ]
-
-exportsJanuary2017 <- sum(exports2017Commodities[exports2017Commodities$Month == 1, "total"], na.rm=TRUE)
+# Calculate progress of NSDP (proxy indicator- ECO 1.4.1). Target sets an increase of 20% by 2030 (percentage should be 120%) 
+exportsJanuary2016 <- sum(totalMonthlyValueByMonthAndExport[totalMonthlyValueByMonthAndExport$Month == 1, "total"], na.rm= TRUE)
 exportsJanuary2020 <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE)
-percentageChangeJanuaryExports<- (exportsJanuary2020/exportsJanuary2017)*100 # needs to be 120% to meet Target
+percentageChangeJanuaryExports<- (exportsJanuary2020/exportsJanuary2016)*100 # needs to be 120% to meet Target
 
 
-# ECO 1.5.2 Calculate Target: trade by trade agreement (value)- 2020 exports increase by 15%
+## ECO 1.5.2, proxy calculated: Trade by trade agreement (value), all exports included to MSG countries- 2020 exports increase by 15%
+
+# Read in the data from the open folder of the repository. Need to calculate Baseline indicators, commodity by Trade Agreements not registered in Asycuda system in 2016 so baseline data taken from 2019
 importsAndExports2019File <- file.path(secureDataFolder,"SEC_PROC_ASY_RawDataAndReferenceTables_CompleteImportExport2019.csv")
 importsAndExports2019 <- read.csv(importsAndExports2019File)
-importsAndExports2019Commodities <- importsAndExports2019[importsAndExports2019$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
 
-tradeStatsForMSG2019 <- importsAndExports2019Commodities[is.na(importsAndExports2019Commodities$PRF) == FALSE & importsAndExports2019Commodities$PRF == "MSG", ]
+# Create subset of all international trade that registered under a trade agreement (only imports registered) 
+tradeStatsMSGImports2019 <- importsAndExports2019[is.na(importsAndExports2019$PRF) == FALSE & importsAndExports2019$PRF == "MSG", ]
+tradeStatsMSGExports2019<- importsAndExports2019[importsAndExports2019$CP4 == 1000 &     importsAndExports2019$CE.CD %in% c("FJ", "NC", "PG", "SB"), ]
+estimatedTradeAgreementCommodities<- rbind(tradeStatsMSGImports2019, tradeStatsMSGExports2019)
 
-msgProxyExportValue2019 <- importsAndExports2019Commodities[importsAndExports2019Commodities$CE.CD %in% c("FJ", "NC", "PG", "SB"), ] #need to exclude re-exports from this calculation
+# Calculate value of Trade Agreements by month
+estimatedTradeAgreementCommodities$Stat..Value <- as.numeric(gsub(",", "", estimatedTradeAgreementCommodities$Stat..Value))# Convert the statistical value to numeric
+totalMonthlyValueTradeAgreements <- estimatedTradeAgreementCommodities %>%
+  group_by(Month) %>%
+  summarise(total = sum(Stat..Value))
 
-
-
-
-
-
-
-totalMonthlyValueByMonthAndExport <- importsAndExports2017Commodities %>%
-  group_by(Month, Procedure) %>%
-  summarise(total = sum(Value))
-
-exports2017Commodities <- totalMonthlyValueByMonthAndExport[totalMonthlyValueByMonthAndExport$Procedure %in% c(1000), ]
-
-exportsJanuary2017 <- sum(exports2017Commodities[exports2017Commodities$Month == 1, "total"], na.rm=TRUE)
-exportsJanuary2020 <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE)
-percentageChangeJanuaryExports<- (exportsJanuary2020/exportsJanuary2017)*100 # needs to be 120% to meet Target
-
-
-
+# Calculate progress of NSDP (proxy indicator- ECO 1.5.2). Target sets an increase of 15% by 2020 (percentage should be 115%) 
+tradeAgreementJanuary2019 <- sum(totalMonthlyValueTradeAgreements[totalMonthlyValueTradeAgreements$Month == 1, "total"], na.rm= TRUE)
+percentageChangeJanuaryExports<- (msgTradeAgreementProxyDataFrame/tradeAgreementJanuary2019)*100 # needs to be 120% to meet Target
 
 
 # ECO 1.5.3 Calculate Target: balance of trade by major partner countries- 2020 exports increase by 20%
