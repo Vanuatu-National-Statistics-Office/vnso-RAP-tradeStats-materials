@@ -197,6 +197,19 @@ percentageChangeJanuaryExports<- (msgTradeAgreementProxyDataFrame/tradeAgreement
 
 # ECO 1.5.3 Calculate Target: balance of trade by major partner countries- 2020 exports increase by 20%
 
+# Read in the data from the secure folder of the repository. Need to calculate Baseline indicators, NSDP launched in 2017, therefore use 2016 data
+importSummaryFile <- file.path(secureDataFolder,"imports_HS_summaryStats_02-10-20.csv")
+importSummarySummaryStats <- read.csv(importSummaryFile)
+importSummarySummaryStats2016<- importSummarySummaryStats[importSummarySummaryStats$Year == "2016", ]
+exportSummaryFile <- file.path(secureDataFolder,"exports_HS_summaryStats_02-10-20.csv")
+exportSummarySummaryStats <- read.csv(exportSummaryFile)
+exportSummarySummaryStats2016<- exportSummarySummaryStats[exportSummarySummaryStats$Year == "2016", ]
+
+# Calculate value of trade by major partner countries per month 
+
+
+
+
 
 
 
