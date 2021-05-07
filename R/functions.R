@@ -7,14 +7,14 @@
 #' @return A character string of the code padded with zeros
 padWithZeros <- function(code, type = "HS", nDigits = 8){
   
+  # Convert the code to a character string
+  code <- as.character(code)
+
   # Skip NA values
   if(is.na(code)){
     return(code)
   }
   
-  # Convert the code to a character string
-  code <- as.character(code)
-
   # Handle HS codes
   if(type == "HS"){
     
@@ -706,11 +706,8 @@ checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, histor
                                                      "CP4", "Itm..")){
   
   # Pad the HS codes with zeros to make up to 8 digits
-  padHSCode <- function(hsCode, length=8){
-    return(paste0(paste(rep(0, length-nchar(hsCode)), collapse=""), hsCode))
-  }
-  historicImportsSummaryStats$HS <- sapply(historicImportsSummaryStats$HS, FUN=padHSCode)
-  historicExportsSummaryStats$HS <- sapply(historicExportsSummaryStats$HS, FUN=padHSCode)
+  historicImportsSummaryStats$HS <- sapply(historicImportsSummaryStats$HS, FUN=padWithZeros, "HS")
+  historicExportsSummaryStats$HS <- sapply(historicExportsSummaryStats$HS, FUN=padWithZeros, "HS")
   
   # Combine the summary stats tables
   historicImportsSummaryStats$HSAndType <- paste0("IMPORT_", historicImportsSummaryStats$HS)
