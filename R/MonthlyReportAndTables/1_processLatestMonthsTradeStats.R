@@ -202,6 +202,9 @@ if(length(rowsWithoutValidHS6) > 0){
 prfColumn <- which(colnames(tradeStatsCommoditiesMergedWithClassifications) == "PRF")
 rowNACounts <- rowSums(is.na(tradeStatsCommoditiesMergedWithClassifications[, -prfColumn]))
 rowsWithNAValues <- tradeStatsCommoditiesMergedWithClassifications[rowNACounts > 0, ]
+if(nrows(rowsWithNAValues) > 0){
+  warning("View the rows of the trade statistics data with missing values with: View(tradeStatsCommoditiesMergedWithClassifications[rowsWithNAValues, ]")
+}
 
 # Print progress
 cat("Finished merging in classification tables.\n")
