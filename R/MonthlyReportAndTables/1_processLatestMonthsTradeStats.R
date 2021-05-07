@@ -122,6 +122,10 @@ tradeStatsFileMergeTransport <- file.path(openDataFolder, "OPN_FINAL_ASY_ModeOfT
 modeOfTransport <- read.csv(tradeStatsFileMergeTransport)
 colnames(modeOfTransport)[1] <- "Office"
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, modeOfTransport, by="Office", all.x=TRUE)
+rowsWithoutValidModeOfTransport <- which(tradeStatsCommodities$Office %in% modeOfTransport$Office == FALSE)
+if(length(rowsWithoutValidModeOfTransport) > 0){
+  warning("Some codes in the \"Office\" column of the trades statistics table are missing in the mode of transport classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidModeOfTransport, \"Office\"])")
+}
 
 ## HARMONISED SYSTEM (HS) CODES ##
 
@@ -131,6 +135,10 @@ hsDescription <- read.csv(tradeStatsFileMergeHSCode)
 colnames(hsDescription)[1] <- "HS.Code_2"
 hsDescription$HS.Code_2 <- sapply(hsDescription$HS.Code_2, FUN=padWithZeros, "HS", 2)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, hsDescription, by="HS.Code_2", all.x=TRUE)
+rowsWithoutValidHS2Code <- which(tradeStatsCommoditiesMergedWithClassifications$HS.Code_2 %in% hsDescription$HS.Code_2 == FALSE)
+if(length(rowsWithoutValidHS2Code) > 0){
+  warning("Some codes in the \"HS.Code_2\" column of the trades statistics table are missing in the HS 2 classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidHS2Code, \"HS.Code_2\"])")
+}
 
 ## STANDARD INTERNATIONAL TRADE CLASSIFICATION (SITC) CODES ##
 
@@ -139,6 +147,10 @@ tradeStatsFileMergeSITCCode <- file.path(openDataFolder, "OPN_FINAL_ASY_SITCCode
 sitcDescription <- read.csv(tradeStatsFileMergeSITCCode)
 colnames(sitcDescription) <- c("SITC_1", "SITC.description")
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, sitcDescription, by="SITC_1", all.x=TRUE)
+rowsWithoutValidSITC1 <- which(tradeStatsCommoditiesMergedWithClassifications$SITC_1 %in% sitcDescription$SITC_1 == FALSE)
+if(length(rowsWithoutValidSITC1) > 0){
+  warning(length(rowsWithoutValidSITC1), " codes in the \"SITC_1\" column of the trades statistics table are missing in the SITC classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidSITC1, \"SITC_1\"])")
+}
 
 ## COUNTRY DESCRIPTIONS OF IMPORTS ##
 
@@ -146,6 +158,10 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMer
 tradeStatsFileMergeCountryDesImports <- file.path(openDataFolder, "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.csv")
 countryDescriptionImports <- read.csv(tradeStatsFileMergeCountryDesImports)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionImports, by="CO", all.x=TRUE)
+rowsWithoutValidImportCountryCode <- which(tradeStatsCommoditiesMergedWithClassifications$CO %in% countryDescriptionImports$CO == FALSE)
+if(length(rowsWithoutValidImportCountryCode) > 0){
+  warning(length(rowsWithoutValidImportCountryCode), " codes in the \"CO\" column of the trades statistics table are missing in the import country classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidImportCountryCode, \"CO\"])")
+}
 
 
 ## COUNTRY DESCRIPTIONS OF EXPORTS ##
@@ -154,6 +170,10 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMer
 tradeStatsFileMergeCountryDesExports <- file.path(openDataFolder, "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.csv") 
 countryDescriptionExports <- read.csv(tradeStatsFileMergeCountryDesExports)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionExports, by="CE.CD", all.x=TRUE)
+rowsWithoutValidExportCountryCode <- which(tradeStatsCommoditiesMergedWithClassifications$CO %in% countryDescriptionExports$CE.CD == FALSE)
+if(length(rowsWithoutValidExportCountryCode) > 0){
+  warning(length(rowsWithoutValidExportCountryCode), " codes in the \"CE.CD\" column of the trades statistics table are missing in the export country classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidExportCountryCode, \"CE.CD\"])")
+}
 
 ## PRINCIPLE COMMODITIES ##
 
@@ -162,6 +182,10 @@ tradeStatsFileMergePrincipleCommdityClass <- file.path(openDataFolder, "OPN_FINA
 principleCommodityClassification <- read.csv(tradeStatsFileMergePrincipleCommdityClass)
 colnames(principleCommodityClassification)[1] <- "HS.Code"
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, principleCommodityClassification, by="HS.Code", all.x=TRUE)
+rowsNotInPrincipleCommoditiesTable <- which(tradeStatsCommoditiesMergedWithClassifications$HS.Code %in% principleCommodityClassification$HS.Code == FALSE)
+if(length(rowsNotInPrincipleCommoditiesTable) > 0){
+  warning(length(rowsNotInPrincipleCommoditiesTable), " codes in the \"HS.Code\" column of the trades statistics table are missing in the principle commodities classification table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsNotInPrincipleCommoditiesTable, \"HS.Code\"])")
+}
 
 ## BROAD ECONOMIC CATEGORIES (BEC) ##
 
@@ -169,32 +193,18 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMer
 tradeStatsFileMergeBECDescriptions <- file.path(openDataFolder, "OPN_FINAL_ASY_BECClassifications_31-01-20.csv")
 becDescriptions <- read.csv(tradeStatsFileMergeBECDescriptions)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, becDescriptions, by="HS.Code_6", all.x=TRUE)
+rowsWithoutValidHS6 <- which(tradeStatsCommoditiesMergedWithClassifications$HS.Code_6 %in% becDescriptions$HS.Code_6 == FALSE)
+if(length(rowsWithoutValidHS6) > 0){
+  warning(length(rowsWithoutValidHS6), " codes in the \"HS.Code_6\" column of the trades statistics table are missing in the BEC classification table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidHS6, \"HS.Code_6\"])")
+}
+
+## Check number of rows with NA values present
+prfColumn <- which(colnames(tradeStatsCommoditiesMergedWithClassifications) == "PRF")
+rowNACounts <- rowSums(is.na(tradeStatsCommoditiesMergedWithClassifications[, -prfColumn]))
+rowsWithNAValues <- tradeStatsCommoditiesMergedWithClassifications[rowNACounts > 0, ]
 
 # Print progress
 cat("Finished merging in classification tables.\n")
-
-#### Check for missing observations after merging ####
-
-# Check each of the columns introduced by merging
-# Note that by is a vector of common columns that were used to join the tables during merging
-# and column is a vector of columns that were imported during the merging (one for each merge only)
-infoAboutMissingObservations <- searchForMissingObservations(
-  tradeStatsCommoditiesMergedWithClassifications, 
-  by=c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6"), 
-  column=c("Mode.of.Transport", "HS.Section", "SITC.description", "IMPORT.REG.", "EXPORT.REG.", "TAR_ALL", "BEC.Descriptions"),
-  printWarnings=FALSE)
-
-# Check whether missing observations were present after merging
-if(is.null(infoAboutMissingObservations) == FALSE){
-  warning(paste0(nrow(infoAboutMissingObservations), " observations were missing following the merging. Examine the \"infoAboutMissingObservations\" variable for more information."))
-}
-
-## TO DO ##
-# Look into why the number of observations has increased here
-
-
-# Print progress
-cat("Finished checking for missing observations after merging.\n")
 
 #### Check if any statistical values fall outside of expected boundaries ####
 

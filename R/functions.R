@@ -1,4 +1,12 @@
 
+checkIfMissingCodesFoundInMergingColumn <- function(rowsWithCodesMissingFromClassificationTable,
+                                                    by, nameOfClassificationTable){
+  
+  if(length(rowsWithCodesMissingFromClassificationTable) > 0){
+    warning(paste0("Some codes in the \"", by, "\" column of the trades statistics data are missing in the ", nameOfClassificationTable, " classification table."))
+  }
+}
+
 #' Pad the SITC or HS code values with zeros
 #'
 #' Pads SITC or HS values with leading/lagging zeros to conform with classification standards. Add zeros to left of HS code to make them 8 digits. Adds zeros to SITC codes to match 5 digit format 000.00.
@@ -575,7 +583,7 @@ searchForMissingObservations <- function(merged, by, columns, printWarnings=TRUE
   }
   
   # Initialise a data.frame to store information about the missing observations
-  missingInfo <- data.frame("ClassificationValue"=NA, "ClassificationColumn"=NA, "MergedColumn"=NA)
+  missingInfo <- data.frame("ValueInColumnUsedToMerge"=NA, "ColumnUsedToMergeOn"=NA, "ColumnBroughtInOnMerge"=NA)
   row <- 0
   
   # Examine each of the columns of interest
