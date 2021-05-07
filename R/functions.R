@@ -4,8 +4,9 @@
 #' Pads SITC or HS values with leading/lagging zeros to conform with classification standards. Add zeros to left of HS code to make them 8 digits. Adds zeros to SITC codes to match 5 digit format 000.00.
 #' @param code A value representing an HS or SITC code
 #' @param type The type of codes ("SITC" or "HS") in values. Defaults to "HS"
+#' @param nDigits The number of zeros to use to pad HS codes. Defaults to 8.
 #' @return A character string of the code padded with zeros
-padWithZeros <- function(code, type = "HS"){
+padWithZeros <- function(code, type = "HS", nDigits = 8){
   
   # Skip NA values
   if(is.na(code)){
@@ -18,7 +19,7 @@ padWithZeros <- function(code, type = "HS"){
   # Handle HS codes
   if(type == "HS"){
     
-    code <- paste0(paste(rep(0, 8 - nchar(code)), collapse = ""), code)
+    code <- paste0(paste(rep(0, nDigits - nchar(code)), collapse = ""), code)
 
   # Handle SITC codes
   }else if(type == "SITC"){
@@ -492,7 +493,7 @@ extractCodeSubset <- function(codes, nDigits){
                              
                              # Check for NA values
                              if(is.na(code)){
-                               warning(paste0("Skipping NA value when extract subset of code."))
+                               warning(paste0("Skipping NA value when extracting subset of code."))
                                return(NA)
                              }
                              

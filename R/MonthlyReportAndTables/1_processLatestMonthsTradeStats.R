@@ -129,7 +129,7 @@ tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, m
 tradeStatsFileMergeHSCode <- file.path(openDataFolder, "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.csv") 
 hsDescription <- read.csv(tradeStatsFileMergeHSCode)
 colnames(hsDescription)[1] <- "HS.Code_2"
-hsDescription$HS.Code_2<- str_pad(hsDescription$HS.Code_2, 2, pad = "0")
+hsDescription$HS.Code_2 <- sapply(hsDescription$HS.Code_2, FUN=padWithZeros, "HS", 2)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, hsDescription, by="HS.Code_2", all.x=TRUE)
 
 ## STANDARD INTERNATIONAL TRADE CLASSIFICATION (SITC) CODES ##
