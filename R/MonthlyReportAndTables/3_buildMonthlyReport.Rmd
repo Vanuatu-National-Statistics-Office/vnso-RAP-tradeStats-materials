@@ -199,25 +199,37 @@ percentageChangeJanuaryExports<- (msgTradeAgreementProxyDataFrame/tradeAgreement
 
 # Read in the data from the secure folder of the repository. Need to calculate Baseline indicators, NSDP launched in 2017, therefore use 2016 data
 importSummaryFile <- file.path(secureDataFolder,"imports_HS_summaryStats_02-10-20.csv")
-importSummarySummaryStats <- read.csv(importSummaryFile)
-importSummarySummaryStats2016<- importSummarySummaryStats[importSummarySummaryStats$Year == "2016", ]
+importSummaryStats <- read.csv(importSummaryFile)
+importSummaryStats2016<- importSummaryStats[importSummaryStats$Year == "2016", ]
 exportSummaryFile <- file.path(secureDataFolder,"exports_HS_summaryStats_02-10-20.csv")
-exportSummarySummaryStats <- read.csv(exportSummaryFile)
-exportSummarySummaryStats2016<- exportSummarySummaryStats[exportSummarySummaryStats$Year == "2016", ]
-
-# Calculate value of trade by major partner countries per month 
+exportSummaryStats <- read.csv(exportSummaryFile)
+exportSummaryStats2016<- exportSummaryStats[exportSummaryStats$Year == "2016", ]
 
 
+# ECO 1.6.2, proxy calculated: Total estimated value of trade agreement as proportion of GDP, all exports included to MSG countries- 2030 increase by 15%
 
+# Read in the data from the open folder of the repository 
+estimatedTradeAgreementCommodities<- rbind(tradeStatsMSGImports2019, tradeStatsMSGExports2019)
+grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
+timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
 
+# Calculate value of Trade Agreements by month
+estimatedTradeAgreementCommodities$Stat..Value <- as.numeric(gsub(",", "", estimatedTradeAgreementCommodities$Stat..Value))# Convert the statistical value to numeric
+totalMonthlyValueTradeAgreements <- estimatedTradeAgreementCommodities %>%
+  group_by(Month) %>%
+  summarise(total = sum(Stat..Value))
 
+# Calculate progress of NSDP (proxy indicator- ECO 1.6.2). Target sets an increase of 15% by 2030 (percentage should be 115%) 
+mostRecentGrossDomesticProduct<- timeSeriesGrossDomesticProduct[13, 2] #identify 2018 GDP
+tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
 
-
-
-
-# ECO 1.6.2 Calculate Target: total estimated value of trade agreement as proportion of GDP- 2030 increase by 15%
 
 # ECO 1.7.1 Calculate Target: level of production of major commodities to include cocoa and copra- 2030 increase 10-15% of the proportion
+
+
+
+
+
 
 # Create the NSDP table
 nsdpIndicators <- data.frame(
@@ -545,6 +557,42 @@ tradeByTradeTable
 # Principle Exports
 
 ```{r principle exports through time, fig.height=1.75}
+# Read in the data from the open folder of the repository 
+majorMonthlyExportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyExportCalculations_31-12-20.csv")
+majorMonthlyExports <- read.csv(majorMonthlyExportsFile)
+
+# Convert values
+majorMonthlyExports$Year <- as.factor(majorMonthlyExports$Year)
+majorMonthlyExports$Copra <- as.numeric(majorMonthlyExports$Copra)
+majorMonthlyExports$Coconut.Oil <- as.numeric(majorMonthlyExports$Coconut.Oil)
+majorMonthlyExports$Beef <- as.numeric(majorMonthlyExports$Beef)
+majorMonthlyExports$Cocoa <- as.numeric(majorMonthlyExports$Cocoa)
+majorMonthlyExports$Kava <- as.numeric(majorMonthlyExports$Kava)
+
+# Calculate value of commodities by year
+totalValueCommoditiesPerYearAverage <- majorMonthlyExports %>%
+  group_by(Year) %>%
+  summarise(Copra = (sum(Copra)/12),
+            Coconut.Oil = (sum(Coconut.Oil)/12),
+            Beef = (sum(Beef)/12),
+            Cocoa = (sum(Cocoa)/12),
+            Kava = (sum(Kava)/12))
+
+# Calculate value of commodities for month
+codesCP4 <- c(1000)
+categoryColumn <- "Principle.Exports"
+columnCategories <- list(
+  "Beef fresh, chilled, frozen and preserved"=c("Beef fresh, chilled, frozen and preserved"),
+  "Cocoa"=c("Cocoa"),
+  "Coconut oil"=c("Coconut Oil"),
+  "Copra"=c("Copra"),
+  "Kava"=c("Kava"))
+
+# Build the table
+totalPrincipleExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+
+
 
 
 
@@ -566,48 +614,7 @@ Automated text to say here where the principle exports are destined for, their w
 
 ```{r new major exports, fig.height=1.75}
 # Add column to tell us whether each row is import or export
-processedTradeStats <- processedTradeStats %>%
-  mutate(CommodityType = case_when(CP4 %in% c(4000, 4071, 7100) ~ "IMPORT",
-                                   CP4 %in% c(1000) ~ "EXPORT",
-                                   CP4 %in% c(3071) ~ "REEXPORT"))
 
-# Calculate total statistical value by country and commodity type
-totalCommodityValueByCountryAndType <- processedTradeStats %>%
-  group_by(CO, CommodityType) %>%
-  summarise(total = sum(Stat..Value), 
-            exportCategory = EXPORT.PARTNER.COUNTRIES[1],
-            importCategory = IMPORT.PARTNER.COUNTRIES[1],
-            country = ifelse(is.na(IMPORT.COUNTRY), EXPORT.COUNTRY[1], IMPORT.COUNTRY[1]),
-            .groups = "drop")
-
-# Calculate the trade balance for each country
-tradeBalanceByCountry <- totalCommodityValueByCountryAndType %>%
-  mutate(totalWithSign = ifelse(CommodityType == "IMPORT", total * -1, total)) %>%
-  group_by(CO, country, importCategory) %>%
-  summarise(balance = sum(totalWithSign), .groups = "drop")
-
-# Order table by the trade balance
-tradeBalanceByCountry <- tradeBalanceByCountry %>%
-  arrange(desc(balance))
-
-# Drop Vanuatu
-tradeBalanceByCountry <- tradeBalanceByCountry %>%
-  filter(country != "VANUATU")
-
-# Select only countries falling into the OTHER category
-tradeBalanceByCountryOther <- tradeBalanceByCountry %>%
-  filter(importCategory == "OTHERS")
-
-# Create a bar chart to view the top 5 and bottom 5 countries
-nRows <- nrow(tradeBalanceByCountryOther)
-ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ], 
-       aes(x = reorder(country, -balance), y = balance)) +
-  geom_bar(stat = "identity") +
-  ylab("Trade Balance") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-        axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank())
 
 
 
@@ -640,6 +647,17 @@ Automated text to say here where the principle exports are destined for, their w
 # Principle Imports
 
 ```{r principle imports through time, fig.height=1.75}
+
+
+
+
+
+
+
+
+
+
+
 dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
                         Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
                         Value=c(50, 76, 96, 65, 86, 30, 60, 45, 75, 80))
@@ -655,49 +673,12 @@ Automated text to say here where the principle exports are destined for, their w
 # Top 5 New Major Imports
 
 ```{r new major imports, fig.height=1.75}
-# Add column to tell us whether each row is import or export
-processedTradeStats <- processedTradeStats %>%
-  mutate(CommodityType = case_when(CP4 %in% c(4000, 4071, 7100) ~ "IMPORT",
-                                   CP4 %in% c(1000) ~ "EXPORT",
-                                   CP4 %in% c(3071) ~ "REEXPORT"))
 
-# Calculate total statistical value by country and commodity type
-totalCommodityValueByCountryAndType <- processedTradeStats %>%
-  group_by(CO, CommodityType) %>%
-  summarise(total = sum(Stat..Value), 
-            exportCategory = EXPORT.PARTNER.COUNTRIES[1],
-            importCategory = IMPORT.PARTNER.COUNTRIES[1],
-            country = ifelse(is.na(IMPORT.COUNTRY), EXPORT.COUNTRY[1], IMPORT.COUNTRY[1]),
-            .groups = "drop")
 
-# Calculate the trade balance for each country
-tradeBalanceByCountry <- totalCommodityValueByCountryAndType %>%
-  mutate(totalWithSign = ifelse(CommodityType == "IMPORT", total * -1, total)) %>%
-  group_by(CO, country, importCategory) %>%
-  summarise(balance = sum(totalWithSign), .groups = "drop")
 
-# Order table by the trade balance
-tradeBalanceByCountry <- tradeBalanceByCountry %>%
-  arrange(desc(balance))
 
-# Drop Vanuatu
-tradeBalanceByCountry <- tradeBalanceByCountry %>%
-  filter(country != "VANUATU")
 
-# Select only countries falling into the OTHER category
-tradeBalanceByCountryOther <- tradeBalanceByCountry %>%
-  filter(importCategory == "OTHERS")
 
-# Create a bar chart to view the top 5 and bottom 5 countries
-nRows <- nrow(tradeBalanceByCountryOther)
-ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ], 
-       aes(x = reorder(country, -balance), y = balance)) +
-  geom_bar(stat = "identity") +
-  ylab("Trade Balance") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-        axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank())
 
 
 
