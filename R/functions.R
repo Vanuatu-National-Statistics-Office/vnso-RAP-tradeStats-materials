@@ -24,8 +24,9 @@ padWithZeros <- function(code, type = "HS"){
   }else if(type == "SITC"){
 
     partsOfCode <- strsplit(code, split = "\\.")[[1]]
+    partsOfCode[2] <- ifelse(length(partsOfCode) == 1, "", partsOfCode[2])
 
-    if(length(partsOfCode) == 2 && nchar(partsOfCode) <= 3 && nchar(partsOfCode[2]) <= 2){
+    if(length(partsOfCode) == 2 && nchar(partsOfCode[1]) <= 3 && nchar(partsOfCode[2]) <= 2){
       code <- paste0(paste(rep(0, 3 - nchar(partsOfCode[1])), collapse = ""), partsOfCode[1], ".", 
                             partsOfCode[2], paste0(rep(0, 3 - nchar(partsOfCode[1])), collapse = ""))
     }else{

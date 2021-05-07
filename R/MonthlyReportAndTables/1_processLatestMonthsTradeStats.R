@@ -44,7 +44,7 @@ tradeStatsNoBlankCols <- tradeStatsNoRepeatedHeader[, emptyColumns == FALSE]
 duplicatedRows <- duplicated(tradeStatsNoBlankCols) 
 tradeStatsNoDup <- tradeStatsNoBlankCols[duplicatedRows == FALSE, ]
 
-# Convert the statistical value to numeric
+# Convert the statistical value to numeric - note numbers formatted with commas in them and these need removed
 tradeStatsNoDup$Stat..Value <- as.numeric(gsub(",", "", tradeStatsNoDup$Stat..Value))
 
 # Convert excel figures to dates
