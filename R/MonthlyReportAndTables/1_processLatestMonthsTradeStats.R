@@ -28,6 +28,9 @@ tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL"
 
 # Initial re-formatting of the data
 
+# Add row ID column to track back to rows in raw unprocessed data
+tradeStats$RawDataRowID <- 1:nrow(tradeStats)
+
 # Remove the repeated header row from the trade statistics data
 tradeStatsNoRepeatedHeader <- tradeStats[tradeStats$Office != "Office", ]
 
