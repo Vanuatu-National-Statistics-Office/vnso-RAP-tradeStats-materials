@@ -572,11 +572,11 @@ majorMonthlyExports$Kava <- as.numeric(majorMonthlyExports$Kava)
 # Calculate value of commodities by year
 totalValueCommoditiesPerYearAverage <- majorMonthlyExports %>%
   group_by(Year) %>%
-  summarise(Copra = (sum(Copra)/12),
-            Coconut.Oil = (sum(Coconut.Oil)/12),
-            Beef = (sum(Beef)/12),
-            Cocoa = (sum(Cocoa)/12),
-            Kava = (sum(Kava)/12))
+  summarise(Copra = (sum(Copra)),
+            Coconut.Oil = (sum(Coconut.Oil)),
+            Beef = (sum(Beef)),
+            Cocoa = (sum(Cocoa)),
+            Kava = (sum(Kava)))
 
 # Calculate value of commodities for month
 codesCP4 <- c(1000)
