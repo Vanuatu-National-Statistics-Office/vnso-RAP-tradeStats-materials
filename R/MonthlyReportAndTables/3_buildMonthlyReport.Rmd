@@ -6,18 +6,34 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-## Set echo=FALSE as default for code cells
+# Set echo=FALSE as default for code cells
 knitr::opts_chunk$set(echo=FALSE)
 
-## Load the required libraries
+# Load the required libraries
 library(knitr) # Creating documents
 library(flextable) # Nicely formatted tables
 library(rworldmap) # World map
 library(ggplot2) # Creating plots
+library(dplyr) # Working with data
 
-## Set the table formatting defaults
+# Set the table formatting defaults
 set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
                        text.align="left", table.layout="fixed", theme_fun="theme_booktabs")
+
+# Note where VNSO code/data is on current computer
+repository <- file.path("..", "..")
+
+# Note the open data path
+openDataFolder <- file.path(repository, "data", "open")
+
+# Note the secure data path
+secureDataFolder <- file.path(repository, "data", "secure")
+
+# Load the general R functions
+source(file.path(repository, "R", "functions.R"))
+
+# Load the processed trade statistics for month of interest
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-12-19.csv"))
 ```
 
 # National Sustainable Development Plan Indicators (NSDP)
