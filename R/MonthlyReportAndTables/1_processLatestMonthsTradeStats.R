@@ -219,8 +219,8 @@ missingValuesBEC <- checkMergingColumnsForClassificationTables(
 prfColumn <- which(colnames(tradeStatsCommoditiesMergedWithClassifications) == "PRF")
 rowNACounts <- rowSums(is.na(tradeStatsCommoditiesMergedWithClassifications[, -prfColumn]))
 rowsWithNAValues <- tradeStatsCommoditiesMergedWithClassifications[rowNACounts > 0, ]
-if(nrows(rowsWithNAValues) > 0){
-  warning("View the rows of the trade statistics data with missing values with: View(tradeStatsCommoditiesMergedWithClassifications[rowsWithNAValues, ]")
+if(nrow(rowsWithNAValues) > 0){
+  warning(paste0("View the ", nrow(rowsWithNAValues), " rows of the trade statistics data with missing values with: View(rowsWithNAValues)"))
 }
 
 # Print progress
