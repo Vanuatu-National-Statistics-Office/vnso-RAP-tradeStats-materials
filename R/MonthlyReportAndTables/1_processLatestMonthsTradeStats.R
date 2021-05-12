@@ -100,6 +100,9 @@ tradeStatsCommodities$HS.Code_2 <- extractCodeSubset(tradeStatsCommodities$HS.Co
 tradeStatsCommodities$SITC_3 <- extractCodeSubset(tradeStatsCommodities$SITC, nDigits=3)
 tradeStatsCommodities$SITC_1 <- extractCodeSubset(tradeStatsCommodities$SITC, nDigits=1)
 
+# If NAs present in any of the above columns, view with:
+#    View(tradeStatsCommodities[is.na(tradeStatsCommodities$column_name), ])
+
 # Print progress
 cat("Added SITC and HS sub-codes into table.\n")
 
@@ -124,7 +127,7 @@ colnames(modeOfTransport)[1] <- "Office"
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, modeOfTransport, by="Office", all.x=TRUE)
 rowsWithoutValidModeOfTransport <- which(tradeStatsCommodities$Office %in% modeOfTransport$Office == FALSE)
 if(length(rowsWithoutValidModeOfTransport) > 0){
-  warning("Some codes in the \"Office\" column of the trades statistics table are missing in the mode of transport classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidModeOfTransport, \"Office\"])")
+  warning("Some codes in the \"Office\" column of the trades statistics table are missing in the mode of transport classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidModeOfTransport, ])")
 }
 
 ## HARMONISED SYSTEM (HS) CODES ##
@@ -137,7 +140,7 @@ hsDescription$HS.Code_2 <- sapply(hsDescription$HS.Code_2, FUN=padWithZeros, "HS
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, hsDescription, by="HS.Code_2", all.x=TRUE)
 rowsWithoutValidHS2Code <- which(tradeStatsCommoditiesMergedWithClassifications$HS.Code_2 %in% hsDescription$HS.Code_2 == FALSE)
 if(length(rowsWithoutValidHS2Code) > 0){
-  warning("Some codes in the \"HS.Code_2\" column of the trades statistics table are missing in the HS 2 classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidHS2Code, \"HS.Code_2\"])")
+  warning("Some codes in the \"HS.Code_2\" column of the trades statistics table are missing in the HS 2 classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidHS2Code, ])")
 }
 
 ## STANDARD INTERNATIONAL TRADE CLASSIFICATION (SITC) CODES ##
@@ -149,7 +152,7 @@ colnames(sitcDescription) <- c("SITC_1", "SITC.description")
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, sitcDescription, by="SITC_1", all.x=TRUE)
 rowsWithoutValidSITC1 <- which(tradeStatsCommoditiesMergedWithClassifications$SITC_1 %in% sitcDescription$SITC_1 == FALSE)
 if(length(rowsWithoutValidSITC1) > 0){
-  warning(length(rowsWithoutValidSITC1), " codes in the \"SITC_1\" column of the trades statistics table are missing in the SITC classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidSITC1, \"SITC_1\"])")
+  warning(length(rowsWithoutValidSITC1), " codes in the \"SITC_1\" column of the trades statistics table are missing in the SITC classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidSITC1, ])")
 }
 
 ## COUNTRY DESCRIPTIONS OF IMPORTS ##
@@ -160,9 +163,8 @@ countryDescriptionImports <- read.csv(tradeStatsFileMergeCountryDesImports)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionImports, by="CO", all.x=TRUE)
 rowsWithoutValidImportCountryCode <- which(tradeStatsCommoditiesMergedWithClassifications$CO %in% countryDescriptionImports$CO == FALSE)
 if(length(rowsWithoutValidImportCountryCode) > 0){
-  warning(length(rowsWithoutValidImportCountryCode), " codes in the \"CO\" column of the trades statistics table are missing in the import country classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidImportCountryCode, \"CO\"])")
+  warning(length(rowsWithoutValidImportCountryCode), " codes in the \"CO\" column of the trades statistics table are missing in the import country classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidImportCountryCode, ])")
 }
-
 
 ## COUNTRY DESCRIPTIONS OF EXPORTS ##
 
@@ -172,7 +174,7 @@ countryDescriptionExports <- read.csv(tradeStatsFileMergeCountryDesExports)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionExports, by="CE.CD", all.x=TRUE)
 rowsWithoutValidExportCountryCode <- which(tradeStatsCommoditiesMergedWithClassifications$CO %in% countryDescriptionExports$CE.CD == FALSE)
 if(length(rowsWithoutValidExportCountryCode) > 0){
-  warning(length(rowsWithoutValidExportCountryCode), " codes in the \"CE.CD\" column of the trades statistics table are missing in the export country classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidExportCountryCode, \"CE.CD\"])")
+  warning(length(rowsWithoutValidExportCountryCode), " codes in the \"CE.CD\" column of the trades statistics table are missing in the export country classifications table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidExportCountryCode, ])")
 }
 
 ## PRINCIPLE COMMODITIES ##
@@ -184,7 +186,7 @@ colnames(principleCommodityClassification)[1] <- "HS.Code"
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, principleCommodityClassification, by="HS.Code", all.x=TRUE)
 rowsNotInPrincipleCommoditiesTable <- which(tradeStatsCommoditiesMergedWithClassifications$HS.Code %in% principleCommodityClassification$HS.Code == FALSE)
 if(length(rowsNotInPrincipleCommoditiesTable) > 0){
-  warning(length(rowsNotInPrincipleCommoditiesTable), " codes in the \"HS.Code\" column of the trades statistics table are missing in the principle commodities classification table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsNotInPrincipleCommoditiesTable, \"HS.Code\"])")
+  warning(length(rowsNotInPrincipleCommoditiesTable), " codes in the \"HS.Code\" column of the trades statistics table are missing in the principle commodities classification table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsNotInPrincipleCommoditiesTable, ])")
 }
 
 ## BROAD ECONOMIC CATEGORIES (BEC) ##
@@ -195,7 +197,7 @@ becDescriptions <- read.csv(tradeStatsFileMergeBECDescriptions)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, becDescriptions, by="HS.Code_6", all.x=TRUE)
 rowsWithoutValidHS6 <- which(tradeStatsCommoditiesMergedWithClassifications$HS.Code_6 %in% becDescriptions$HS.Code_6 == FALSE)
 if(length(rowsWithoutValidHS6) > 0){
-  warning(length(rowsWithoutValidHS6), " codes in the \"HS.Code_6\" column of the trades statistics table are missing in the BEC classification table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidHS6, \"HS.Code_6\"])")
+  warning(length(rowsWithoutValidHS6), " codes in the \"HS.Code_6\" column of the trades statistics table are missing in the BEC classification table. Examine with View(tradeStatsCommoditiesMergedWithClassifications[rowsWithoutValidHS6, ])")
 }
 
 ## Check number of rows with NA values present
