@@ -83,7 +83,7 @@ par(mar=c(10, 4, 4, 1))
 # Check for columns with high amounts of NA values
 colsWithManyMissingValues <- names(proportionMissing)[proportionMissing > 0.1]
 for(column in colsWithManyMissingValues){
-  warning(paste0("Large amounts of missing data identified in \"", column, "\" column. Use View(tradeStatsCommodities[is.na(tradeStatsCommodities[, \"",  column, "\"]) to view."))
+  warning(paste0("Large amounts of missing data identified in \"", column, "\" column. View with: \n\tView(tradeStatsCommodities[is.na(tradeStatsCommodities[, \"",  column, "\"]), ])"))
 }
 
 # Print progress
