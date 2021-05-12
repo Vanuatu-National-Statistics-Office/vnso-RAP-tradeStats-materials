@@ -237,7 +237,7 @@ commoditiesWithExpectations <- checkCommodityValues(tradeStatsCommoditiesMergedW
                                                     historicImportsSummaryStats, historicExportsSummaryStats,
                                                     importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000, 3071), useUnitValue=FALSE,
                                                     columnsOfInterest = c("HS.Code", "Type", "Reg..Date", 
-                                                                          "CP4", "Itm.."))
+                                                                          "CP4", "Itm..", "RawDataRowID"))
 
 # Print progress
 cat("Finished checking whether commodity values fall outside of expectations based on historic data.\n")
