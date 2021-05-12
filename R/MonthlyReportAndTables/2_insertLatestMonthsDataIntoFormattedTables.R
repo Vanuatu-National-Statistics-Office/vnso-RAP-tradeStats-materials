@@ -1,5 +1,8 @@
 #### Preparation ####
 
+# Load the required libraries
+library(openxlsx) # Reading and writing excel formatted data
+
 # Check that 1_processLatestMonthsTradeStats.R has already been run
 if(exists("repository") == FALSE || exists("secureDataFolder") == FALSE || 
    exists("openDataFolder") == FALSE || exists("processedTradeStats") == FALSE){
@@ -13,7 +16,6 @@ outputsFolder <- file.path(repository, "outputs")
 date <- max(processedTradeStats$Reg..Date, na.rm=TRUE)
 month <- format(date, "%B")
 year <- format(date, "%Y")
-
 
 # Note the excel workbook containing the final formatted tables
 finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-12-19_WORKING.xlsx")
