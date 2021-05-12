@@ -1,3 +1,34 @@
+#' Check for missing values in columns used for merging trade statistics data with classification table
+#'
+#' Given the column used for merging the trade statistics data and classification table, the current function will check if any values in either table's column (used to merge) are missing in the other
+#' @param tradeStats A dataframe containing the trade statistics data
+#' @param classificationTable A dataframe of code classifications
+#' @param tradeStatsColumn The column in the tradeStats dataframe used for merge
+#' @param classificationColumn The column in the classification dataframe used for merge. Defaults to same as for trade statistics dataframe
+#' @param classificationTableName The name of the classification table being examine - helps with more meaningful warning messages. Defaults to ""
+#' @return A list reporting the values that were found to be missing in the merging column of each dataframe
+checkMergingColumnsForClassificationTables <- function(tradeStats, classificationsTable, tradeStatsColumn,
+                                                       classificationColumn = tradeStatsColumn, 
+                                                       classificationTableName = ""){
+  
+  # Note the values in the trade statistics column that aren't in classification table column
+  rowsNotInClassificationTable <- which(tradeStats[, tradeStatsColumn] %in% 
+                                          classificationsTable[, classificationColumn] == FALSE)
+  if(length(rowsNotInClassificationTable) > 0){
+    warning(length(rowsNotInClassificationTable), " codes in the \"", tradeStatsColumn ,"\" column of the trades statistics table are not in the \"", classificationColumn, "\" of the ", classificationTableName, " classification table.")
+  }
+  
+  # Note the values in the classification table column that aren't in the trade statistics column
+  rowsNotInTradesData <- which(classificationsTable[, classificationColumn] %in% 
+                                 tradeStats[, tradeStatsColumn] == FALSE)
+  if(length(rowsNotInTradesData) > 0){
+    warning(length(rowsNotInTradesData), " codes in the \"", classificationColumn, "\" column of the ", classificationTableName, " classification table are not in the \"", tradeStatsColumn ,"\" column of the trades statistics table.")
+  }
+  
+  return(list("NotPresentInClassificationTable" = tradeStats[rowsNotInClassificationTable, tradeStatsColumn],
+              "NotPresentInTradesData" = classificationsTable[rowsNotInTradesData, classificationColumn]))
+}
+
 #' Pad the SITC or HS code values with zeros
 #'
 #' Pads SITC or HS values with leading/lagging zeros to conform with classification standards. Add zeros to left of HS code to make them 8 digits. Adds zeros to SITC codes to match 5 digit format 000.00.
