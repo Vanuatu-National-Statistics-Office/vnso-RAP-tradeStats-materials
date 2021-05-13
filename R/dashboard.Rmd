@@ -19,14 +19,11 @@ library(gganimate)
 library(plotly)
 library(knitr)
 library(shiny)
-<<<<<<< HEAD
 library(formattable)
-=======
 library(rgdal) # Reading and writing shape files
 library(sp) # Working with spatial data
 library(rmapshaper) # Simplifying polygons
 library(leaflet) # Interactive mapping
->>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
 
 # Note repository location
 repository <- dirname(getwd()) # Note that to run code inline you'll need to set session working directory to source file location using Session in toolbar above
@@ -415,17 +412,12 @@ anim_exp <- ggplot(exp_formatted,
 animate(anim_imp, nframes = 100, fps = 5)
 ```
 
-
-<<<<<<< HEAD
-```{r Export by commodities, warning=FALSE}
-=======
 Export by Commodity
 =====================================
 
 Column {.sidebar}
 ------------------------------------------------------------------
-```{r}
->>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
+```{r Export by commodities, warning=FALSE}
 startData <- toptenexport
 GBChoices <- as.list(names(startData))
 names(GBChoices) <- paste(names(startData),map(startData,~length(unique(.x))))
@@ -439,8 +431,6 @@ updateData <- reactive(
     summarise_if(is.numeric, sum, na.rm=T)
   )
 ```
-
-<<<<<<< HEAD
 
 ```{r Expot by countries}
 countryExport <- countryYearExport
@@ -465,8 +455,6 @@ selectInput(inputId = "GB", label = "Group By", choices = GBChoices)
 selectInput(inputId = "Metric", label = "Metric", choices = names(select_if(startData,is.numeric)))
 ```
 
-=======
->>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
 Column 
 ------------------------------------------------------------------
 
@@ -474,15 +462,9 @@ Column
 ```{r}
 renderPlot({
   updateData() %>%
-<<<<<<< HEAD
     ggplot(aes_string(x=input$GB, y=input$Metric, fill=input$GB)) +
       geom_col() +
       theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
-    
-=======
-  ggplot(aes_string(x=input$GB, y=input$Metric, fill=input$GB)) +
-  geom_col()
->>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
 })
 ```
 
@@ -656,8 +638,6 @@ renderDT(
 Trade through Maps
 ===============================================
 
-<<<<<<< HEAD
-=======
 ```{r load world map, include = FALSE}
 # Download world country boundaries from: https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/ (https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_0_countries.zip)
 # Get a map of the world as as a spatial polygons object
@@ -727,5 +707,3 @@ leaflet(worldImportsAndExports, options = leafletOptions(crs = leafletCRS(crsCla
                    options = layersControlOptions(collapsed=FALSE)) %>%
   hideGroup(c("Exports"))
 ```
-
->>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
