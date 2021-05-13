@@ -51,6 +51,8 @@ trade_ports <- read.csv(file.path(repository, "data", "secure", "trades_billions
 importMajor <- read.csv(file.path(repository, "data", "open", "MAJOR_IMPORTS.csv"))
 importHistorysummary <- read.csv(file.path(repository, "data", "secure", "imports_history_summary.csv"))
 
+
+
 ```
 
 Dashboard
@@ -285,7 +287,7 @@ Column {data-width=350}
 
 ### Trade Import Activities with 10 top countries overtime
 
-```{r animated graphic for top 10 countries by year for imports, eval= FALSE}
+```{r animated graphic for top 10 countries by year for imports}
 
 imp %>% 
   mutate_if(is.factor, as.character) %>%
@@ -347,7 +349,7 @@ animate(anim_imp, 200)
 
 ### Trade Export Activities with 10 top countries overtime
 
-```{r animated graphic for top 10 countries by year for exports, eval= FALSE}
+```{r animated graphic for top 10 countries by year for exports}
 exp %>%
   mutate_if(is.factor, as.character)%>%
   mutate_if(is.integer, as.numeric) -> exp 
