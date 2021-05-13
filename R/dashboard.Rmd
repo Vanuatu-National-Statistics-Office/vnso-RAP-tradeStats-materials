@@ -8,7 +8,7 @@ output:
     vertical_layout: scroll
 runtime: shiny
 params:
-  build_animations: FALSE
+  build_animations: TRUE
 ---
 
 ```{r setup, include=FALSE, warning=FALSE}
