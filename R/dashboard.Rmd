@@ -19,7 +19,14 @@ library(gganimate)
 library(plotly)
 library(knitr)
 library(shiny)
+<<<<<<< HEAD
 library(formattable)
+=======
+library(rgdal) # Reading and writing shape files
+library(sp) # Working with spatial data
+library(rmapshaper) # Simplifying polygons
+library(leaflet) # Interactive mapping
+>>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
 
 # Note repository location
 repository <- dirname(getwd()) # Note that to run code inline you'll need to set session working directory to source file location using Session in toolbar above
@@ -335,7 +342,7 @@ anim_imp <- ggplot(imp_formatted,
         plot.background=element_blank(),
         plot.margin = margin(2,2, 2, 4, "cm")) +
   
-  transition_states(Year, transition_length = 4, state_length = 1, wrap = FALSE) +
+  transition_states(Year, transition_length = 2, state_length = 1, wrap = FALSE) +
   
   view_follow(fixed_x = TRUE)  +
   
@@ -343,7 +350,7 @@ anim_imp <- ggplot(imp_formatted,
        subtitle  =  "Top 10 Countries Vanuatu has imported from",
        caption  = "Import Value in Billions of Vatu | Data Source: Asycuda")
 
-animate(anim_imp, 200)
+animate(anim_imp, nframes = 100, fps = 5)
 ```
 
 
@@ -405,14 +412,26 @@ anim_exp <- ggplot(exp_formatted,
        subtitle  =  "Top 10 Countries Vanuatu has exported to",
        caption  = "Export Value in Billions of Vatu | Data Source: Asycuda") 
 
-animate(anim_exp, 200)
+animate(anim_imp, nframes = 100, fps = 5)
 ```
 
 
+<<<<<<< HEAD
 ```{r Export by commodities, warning=FALSE}
+=======
+Export by Commodity
+=====================================
+
+Column {.sidebar}
+------------------------------------------------------------------
+```{r}
+>>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
 startData <- toptenexport
 GBChoices <- as.list(names(startData))
 names(GBChoices) <- paste(names(startData),map(startData,~length(unique(.x))))
+
+selectInput(inputId = "GB", label = "Group By", choices = GBChoices, selected = "Year 19")
+selectInput(inputId = "Metric", label = "Metric", choices = names(select_if(startData,is.numeric)), selected = "Year")
 
 updateData <- reactive(
   startData %>% 
@@ -421,6 +440,7 @@ updateData <- reactive(
   )
 ```
 
+<<<<<<< HEAD
 
 ```{r Expot by countries}
 countryExport <- countryYearExport
@@ -445,6 +465,8 @@ selectInput(inputId = "GB", label = "Group By", choices = GBChoices)
 selectInput(inputId = "Metric", label = "Metric", choices = names(select_if(startData,is.numeric)))
 ```
 
+=======
+>>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
 Column 
 ------------------------------------------------------------------
 
@@ -452,10 +474,15 @@ Column
 ```{r}
 renderPlot({
   updateData() %>%
+<<<<<<< HEAD
     ggplot(aes_string(x=input$GB, y=input$Metric, fill=input$GB)) +
       geom_col() +
       theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
     
+=======
+  ggplot(aes_string(x=input$GB, y=input$Metric, fill=input$GB)) +
+  geom_col()
+>>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
 })
 ```
 
@@ -479,8 +506,18 @@ Export by Country {data-navmenu="Trade in Export"}
 Column {.sidebar}
 ------------------------------------------------------------------
 ```{r}
-selectInput(inputId = "CE",label = "Group By",choices = CEChoices)
-selectInput(inputId = "Metric_two",label = "Metric",choices = names(select_if(countryExport,is.numeric)))
+countryExport <- countryYearExport
+CEChoices <- as.list(names(countryExport))
+names(CEChoices) <- paste(names(countryExport),map(countryExport,~length(unique(.x))))
+
+selectInput(inputId = "CE",label = "Group By",choices = CEChoices, selected = "Year 19")
+selectInput(inputId = "Metric_two",label = "Metric",choices = names(select_if(countryExport,is.numeric)), selected = "Year")
+
+updateCountryExport <- reactive(
+  countryExport %>%
+    group_by_(input$CE) %>% 
+    summarise_if(is.numeric,sum,na.rm=T)
+  )
 ```
 
 column
@@ -619,3 +656,76 @@ renderDT(
 Trade through Maps
 ===============================================
 
+<<<<<<< HEAD
+=======
+```{r load world map, include = FALSE}
+# Download world country boundaries from: https://www.naturalearthdata.com/downloads/50m-cultural-vectors/50m-admin-0-countries-2/ (https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/cultural/ne_50m_admin_0_countries.zip)
+# Get a map of the world as as a spatial polygons object
+shapeFile <- file.path(repository, "data", "secure", "ne_50m_admin_0_countries", "ne_50m_admin_0_countries.shp")
+world <- readOGR(shapeFile, verbose = FALSE)
+
+# Simplify the polygons
+worldSimple <- ms_simplify(world, keep = 0.1)
+
+# Keep necessary columns for joining
+worldSimple@data <- worldSimple@data[, c("NAME", "CONTINENT", "ISO_A2", "ISO_A3")]
+```
+
+```{r join world with trades data}
+# Join in the imports data
+worldImports <- merge(worldSimple, imp[imp$Year == 2018, c("CTY_ID", "Value_mill")], by.x = "ISO_A2", by.y = "CTY_ID")
+
+# Join in the exports
+worldImportsAndExports <- merge(worldImports, exp[exp$Year == 2018, c("CNTY_CODE", "Value_mill")],
+                                by.x = "ISO_A2", by.y = "CNTY_CODE",
+                                suffixes = c("_Imports", "_Exports"))
+```
+
+```{r build interactive map}
+# Create a colour palette
+valueRange <- range(c(worldImportsAndExports$Value_mill_Imports, 
+                      worldImportsAndExports$Value_mill_Exports), na.rm = TRUE)
+colours <- c("blue", "white", "red")
+colourPalette <- colorNumeric(colours, valueRange)
+colourPaletteWithoutNA <- colorNumeric(colours, valueRange, na.color=rgb(0,0,0,0))
+
+# Create labels that will appear on hover
+labels <- paste0("<strong>", worldImportsAndExports$NAME, "</strong>",
+                 "<br>Import value: ", round(worldImportsAndExports$Value_mill_Imports, digits=2),
+                    ifelse(is.na(worldImportsAndExports$Value_mill_Imports), "", " million"),
+                 "<br>Export value: ", round(worldImportsAndExports$Value_mill_Exports, digits=2),
+                 ifelse(is.na(worldImportsAndExports$Value_mill_Exports), "", " million")) %>% lapply(htmltools::HTML)
+
+# Create an interactive map
+leaflet(worldImportsAndExports, options = leafletOptions(crs = leafletCRS(crsClass = "L.CRS.EPSG4326"))) %>%
+
+  setView(lng = 0, lat = 0, zoom = 1) %>%
+  
+  addPolygons(weight = 2, color = "white", dashArray = "3", fillOpacity = 0.5,
+              fillColor = ~colourPalette(Value_mill_Imports),
+              highlight = highlightOptions(weight = 5, color = "#666", dashArray = "",
+                                           fillOpacity = 1, bringToFront = TRUE),
+              label = labels,
+              labelOptions = labelOptions(style = list("font-weight" = "normal", padding = "3px 8px"),
+                                          textsize = "15px", direction = "auto"),
+              group = "Imports") %>%
+
+  addPolygons(weight = 2, color = "white", dashArray = "3", fillOpacity = 0.5,
+              fillColor = ~colourPalette(Value_mill_Exports),
+              highlight = highlightOptions(weight = 5, color = "#666", dashArray = "",
+                                           fillOpacity = 1, bringToFront = TRUE),
+              label = labels,
+              labelOptions = labelOptions(style = list("font-weight" = "normal", padding = "3px 8px"),
+                                          textsize = "15px", direction = "auto"),
+              group = "Exports") %>%
+  
+  addLegend(values = valueRange, bins = seq(from = 0, to = signif(valueRange[2], 2), length.out = 5),
+            pal = colourPaletteWithoutNA, title = "Value (millions)",
+            position = "bottomleft", na.label = "") %>%
+  
+  addLayersControl(baseGroups = c("Imports", "Exports"), 
+                   options = layersControlOptions(collapsed=FALSE)) %>%
+  hideGroup(c("Exports"))
+```
+
+>>>>>>> 15a720a08ee49ca902a479b02f67af98de9c96ce
