@@ -7,6 +7,8 @@ output:
     theme: cosmo
     vertical_layout: scroll
 runtime: shiny
+params:
+  build_animations: FALSE
 ---
 
 ```{r setup, include=FALSE, warning=FALSE}
@@ -24,6 +26,7 @@ library(rgdal) # Reading and writing shape files
 library(sp) # Working with spatial data
 library(rmapshaper) # Simplifying polygons
 library(leaflet) # Interactive mapping
+library(countrycode) # Get country codes
 
 # Note repository location
 repository <- dirname(getwd()) # Note that to run code inline you'll need to set session working directory to source file location using Session in toolbar above
@@ -38,7 +41,7 @@ imp <- read.csv(file.path(repository, "data", "secure", "country_year_import.csv
 services <- read.csv(file.path(repository, "data", "secure", "tblservices.csv"))
 trades <- read.csv(file.path(repository, "data", "secure", "trades.csv"))
 tradenobalances <- read.csv(file.path(repository, "data", "secure", "trade.csv"))
-trade_ports <- read.csv(file.path(repository, "data", "secure", "trades_billions.csv"))
+#trade_ports <- read.csv(file.path(repository, "data", "secure", "trades_billions.csv"))
 
 
 
@@ -291,7 +294,7 @@ Column {data-width=350}
 
 ### Trade Import Activities with 10 top countries overtime
 
-```{r animated graphic for top 10 countries by year for imports}
+```{r animated graphic for top 10 countries by year for imports, eval = params$build_animations}
 
 imp %>% 
   mutate_if(is.factor, as.character) %>%
@@ -353,7 +356,7 @@ animate(anim_imp, nframes = 100, fps = 5)
 
 ### Trade Export Activities with 10 top countries overtime
 
-```{r animated graphic for top 10 countries by year for exports}
+```{r animated graphic for top 10 countries by year for exports, eval = params$build_animations}
 exp %>%
   mutate_if(is.factor, as.character)%>%
   mutate_if(is.integer, as.numeric) -> exp 
@@ -549,8 +552,9 @@ selectInput(inputId = "MJTN",label = "Major 10 Goods",choices = majorTen)
 
 updateData_import_commodity <- reactive(
   importHistorysummary %>% 
-    group_by_(input$MJTN) %>% 
-    summarise_if(is.numeric, sum, na.rm=T)
+    filter(HS == input$MJTN) %>%
+    group_by(Year) %>%
+    summarise(sum = Value_Sum, .groups = "drop")
   )
 
 ```
@@ -561,10 +565,10 @@ column
 
 ```{r}
 renderPlot({
- updateData_import_commodity() %>% 
-  ggplot(aes_string(x=Year,y=input$MJTN,fill=Value_Sum)) +
-  geom_col() +
-  theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
+  updateData_import_commodity() %>% 
+  ggplot(aes(x=Year, y=sum)) +
+    geom_col() +
+    theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
 })
 ```
 
@@ -591,7 +595,14 @@ Import by Country {data-navmenu="Trade in Import"}
 Column {.sidebar}
 ------------------------------------------------------------------
 ```{r}
-selectInput(inputId = "exportCountry",label = "Metric",choices = names(select_if(countryExport,is.numeric)))
+uniqueCountriesISO2 <- unique(importHistorysummary$CTY_Origin[is.na(importHistorysummary$CTY_Origin) == FALSE])
+countries <- countrycode(uniqueCountriesISO2, origin = "iso2c", destination = "country.name")
+
+countriesToSelectFrom <- uniqueCountriesISO2
+names(countriesToSelectFrom) <- countries
+countriesToSelectFrom <- countriesToSelectFrom[is.na(countries) == FALSE]
+
+selectInput(inputId = "importCountry",label = "Metric", choices = countriesToSelectFrom)
 ```
 
 
@@ -599,9 +610,10 @@ selectInput(inputId = "exportCountry",label = "Metric",choices = names(select_if
 
 updateData_import_country <- reactive(
   importHistorysummary %>% 
-    group_by_(input$exportCountry) %>% 
-    summarise_if(is.numeric, sum, na.rm=T)
-  )
+    filter(CTY_Origin == input$importCountry) %>%
+    group_by(Year) %>%
+    summarise(sum = Value_Sum, .groups = "drop")
+)
 
 ```
 
@@ -612,8 +624,8 @@ column
 
 ```{r}
 renderPlot({
- updateData_import_country() %>% 
-  ggplot(aes_string(x=Year,y=input$exportCountry,fill=Value_Sum)) +
+ updateData_import_country() %>%
+  ggplot(aes(x=Year, y=sum)) +
   geom_col() +
   theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
 })
