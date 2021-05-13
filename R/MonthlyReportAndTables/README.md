@@ -9,7 +9,7 @@
 
 ## Updating the monthly report tables
 5. Save the excel formatted monthly report tables file (with data up until the previous month already present) in the  `outputs/` folder
-6. Open [`R/MonthlyReportAndTables/1_processLatestMonthsTradeStats.R`](https://github.com/Vanuatu-National-Statistics-Office/vnso-RAP-tradeStats-materials/blob/automated-highlights-report-new/R/MonthlyReportAndTables/1_processLatestMonthsTradeStats.R) in RStudio
+6. Open [`R/MonthlyReportAndTables/2_insertLatestMonthsDataIntoFormattedTables.R`](https://github.com/Vanuatu-National-Statistics-Office/vnso-RAP-tradeStats-materials/blob/automated-highlights-report-new/R/MonthlyReportAndTables/2_insertLatestMonthsDataIntoFormattedTables.R) in RStudio
 7. Update `line 21` with the name of the formatted monthly report file
 8. Click <img src="https://user-images.githubusercontent.com/17436210/117978683-0d6a4a00-b32a-11eb-8c62-d00257d3b282.png" width="20">
  *Source* in the top right corner
