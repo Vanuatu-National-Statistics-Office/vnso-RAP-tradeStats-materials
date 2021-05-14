@@ -33,7 +33,7 @@ secureDataFolder <- file.path(repository, "data", "secure")
 source(file.path(repository, "R", "functions.R"))
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-12-19.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-01-20.csv"))
 ```
 
 # National Sustainable Development Plan Indicators (NSDP)
