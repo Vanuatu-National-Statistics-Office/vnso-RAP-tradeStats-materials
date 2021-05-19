@@ -187,7 +187,6 @@ missingValuesExportCountry <- checkMergingColumnsForClassificationTables(
   tradeStatsColumn = "CE.CD",
   classificationTableName = "Export country")
 
-
 ## PRINCIPLE COMMODITIES ##
 
 # Merge Principle Commodity Classifications of Exports and Imports with cleaned data
