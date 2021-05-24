@@ -42,10 +42,6 @@ processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_Proces
 
 ### Calculating NSDP Indicators 
 
-## ECO 1.4.1 Value and volume of national trade/merchandise trade
-## Proxy calculated: Value of international export trade/merchandise trade 
-exports <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE) 
-
 # ECO 1.5.2 Trade by trade agreement (value)
 ## Proxy calculated: Trade by trade agreement, all exports included to MSG countries
 
@@ -57,8 +53,7 @@ msgImportValue<- sum(tradeStatsForMSG$Stat..Value)
 msgProxyExportValue <- sum(processedTradeStats[processedTradeStats$CP4 == 1000 & processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
 
 # Proxy indicator for NSDP indicator ECO 1.5.2
-msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
-msgTradeAgreementProxyDataFrame <- data.frame("TradeAgreementEstimate"= msgTradeAgreementProxyValue)
+msgTradeAgreementProxyValueSeparated<- msgTradeAgreementProxyDataFrame <- data.frame("MSGImportValue"= msgImportValue, "MSGExportEstimateValue"= msgProxyExportValue)
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
 codesCP4 <- c(1000, 3071) # Define the CP4 codes need for Exports table 
@@ -142,6 +137,7 @@ timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
 
 # Proxy indicator for NSDP ECO 1.6.2
 mostRecentGrossDomesticProduct<- timeSeriesGrossDomesticProduct[13, 2] #identify 2018 GDP
+msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
 tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
 
 
@@ -163,31 +159,13 @@ columnCategories <- list(
 )
 
 # Build the table
-totalPrincipleExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+totalMajorExportCommodities <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Proxy indicator for NSDP ECO 1.7.1
-aggregatedTtotalPrincipleExports<- sum(totalPrincipleExports$Total)
+aggregatedTotalPrincipleExports<- sum(totalPrincipleExports$Total)
 
 
 ### Calculating Progress Against NSDP Indicator Targets
-
-## ECO 1.4.1, proxy calculated: Value of international export trade/merchandise trade- 2030 increase of 20%
-
-# Read in the data from the secure folder of the repository. Need to calculate Baseline indicators, NSDP launched in 2017, therefore use 2016 data
-exportSummaryFile <- file.path(secureDataFolder,"exports_HS_summaryStats_02-10-20.csv")
-exportSummarySummaryStats <- read.csv(exportSummaryFile)
-
-# Calculate value of exports by month
-exports2016Commodities <- exportSummarySummaryStats[exportSummarySummaryStats$Procedure == 1000 & exportSummarySummaryStats$Year == "2016", ]
-totalMonthlyValueByMonthAndExport <- exports2016Commodities %>%
-  group_by(Month, Procedure) %>%
-  summarise(total = sum(Value))
-
-# Calculate progress of NSDP (proxy indicator- ECO 1.4.1). Target sets an increase of 20% by 2030 (percentage should be 120%) 
-exportsJanuary2016 <- sum(totalMonthlyValueByMonthAndExport[totalMonthlyValueByMonthAndExport$Month == 1, "total"], na.rm= TRUE)
-exportsJanuary2020 <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE)
-percentageChangeJanuaryExports<- (exportsJanuary2020/exportsJanuary2016)*100 # needs to be 120% to meet Target
-
 
 ## ECO 1.5.2, proxy calculated: Trade by trade agreement (value), all exports included to MSG countries- 2020 exports increase by 15%
 
@@ -208,7 +186,7 @@ totalMonthlyValueTradeAgreements <- estimatedTradeAgreementCommodities %>%
 
 # Calculate progress of NSDP (proxy indicator- ECO 1.5.2). Target sets an increase of 15% by 2020 (percentage should be 115%) 
 tradeAgreementJanuary2019 <- sum(totalMonthlyValueTradeAgreements[totalMonthlyValueTradeAgreements$Month == 1, "total"], na.rm= TRUE)
-percentageChangeJanuaryExports<- (msgTradeAgreementProxyDataFrame/tradeAgreementJanuary2019)*100 # needs to be 120% to meet Target
+percentageChangeJanuaryExports<- (msgTradeAgreementProxyValue/tradeAgreementJanuary2019)*100 # needs to be 120% to meet Target
 
 
 # ECO 1.5.3 Calculate Target: balance of trade by major partner countries- 2020 exports increase by 20%
