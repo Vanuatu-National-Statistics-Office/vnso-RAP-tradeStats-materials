@@ -736,6 +736,14 @@ checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, histor
                                  columnsOfInterest=c("HS.Code", "Type", "Reg..Date", 
                                                      "CP4", "Itm..")){
   
+  # Check essential columns are present in the trade statistics data
+  if("Stat..Value" %in% colnames(tradeStats) == FALSE){
+    stop("The \"Stat..Value\" column is not present in the trade statistics table!")
+  }
+  if("CP4" %in% colnames(tradeStats) == FALSE){
+    stop("The \"CP4\" column is not present in the trade statistics table!")
+  }
+  
   # Pad the HS codes with zeros to make up to 8 digits
   historicImportsSummaryStats$HS <- sapply(historicImportsSummaryStats$HS, FUN=padWithZeros, "HS")
   historicExportsSummaryStats$HS <- sapply(historicExportsSummaryStats$HS, FUN=padWithZeros, "HS")
@@ -744,6 +752,12 @@ checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, histor
   historicImportsSummaryStats$HSAndType <- paste0("IMPORT_", historicImportsSummaryStats$HS)
   historicExportsSummaryStats$HSAndType <- paste0("EXPORT_", historicExportsSummaryStats$HS)
   historicSummaryStats <- rbind(historicImportsSummaryStats, historicExportsSummaryStats)
+  
+  # Check the CP4 codes provided are present in trades data
+  cp4CodesNotPresent <- c(importCP4s, exportCP4s)[c(importCP4s, exportCP4s) %in% tradeStats$CP4 == FALSE]
+  if(length(cp4CodesNotPresent) > 0){
+    warning(paste0("Some of the CP4 codes provided (", paste(cp4CodesNotPresent, collapse = ","), ") are not present in the CP4 column of the trade statistics data."))
+  }
   
   # Identify imports and exports and create
   tradeStats$Type <- "UNKNOWN"
@@ -758,6 +772,16 @@ checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, histor
   }
   summaryColumnsOfInterest <- paste0(summaryPrefix, c("Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"))
   
+  # Check all the columns of interest are present
+  summaryColumnsNotPresent <- summaryColumnsOfInterest[summaryColumnsOfInterest %in% colnames(historicSummaryStats) == FALSE]
+  if(length(summaryColumnsNotPresent) > 0){
+    stop(paste0("Some expected sumamry columns (", paste(summaryColumnsNotPresent, collapse=","), ") aren't present in historic data summary tables!"))
+  }
+  columnsOfInterestNotPresent <- columnsOfInterest[columnsOfInterest %in% colnames(tradeStats) == FALSE]
+  if(length(columnsOfInterestNotPresent) > 0){
+    stop(paste0("Some of the columns of interest (", paste(columnsOfInterestNotPresent, collapse=","), ") aren't present in trade statistics data!"))
+  }
+
   # Get the expected distribution summary statistics for each commodity
   commoditiesWithExpectations <- merge(tradeStats[, c("HSAndType", columnsOfInterest, "Stat..Value")],
                                        historicSummaryStats[, c("HSAndType", summaryColumnsOfInterest)],
