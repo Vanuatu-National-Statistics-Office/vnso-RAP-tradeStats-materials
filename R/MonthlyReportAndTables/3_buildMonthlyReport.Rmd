@@ -12,9 +12,11 @@ knitr::opts_chunk$set(echo=FALSE)
 # Load the required libraries
 library(knitr) # Creating documents
 library(flextable) # Nicely formatted tables
-library(rworldmap) # World map
+library(rnaturalearth) # World map
+library(sf) # Working with spatial data
 library(ggplot2) # Creating plots
 library(dplyr) # Working with data
+library(tidyr) # For pivoting data.frames
 
 # Set the table formatting defaults
 set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
@@ -119,10 +121,10 @@ totalPartnerCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4
 
 # Calculate the Balance of Trade by Major Partner Countries
 balanceOfTradeByMajorPartnerCountries <- totalPartnerCountryExports - totalPartnerCountryImports
-colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTradeByMajorPartnerCountries),
-                                                          FUN=function(colName){
-                                                            return(strsplit(colName, split=":")[[1]][1])
-                                                          })
+colnames(balanceOfTradeByMajorPartnerCountries) <- gsub(pattern = ": Exports", replacement = "", colnames(balanceOfTradeByMajorPartnerCountries))
+
+
+
 
 # Indicator for NSDP ECO 1.5.3
 aggregatedBalanceOfTradeByMajorPartnerCountries<- sum(balanceOfTradeByMajorPartnerCountries$Total)
@@ -134,9 +136,11 @@ aggregatedBalanceOfTradeByMajorPartnerCountries<- sum(balanceOfTradeByMajorPartn
 # Read in the data from the open folder of the repository 
 grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
 timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
+colnames(timeSeriesGrossDomesticProduct) <- c("Year", "Value")
+timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSeriesGrossDomesticProduct$Year), ]
 
 # Proxy indicator for NSDP ECO 1.6.2
-mostRecentGrossDomesticProduct<- timeSeriesGrossDomesticProduct[13, 2] #identify 2018 GDP
+mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
 msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
 tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
 
@@ -352,15 +356,30 @@ colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTrad
                                                             return(strsplit(colName, split=":")[[1]][1])
                                                           })
 
-
 # Get the polygons for the world
-world <- getMap(resolution="coarse")
+worldmap <- rnaturalearth::ne_download(scale = 110,
+                                       type = "countries",
+                                       category = "cultural",
+                                       destdir = tempdir(),
+                                       load = TRUE,
+                                       returnclass = "sp")
 
-# Remove plotting margins
-par(mar=c(0,0,0,0))
+# COnvert to sf spatial feature
+world <- sf::st_as_sf(worldmap)
 
-# Plot the map
-plot(world, col=rgb(1,0,0, runif(length(world))))
+# Generate some example data
+countryRecords <- data.frame("ISO3" = sample(world$ADM0_A3, size = 50),
+                             "RandomValue" = runif(50))
+
+# Merge in my example data
+world <- merge(world, countryRecords, by.x = "ADM0_A3", by.y = "ISO3", all.x = TRUE)
+
+# Plot the map in base R
+plot(world["RandomValue"])
+
+# Plot with ggplot
+ggplot(data = world) +
+    geom_sf(aes(fill = RandomValue))
 ```
 
 # Trade Balance of Pacific Islands (excluding Melanesian Islands, Australia and New Zealand) 
@@ -393,7 +412,7 @@ columnCategories <- list(
 totalPacificCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Select top five Pacific Islands 
-orderedtotalPacificCountryExports<- head(sort(totalPacificCountryExports, decreasing= TRUE))
+orderedtotalPacificCountryExports <- head(sort(totalPacificCountryExports, decreasing= TRUE))
 top5PacificCountryExports<- orderedtotalPacificCountryExports %>% select(2:6)
 prettyTable(top5PacificCountryExports)
 
@@ -434,19 +453,32 @@ tradeBalancePacificIslands<- totalPacificCountryExports - totalPacificCountryImp
 orderedtradeBalancePacificIslands<- head(sort(tradeBalancePacificIslands, decreasing= TRUE))
 prettyTable(orderedtradeBalancePacificIslands)
 
+# Combine Imports and Exports into single table
+totalPacificCountryImportsTransposed <- as.data.frame(t(totalPacificCountryImports))
+totalPacificCountryImportsTransposed$Country <- gsub(": Exports|: Imports", "", rownames(totalPacificCountryImportsTransposed))
+totalPacificCountryExportsTransposed <- as.data.frame(t(totalPacificCountryExports))
+totalPacificCountryExportsTransposed$Country <- gsub(": Exports|: Imports", "", rownames(totalPacificCountryExportsTransposed))
+pacificCountryTotals <- merge(totalPacificCountryImportsTransposed, totalPacificCountryExportsTransposed,
+                              by = "Country", all = TRUE, suffixes = c("Imports", "Exports"))
+colnames(pacificCountryTotals) <- gsub("V1", "", colnames(pacificCountryTotals))
 
-# Create some dummy data
-dummyData <- data.frame("TradeBalance"=c(rnorm(5, mean=1000, sd=100), rnorm(5, mean=1100, sd=100)), 
-                        "Country"=c("A", "B", "C", "D", "E"),
-                        "Type"=c(rep("Current", 5), rep("Previous", 5)))
+# Calculate the trade balance
+pacificCountryTotals$Balance <- pacificCountryTotals$Exports - pacificCountryTotals$Imports
+
+# Remove the total row and pivot to be in format for bar chart
+pacificCountryTotalsLong <- pacificCountryTotals %>%
+  filter(Country != "Total") %>%
+  pivot_longer(cols = c("Imports", "Exports", "Balance"), 
+               names_to = "Type", values_to = "Value")
 
 # Create a bar chart
-ggplot(data=dummyData, aes(x=Country, y=TradeBalance, fill=Type)) +
+ggplot(pacificCountryTotalsLong, aes(x=Country, y=Value, fill=Type)) +
   geom_bar(stat="identity", color="black", position=position_dodge()) +
   theme_minimal() + 
   scale_fill_brewer(palette="Blues") +
-  theme(legend.title=element_blank()) + 
-  coord_cartesian(ylim=range(dummyData$TradeBalance))
+  theme(legend.title=element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
 ```
 
 Automated text to highlight trade balance; difference between value of imports and exports comparing this month to same month in previous year.
