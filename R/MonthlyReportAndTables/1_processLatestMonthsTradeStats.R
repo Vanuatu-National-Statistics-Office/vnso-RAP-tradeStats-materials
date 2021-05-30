@@ -101,7 +101,7 @@ tradeStatsCommodities$SITC_3 <- extractCodeSubset(tradeStatsCommodities$SITC, nD
 tradeStatsCommodities$SITC_1 <- extractCodeSubset(tradeStatsCommodities$SITC, nDigits=1)
 
 # If NAs present in any of the above columns, view with:
-#    View(tradeStatsCommodities[is.na(tradeStatsCommodities$column_name), ])
+#    View(tradeStatsCommodities[is.na(tradeStatsCommodities$column_name), ]) # Replace column_name with name of column you're wanting to examine
 
 # Print progress
 cat("Added SITC and HS sub-codes into table.\n")
