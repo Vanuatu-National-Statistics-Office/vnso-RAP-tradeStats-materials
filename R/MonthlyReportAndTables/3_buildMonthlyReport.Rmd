@@ -214,8 +214,7 @@ totalMonthlyValueTradeAgreements <- estimatedTradeAgreementCommodities %>%
   summarise(total = sum(Stat..Value))
 
 # Calculate progress of NSDP (proxy indicator- ECO 1.6.2). Target sets an increase of 15% by 2030 (percentage should be 115%) 
-mostRecentGrossDomesticProduct<- timeSeriesGrossDomesticProduct[13, 2] #identify 2018 GDP
-tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
+
 
 
 # ECO 1.7.1 Calculate Target: level of production of major commodities to include cocoa and copra- 2030 increase 10-15% of the proportion
@@ -395,7 +394,6 @@ totalPacificCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4
 # Select top five Pacific Islands 
 orderedtotalPacificCountryExports<- head(sort(totalPacificCountryExports, decreasing= TRUE))
 top5PacificCountryExports<- orderedtotalPacificCountryExports %>% select(2:6)
-prettyTable(top5PacificCountryExports)
 
 ## Calculate imports 
 
@@ -426,13 +424,10 @@ totalPacificCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4
 # Select top five Pacific Islands 
 orderedtotalPacificCountryImports<- head(sort(totalPacificCountryImports, decreasing= TRUE))
 top5PacificCountryImports<- orderedtotalPacificCountryImports %>% select(2:6)
-prettyTable(top5PacificCountryExports)
-
 
 # Calculate Trade Balance of Pacific Islands
 tradeBalancePacificIslands<- totalPacificCountryExports - totalPacificCountryImports
 orderedtradeBalancePacificIslands<- head(sort(tradeBalancePacificIslands, decreasing= TRUE))
-prettyTable(orderedtradeBalancePacificIslands)
 
 
 # Create some dummy data
