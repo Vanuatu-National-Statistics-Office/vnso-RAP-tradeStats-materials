@@ -34,14 +34,18 @@ processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_Proces
 # National Sustainable Development Plan Indicators (NSDP)
 
 ```{r NSDP indicators}
-### Calculating NSDP Indicators 
-# ECO 1.5.2 Trade by trade agreement (value)
-## Proxy calculated: Trade by trade agreement, all exports included to MSG countries
-# Calculate value of all international trade that registered under a trade agreement (only imports registered) 
-tradeStatsForMSG <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
-msgImportValue<- sum(tradeStatsForMSG$Stat..Value)
-# Calculate estimated value of exports that are destined to countries that have signed trade agreement (MSG)
+### Calculating NSDP Indicators
+
+## ECO 1.5.2 Trade by trade agreement (value)
+## Proxy calculated: Calculate value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports to MSG countries included)
+
+# Calculate value of imports that are from countries that have signed the MSG and PICTA trade agreements
+tradeAgreementImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
+tradeAgreementImportsValue<- sum(tradeAgreementImports$Stat..Value)
+
+# Calculate value of exports that are destined to countries that have signed the MSG trade agreement 
 msgProxyExportValue <- sum(processedTradeStats[processedTradeStats$CP4 == 1000 & processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
+
 # Proxy indicator for NSDP indicator ECO 1.5.2
 msgTradeAgreementProxyValueSeparated<- msgTradeAgreementProxyDataFrame <- data.frame("MSGImportValue"= msgImportValue, "MSGExportEstimateValue"= msgProxyExportValue)
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 

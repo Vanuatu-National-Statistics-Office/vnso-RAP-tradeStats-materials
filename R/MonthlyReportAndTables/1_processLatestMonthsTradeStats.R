@@ -26,6 +26,11 @@ tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL"
 
 #### Clean and process the latest month's data ####
 
+# Delete header row from raw data
+names(tradeStats)<- NULL
+tradeStats<- tradeStats[-c(1), ]
+colnames(tradeStats) <- tradeStats[c(1), ]
+
 # Initial re-formatting of the data
 
 # Add row ID column to track back to rows in raw unprocessed data
@@ -68,7 +73,7 @@ cat("Finished initial cleaning and processing of data.\n")
 
 #### Explore the extent of missing data ####
 
-# Count the number of missing values in each column
+# Count the number of missing values in each column (run numberMissing to see exact values)
 numberMissing <- apply(tradeStatsCommodities, MARGIN=2,
                        FUN=function(columnValues){
                          return(sum(is.na(columnValues)))
@@ -85,6 +90,8 @@ colsWithManyMissingValues <- names(proportionMissing)[proportionMissing > 0.1]
 for(column in colsWithManyMissingValues){
   warning(paste0("Large amounts of missing data identified in \"", column, "\" column. View with: \n\tView(tradeStatsCommodities[is.na(tradeStatsCommodities[, \"",  column, "\"]), ])"))
 }
+
+# NAs present in any of above columns use, View(tradeStatsCommodities[is.na(tradeStatsCommodities$column_name), ])
 
 # Print progress
 cat("Finished exploring extent of missing data.\n")
@@ -126,7 +133,7 @@ modeOfTransport <- read.csv(tradeStatsFileMergeTransport)
 colnames(modeOfTransport)[1] <- "Office"
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, modeOfTransport, by="Office", all.x=TRUE)
 
-missingValuesHSCode_2 <- checkMergingColumnsForClassificationTables(
+missingValuesOffice <- checkMergingColumnsForClassificationTables(
   tradeStatsCommoditiesMergedWithClassifications,
   modeOfTransport,
   tradeStatsColumn = "Office",
