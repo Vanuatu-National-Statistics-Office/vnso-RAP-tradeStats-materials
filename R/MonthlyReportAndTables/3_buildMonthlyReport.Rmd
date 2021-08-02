@@ -133,17 +133,17 @@ indictaor1.5.3DataFrame <- data.frame("Balance of Trade by Major Partner Countri
 grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
 timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
 
-# 
+# Rename column headers and order the data
 colnames(timeSeriesGrossDomesticProduct) <- c("Year", "Value")
 timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSeriesGrossDomesticProduct$Year), ]
 
-# Proxy indicator for NSDP ECO 1.6.2
+# Proxy indicator calculated for NSDP ECO 1.6.2 by dividing latest GDP figure by Trade Agreement value
 mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
-msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
-tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
+proxyIndicatorCalucluated1.6.2<- (proxyIndictaorCalucluated1.5.2/mostRecentGrossDomesticProduct)*100
 
-
-colnames(balanceOfTradeByMajorPartnerCountries) <- gsub(pattern = ": Exports", replacement = "", colnames(balanceOfTradeByMajorPartnerCountries))
+# Insert values into table as a percentage to 2d.p
+proxyIndicatorCalucluated1.6.2<- round(proxyIndicatorCalucluated1.6.2, digits = 2)
+proxyIndictaor1.6.2DataFrame <- data.frame("Value of Trade Agreement as Proportion of GDP"= proxyIndicatorCalucluated1.6.2)
 
 
 ## Calculate ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra
