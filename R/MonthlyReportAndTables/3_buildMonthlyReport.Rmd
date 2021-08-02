@@ -36,20 +36,29 @@ processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_Proces
 ```{r NSDP indicators}
 ### Calculating NSDP Indicators
 
+
 ## ECO 1.5.2 Trade by trade agreement (value)
-## Proxy calculated: Calculate value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports to MSG countries included)
+## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports to MSG countries included)
 
 # Calculate value of imports that are from countries that have signed the MSG and PICTA trade agreements
 tradeAgreementImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
-tradeAgreementImportsValue<- sum(tradeAgreementImports$Stat..Value)
+tradeAgreementImportValue<- sum(tradeAgreementImports$Stat..Value)
 
-# Calculate value of exports that are destined to countries that have signed the MSG trade agreement 
-msgProxyExportValue <- sum(processedTradeStats[processedTradeStats$CP4 == 1000 & processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
+# Calculate value of all exports that are destined to countries that have signed the MSG trade agreement 
+tradeAgreementProxyExportValue <- sum(processedTradeStats[processedTradeStats$CP4 == 1000 & processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
 
-# Proxy indicator for NSDP indicator ECO 1.5.2
-msgTradeAgreementProxyValueSeparated<- msgTradeAgreementProxyDataFrame <- data.frame("MSGImportValue"= msgImportValue, "MSGExportEstimateValue"= msgProxyExportValue)
+# Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
+proxyIndictaorCalucluated1.5.2<- tradeAgreementImportValue + tradeAgreementProxyExportValue
+
+# Insert values into table
+proxyIndictaor1.5.2DataFrame <- data.frame("Trade by Trade Agreement Value"= proxyIndictaorCalucluated1.5.2)
+
+
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
-codesCP4 <- c(1000, 3071) # Define the CP4 codes need for Exports table 
+
+# Define the CP4 codes need for Exports table 
+codesCP4 <- c(1000, 3071) 
+
 # Define the categories used for each column
 categoryColumn <- "EXPORT.COUNTRY"
 columnCategories <- list(
@@ -74,10 +83,13 @@ columnCategories <- list(
   "United Kingdom: Exports"=c("UNITED KINGDOM"),
   "United States of America: Exports"=c("UNITED STATES OF AMERICA")
 )
+
 # Build the table
 totalPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
 # Define the CP4 codes need for Imports table
 codesCP4 <- c(4000, 4071, 7100)
+
 # Define the categories used for each column
 categoryColumn <- "IMPORT.COUNTRY"
 columnCategories <- list(
@@ -102,24 +114,38 @@ columnCategories <- list(
   "United Kingdom: Imports"=c("UNITED KINGDOM"),
   "United States of America: Imports"=c("UNITED STATES OF AMERICA")
 )
+
 # Build the table
 totalPartnerCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
-# Calculate the Balance of Trade by Major Partner Countries
+
+# Indicator calculated for NSDP indicator ECO 1.5.3 by subtracting total imports from exports 
 balanceOfTradeByMajorPartnerCountries <- totalPartnerCountryExports - totalPartnerCountryImports
-colnames(balanceOfTradeByMajorPartnerCountries) <- gsub(pattern = ": Exports", replacement = "", colnames(balanceOfTradeByMajorPartnerCountries))
-# Indicator for NSDP ECO 1.5.3
-aggregatedBalanceOfTradeByMajorPartnerCountries<- sum(balanceOfTradeByMajorPartnerCountries$Total)
+indicator1.5.3Calculated<- balanceOfTradeByMajorPartnerCountries$Total
+
+# Insert values into table
+indictaor1.5.3DataFrame <- data.frame("Balance of Trade by Major Partner Countries"= indicator1.5.3Calculated)
+
+
 ## ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP
-## Proxy calculated: Total estimated value of trade agreement as a proportion of GDP (all exports included to MSG countries, and GDP taken from 2018) 
-# Read in the data from the open folder of the repository 
+## Proxy calculated: estimated value of trade agreements and use of 2018 GDP calculation  
+
+# Read in the data from the open folder of the repository for GDP
 grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
 timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
+
+# 
 colnames(timeSeriesGrossDomesticProduct) <- c("Year", "Value")
 timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSeriesGrossDomesticProduct$Year), ]
+
 # Proxy indicator for NSDP ECO 1.6.2
 mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
 msgTradeAgreementProxyValue<- msgImportValue + msgProxyExportValue
 tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossDomesticProduct)*100
+
+
+colnames(balanceOfTradeByMajorPartnerCountries) <- gsub(pattern = ": Exports", replacement = "", colnames(balanceOfTradeByMajorPartnerCountries))
+
+
 ## Calculate ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra
 ## Proxy calculated: Level of production of major exported commodities to including beef, cocoa, coconut oil, coffee, copra, fish tuna, kava and wood 
 codesCP4 <- c(1000) # CP4 code for exports
@@ -153,6 +179,8 @@ estimatedTradeAgreementCommodities$Stat..Value <- as.numeric(gsub(",", "", estim
 totalMonthlyValueTradeAgreements <- estimatedTradeAgreementCommodities %>%
   group_by(Month) %>%
   summarise(total = sum(Stat..Value))
+
+
 # Calculate progress of NSDP (proxy indicator- ECO 1.5.2). Target sets an increase of 15% by 2020 (percentage should be 115%) 
 tradeAgreementJanuary2019 <- sum(totalMonthlyValueTradeAgreements[totalMonthlyValueTradeAgreements$Month == 1, "total"], na.rm= TRUE)
 percentageChangeJanuaryExports<- (msgTradeAgreementProxyValue/tradeAgreementJanuary2019)*100 # needs to be 120% to meet Target
