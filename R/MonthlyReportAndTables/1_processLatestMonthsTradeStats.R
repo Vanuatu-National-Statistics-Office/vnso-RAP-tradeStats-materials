@@ -61,11 +61,12 @@ tradeStatsNoDup$SITC <- sapply(tradeStatsNoDup$SITC, FUN=padWithZeros, "SITC")
 # Convert HS.Code to character
 tradeStatsNoDup$HS.Code <- sapply(tradeStatsNoDup$HS.Code, FUN=padWithZeros, "HS")
 
-# Exclude banknotes from exports
+# Exclude banknotes and coins from exports
 tradeStatsNoBanknotes <- tradeStatsNoDup[tradeStatsNoDup$HS.Code != "49070010", ]
+tradeStatsNoCoins <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$HS.Code != "71189000", ]
 
 # Create subset for Export and Import commodities 
-tradeStatsSubset <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$Type %in% c("EX / 1","EX / 3", "IM / 4", "IM / 7", "PC / 4"), ]
+tradeStatsSubset <- tradeStatsNoCoins[tradeStatsNoCoins$Type %in% c("EX / 1","EX / 3", "IM / 4", "IM / 7", "PC / 4"), ]
 tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
 
 # Print progress
@@ -78,6 +79,7 @@ numberMissing <- apply(tradeStatsCommodities, MARGIN=2,
                        FUN=function(columnValues){
                          return(sum(is.na(columnValues)))
                        })
+numberMissing
 
 # Convert the counts to a proportion
 proportionMissing <- numberMissing / nrow(tradeStatsCommodities)
@@ -200,6 +202,7 @@ missingValuesExportCountry <- checkMergingColumnsForClassificationTables(
 tradeStatsFileMergePrincipleCommdityClass <- file.path(openDataFolder, "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.csv") 
 principleCommodityClassification <- read.csv(tradeStatsFileMergePrincipleCommdityClass)
 colnames(principleCommodityClassification)[1] <- "HS.Code"
+hsDescription$HS.Code <- sapply(hsDescription$HS.Code, FUN=padWithZeros, "HS")
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, principleCommodityClassification, by="HS.Code", all.x=TRUE)
 
 missingValuesPrincipleCommodities <- checkMergingColumnsForClassificationTables(
@@ -213,6 +216,7 @@ missingValuesPrincipleCommodities <- checkMergingColumnsForClassificationTables(
 # Merge Broad Economic Categories (BEC) classifications with cleaned data
 tradeStatsFileMergeBECDescriptions <- file.path(openDataFolder, "OPN_FINAL_ASY_BECClassifications_31-01-20.csv")
 becDescriptions <- read.csv(tradeStatsFileMergeBECDescriptions)
+becDescriptions$HS.Code_6<- sapply(becDescriptions$HS.Code_6, FUN=padWithZeros, "HS", 6)
 tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, becDescriptions, by="HS.Code_6", all.x=TRUE)
 
 missingValuesBEC <- checkMergingColumnsForClassificationTables(

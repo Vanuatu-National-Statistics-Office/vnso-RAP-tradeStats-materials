@@ -141,14 +141,17 @@ timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSerie
 mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
 proxyIndicatorCalucluated1.6.2<- (proxyIndictaorCalucluated1.5.2/mostRecentGrossDomesticProduct)*100
 
-# Insert values into table as a percentage to 2d.p
+# Insert values into table as a percentage to 2 decimal places
 proxyIndicatorCalucluated1.6.2<- round(proxyIndicatorCalucluated1.6.2, digits = 2)
 proxyIndictaor1.6.2DataFrame <- data.frame("Value of Trade Agreement as Proportion of GDP"= proxyIndicatorCalucluated1.6.2)
 
 
 ## Calculate ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra
-## Proxy calculated: Level of production of major exported commodities to including beef, cocoa, coconut oil, coffee, copra, fish tuna, kava and wood 
-codesCP4 <- c(1000) # CP4 code for exports
+## Proxy calculated: level of production of major exported commodities to including beef, cocoa, coconut oil, coffee, copra, fish tuna, kava and wood 
+
+# CP4 code for exports
+codesCP4 <- c(1000) 
+
 # Define the categories used for each column
 categoryColumn <- "Principle.Exports"
 columnCategories <- list(
@@ -161,30 +164,46 @@ columnCategories <- list(
   "Kava"=c("Kava"),
   "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal")
 )
+
 # Build the table
 totalMajorExportCommodities <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
 # Proxy indicator for NSDP ECO 1.7.1
 aggregatedTotalPrincipleExports<- sum(totalPrincipleExports$Total)
+
+
+
+
+subset2016Imports<- 
+
+
+
+
 ### Calculating Progress Against NSDP Indicator Targets
-## ECO 1.5.2, proxy calculated: Trade by trade agreement (value), all exports included to MSG countries- 2020 exports increase by 15%
-# Read in the data from the open folder of the repository. Need to calculate Baseline indicators, commodity by Trade Agreements not registered in Asycuda system in 2016 so baseline data taken from 2019
+
+## ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15%
+## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports to MSG countries included)
+
+# Read in the data from the secure folder of the repository (need to calculate baseline indicators- Trade Agreements not registered in Customs system in 2016 so baseline data taken from 2019)
 importsAndExports2019File <- file.path(secureDataFolder,"SEC_PROC_ASY_RawDataAndReferenceTables_CompleteImportExport2019.csv")
 importsAndExports2019 <- read.csv(importsAndExports2019File)
-# Create subset of all international trade that registered under a trade agreement (only imports registered) 
-tradeStatsMSGImports2019 <- importsAndExports2019[is.na(importsAndExports2019$PRF) == FALSE & importsAndExports2019$PRF == "MSG", ]
+
+# Create subset of all international exports to MSG countries in 2019
 tradeStatsMSGExports2019<- importsAndExports2019[importsAndExports2019$CP4 == 1000 &     importsAndExports2019$CE.CD %in% c("FJ", "NC", "PG", "SB"), ]
-estimatedTradeAgreementCommodities<- rbind(tradeStatsMSGImports2019, tradeStatsMSGExports2019)
+
 # Calculate value of Trade Agreements by month
-estimatedTradeAgreementCommodities$Stat..Value <- as.numeric(gsub(",", "", estimatedTradeAgreementCommodities$Stat..Value))# Convert the statistical value to numeric
-totalMonthlyValueTradeAgreements <- estimatedTradeAgreementCommodities %>%
+tradeStatsMSGExports2019$Stat..Value <- as.numeric(gsub(",", "", tradeStatsMSGExports2019$Stat..Value))# Convert the statistical value to numeric
+totalMonthlyValueTradeAgreementsExports <- tradeStatsMSGExports2019 %>%
   group_by(Month) %>%
   summarise(total = sum(Stat..Value))
 
-
-# Calculate progress of NSDP (proxy indicator- ECO 1.5.2). Target sets an increase of 15% by 2020 (percentage should be 115%) 
+# Calculate ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15% 
 tradeAgreementJanuary2019 <- sum(totalMonthlyValueTradeAgreements[totalMonthlyValueTradeAgreements$Month == 1, "total"], na.rm= TRUE)
-percentageChangeJanuaryExports<- (msgTradeAgreementProxyValue/tradeAgreementJanuary2019)*100 # needs to be 120% to meet Target
-# ECO 1.5.3 Calculate Target: balance of trade by major partner countries- 2020 exports increase by 20%
+percentageChangeJanuaryMSGExports<- ((tradeAgreementProxyExportValue - tradeAgreementJanuary2019)/tradeAgreementJanuary2019)*100 # needs to be 15% to meet Target
+ 
+
+## Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
+
 # Read in the data from the secure folder of the repository. Need to calculate Baseline indicators, NSDP launched in 2017, therefore use 2016 data
 importSummaryFile <- file.path(secureDataFolder,"imports_HS_summaryStats_02-10-20.csv")
 importSummaryStats <- read.csv(importSummaryFile)
@@ -192,6 +211,7 @@ importSummaryStats2016<- importSummaryStats[importSummaryStats$Year == "2016", ]
 exportSummaryFile <- file.path(secureDataFolder,"exports_HS_summaryStats_02-10-20.csv")
 exportSummaryStats <- read.csv(exportSummaryFile)
 exportSummaryStats2016<- exportSummaryStats[exportSummaryStats$Year == "2016", ]
+
 # ECO 1.6.2, proxy calculated: Total estimated value of trade agreement as proportion of GDP, all exports included to MSG countries- 2030 increase by 15%
 # Read in the data from the open folder of the repository 
 estimatedTradeAgreementCommodities<- rbind(tradeStatsMSGImports2019, tradeStatsMSGExports2019)
