@@ -286,6 +286,7 @@ indicatorsTable <- theme_booktabs(indicatorsTable)
 indicatorsTable
 ```
 
+
 Automated text which states the growth rate that is needed for the policy objectives to meet their target indicators. If the country is on course to achieve the trade related NSDP goals.
 
 # Trade Balance by Major Partner Countries
