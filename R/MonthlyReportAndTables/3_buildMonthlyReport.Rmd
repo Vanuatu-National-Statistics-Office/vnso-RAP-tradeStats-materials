@@ -85,7 +85,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+totalMajorPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Define the CP4 codes need for Imports table
 codesCP4 <- c(4000, 4071, 7100)
@@ -222,19 +222,11 @@ totalMonthlyValueMajorPartnerCountryExports <- monthlyValueMajorPartnerCountryEx
   group_by(Month) %>%
   summarise(total = sum(total))
 
+# Calculate current monthly value
+currentMonthlyValueMajorPartnerCountryExports<- totalMonthlyValueMajorPartnerCountryExports[totalMonthlyValueMajorPartnerCountryExports$Month == 1, ]
 
-
-
-
-
-
-
-
-
-
-
-
-
+# Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20% 
+percentageChangeCurrentMonthMajorPartnerCountries<- ((currentMonthlyValueMajorPartnerCountryExports$total - totalMajorPartnerCountryExports$Total)/totalMajorPartnerCountryExports$Total)*100 # needs to be 20% to meet Target
 
 
 # ECO 1.6.2, proxy calculated: Total estimated value of trade agreement as proportion of GDP, all exports included to MSG countries- 2030 increase by 15%
