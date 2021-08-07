@@ -5,6 +5,8 @@ output:
     social: ["twitter", "facebook", "menu"]
     orientation: rows
     theme: cosmo
+    logo: www/logo.png
+    css: www/style.css
     vertical_layout: scroll
 runtime: shiny
 params:
@@ -27,12 +29,37 @@ library(sp) # Working with spatial data
 library(rmapshaper) # Simplifying polygons
 library(leaflet) # Interactive mapping
 library(countrycode) # Get country codes
+library(openxlsx) # Read Excel files into R
 
 # Note repository location
 repository <- dirname(getwd()) # Note that to run code inline you'll need to set session working directory to source file location using Session in toolbar above
 ```
 
 ```{r Load files}
+# Import historical import and export
+historyImport <- read.csv(file.path(repository, "data", "secure", "tradeStats_historic_IMPORTS_14-09-20.csv"))
+historyExport <- read.csv(file.path(repository, "data", "secure", "tradeStats_historic_EXPORTS_14-09-20.csv"))
+
+# Import Import and Export classifications
+majorTen_Extract_Class <- read.xlsx(file.path(repository, "data", "open", "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.xlsx"))
+
+# Prepare Import dashboard files
+historyImport_Dashboard <- historyImport %>%
+  select(Date, Year, Month, Procedure, HS, SITC, CTY_Origin, Weight, Value )
+
+majorTen_Extract_Class$HS <- majorTen_Extract_Class$HS.Code
+
+historyImport_Major10_merge <- merge(historyImport_Dashboard, majorTen_Extract_Class, by="HS")  
+
+# Prepare Export dashboard files
+
+historyExport_Dashboard <- historyExport %>%
+  select(Date, Year, Month, Procedure, HS, SITC, CTY_Dest, Weight, Value )
+
+historyExport_Major10_merge <- merge(historyExport_Dashboard, majorTen_Extract_Class, by="HS")
+  
+
+
 toptenexport <- read.csv(file.path(repository, "data", "secure", "tab.csv"))
 countryYearExport <- read.csv(file.path(repository, "data", "secure", "country_export.csv"))
 curtrade <- read.csv(file.path(repository, "data", "secure", "curtrade.csv"))
@@ -41,7 +68,7 @@ imp <- read.csv(file.path(repository, "data", "secure", "country_year_import.csv
 services <- read.csv(file.path(repository, "data", "secure", "tblservices.csv"))
 trades <- read.csv(file.path(repository, "data", "secure", "trades.csv"))
 tradenobalances <- read.csv(file.path(repository, "data", "secure", "trade.csv"))
-#trade_ports <- read.csv(file.path(repository, "data", "secure", "trades_billions.csv"))
+trade_ports <- read.csv(file.path(repository, "data", "secure", "trades_billions.csv"))
 
 
 
@@ -215,7 +242,7 @@ trades %>%
 
 Column
 ---------------------------------------------------------------------
-### Trade in Goods through Port Vila Ports
+### Trade in Goods by Ports
 
 ```{r Trade in goods by Port}
 trade_ports %>%
@@ -285,10 +312,6 @@ trade_ports %>%
 ```
 
 
-
-
-
-
 Column {data-width=350}
 -----------------------------------------------------------------------
 
@@ -348,7 +371,7 @@ anim_imp <- ggplot(imp_formatted,
   
   labs(title = 'Import per Year : {closest_state}',  
        subtitle  =  "Top 10 Countries Vanuatu has imported from",
-       caption  = "Import Value in Billions of Vatu | Data Source: Asycuda")
+       caption  = "Import Value in Millions of Vatu | Data Source: Asycuda")
 
 animate(anim_imp, nframes = 100, fps = 5)
 ```
@@ -410,79 +433,74 @@ anim_exp <- ggplot(exp_formatted,
   
   labs(title = 'Export per Year : {closest_state}',  
        subtitle  =  "Top 10 Countries Vanuatu has exported to",
-       caption  = "Export Value in Billions of Vatu | Data Source: Asycuda") 
+       caption  = "Export Value in Millions of Vatu | Data Source: Asycuda") 
 
-animate(anim_imp, nframes = 100, fps = 5)
-```
-
-Export by Commodity
-=====================================
-
-Column {.sidebar}
-------------------------------------------------------------------
-```{r Export by commodities, warning=FALSE}
-startData <- toptenexport
-GBChoices <- as.list(names(startData))
-names(GBChoices) <- paste(names(startData),map(startData,~length(unique(.x))))
-
-selectInput(inputId = "GB", label = "Group By", choices = GBChoices, selected = "Year 19")
-selectInput(inputId = "Metric", label = "Metric", choices = names(select_if(startData,is.numeric)), selected = "Year")
-
-updateData <- reactive(
-  startData %>% 
-    group_by_(input$GB) %>% 
-    summarise_if(is.numeric, sum, na.rm=T)
-  )
-```
-
-```{r Expot by countries}
-countryExport <- countryYearExport
-CEChoices <- as.list(names(countryExport))
-names(CEChoices) <- paste(names(countryExport),map(countryExport,~length(unique(.x))))
-
-updateCountryExport <- reactive(
-  countryExport %>%
-    group_by_(input$CE) %>% 
-    summarise_if(is.numeric,sum,na.rm=T)
-  )
+animate(anim_exp, nframes = 100, fps = 5)
 ```
 
 
 Export by Commodity {data-navmenu="Trade in Export"}
 =====================================
 
+```{r Export by goods of interest}
+
+majorTen_Exp <- majorTen_Extract_Class %>%
+  select(HS.Code, Principle.Exports)
+
+majorTen_Exp_Select <- majorTen_Exp %>%
+  group_by(Principle.Exports) %>%
+  summarise()
+
+```
+
+
 Column {.sidebar}
 ------------------------------------------------------------------
 ```{r}
-selectInput(inputId = "GB", label = "Group By", choices = GBChoices)
-selectInput(inputId = "Metric", label = "Metric", choices = names(select_if(startData,is.numeric)))
+selectInput(inputId = "MJTN_Exp",label = "Major 10 Goods",choices = majorTen_Exp_Select)
+
 ```
 
-Column 
-------------------------------------------------------------------
-
-### Bar Plot of the selected commodity
 ```{r}
-renderPlot({
-  updateData() %>%
-    ggplot(aes_string(x=input$GB, y=input$Metric, fill=input$GB)) +
-      geom_col() +
-      theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
-})
+
+updateData_export_commodity <- reactive(
+  historyExport_Major10_merge %>% 
+    filter(Principle.Exports == input$MJTN_Exp) %>%
+    group_by(Year) %>%
+    summarise(sum = sum(Value/1000000), .groups = "drop")
+  )
+
 ```
 
 column
+---------------------------------------------------------------
+### Bar Plot of Import by Commodity
+
+```{r}
+renderPlot({
+  updateData_export_commodity() %>% 
+  ggplot(aes(x=Year, y=sum)) +
+    geom_col() +
+    theme(panel.background = element_rect(fill = '#cccccc', colour = 'red')) +
+    xlab("Year") +
+    ylab("Value (Billion(Vatu))")
+})
+```
+
+
+column
 -------------------------------------------------
-### Table didplay of the selected commodity 
+### Table display of the selected commodity 
 ```{r}
 renderDT(
-  updateData(), rownames = F, extensions = 'Buttons', filter="top", editable=T,
+  updateData_export_commodity(), rownames = F, extensions = 'Buttons', filter="top", editable=T,
   options = list(
     dom = 'Blfrtip',
     buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
     lengthMenu = list(c(10,50,100,-1),c(10,50,100,"All"))
   )
 )
+
 ```
 
 Export by Country {data-navmenu="Trade in Export"}
@@ -491,45 +509,62 @@ Export by Country {data-navmenu="Trade in Export"}
 Column {.sidebar}
 ------------------------------------------------------------------
 ```{r}
-countryExport <- countryYearExport
-CEChoices <- as.list(names(countryExport))
-names(CEChoices) <- paste(names(countryExport),map(countryExport,~length(unique(.x))))
 
-selectInput(inputId = "CE",label = "Group By",choices = CEChoices, selected = "Year 19")
-selectInput(inputId = "Metric_two",label = "Metric",choices = names(select_if(countryExport,is.numeric)), selected = "Year")
+uniqueCountriesISO2 <- unique(historyExport_Dashboard$CTY_Dest[is.na(historyExport_Dashboard$CTY_Dest) == FALSE])
+countries <- countrycode(uniqueCountriesISO2, origin = "iso2c", destination = "country.name")
 
-updateCountryExport <- reactive(
-  countryExport %>%
-    group_by_(input$CE) %>% 
-    summarise_if(is.numeric,sum,na.rm=T)
-  )
+countriesToSelectFrom <- uniqueCountriesISO2
+names(countriesToSelectFrom) <- countries
+countriesToSelectFrom <- countriesToSelectFrom[is.na(countries) == FALSE]
+
+selectInput(inputId = "exportCountry",label = "Metric", choices = countriesToSelectFrom)
+
+```
+
+
+```{r}
+
+updateData_export_country <- reactive(
+  historyExport_Dashboard %>% 
+    filter(CTY_Dest == input$exportCountry) %>%
+    group_by(Year) %>%
+    summarise(sum = Value/1000000, .groups = "drop")
+)
+
 ```
 
 column
---------------------------------------
-### Bar Plot of the export value by selected country
+-------------------------------------------------
+### Bar Plot of Export by Country
+
 ```{r}
 renderPlot({
- updateCountryExport() %>% 
-  ggplot(aes_string(x=input$CE,y=input$Metric_two,fill=input$CE)) +
+ updateData_export_country() %>%
+  ggplot(aes(x=Year, y=sum)) +
   geom_col() +
-  theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
+  theme(panel.background = element_rect(fill = '#cccccc', colour = 'red')) +
+  xlab("Year") +
+  ylab("Value (Billion(Vatu))")
 })
 ```
 
+
 column
------------------------------------------------------
-### Table didplay of export value by selected country 
+-------------------------------------------------
+### Table display of the selected country 
 ```{r}
 renderDT(
-  updateCountryExport(), rownames = F, extensions = 'Buttons', filter="top", editable=T,
+  updateData_export_country(), rownames = F, extensions = 'Buttons', filter="top", editable=T,
   options = list(
     dom = 'Blfrtip',
     buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
     lengthMenu = list(c(10,50,100,-1),c(10,50,100,"All"))
   )
 )
+
 ```
+
+
 
 
 
@@ -537,24 +572,30 @@ Import by Goods {data-navmenu="Trade in Import"}
 =====================================
 
 ```{r Import by goods of interest}
-majorTen <- c("Rice"=10063000, "Wheat flour/ mesline flour"=11010000, "Cigarettes containing tobacco"=24022000, "Portland cement (excl. white)"=25232900, "Pharmaceutical products"=30049000, "Personal & Household effects"=98010000)
+
+majorTen_Imp <- majorTen_Extract_Class %>%
+  select(HS.Code, Principle.Imports)
+
+majorTen_Imp_Select <- majorTen_Imp %>%
+  group_by(Principle.Imports) %>%
+  summarise()
 
 ```
 
 Column {.sidebar}
 ------------------------------------------------------------------
 ```{r}
-selectInput(inputId = "MJTN",label = "Major 10 Goods",choices = majorTen)
+selectInput(inputId = "MJTN",label = "Major 10 Goods",choices = majorTen_Imp_Select)
 
 ```
 
 ```{r}
 
 updateData_import_commodity <- reactive(
-  importHistorysummary %>% 
-    filter(HS == input$MJTN) %>%
+  historyImport_Major10_merge %>% 
+    filter(Principle.Imports == input$MJTN) %>%
     group_by(Year) %>%
-    summarise(sum = Value_Sum, .groups = "drop")
+    summarise(sum = sum(Value/1000000), .groups = "drop")
   )
 
 ```
@@ -568,7 +609,9 @@ renderPlot({
   updateData_import_commodity() %>% 
   ggplot(aes(x=Year, y=sum)) +
     geom_col() +
-    theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
+    theme(panel.background = element_rect(fill = '#cccccc', colour = 'red')) +
+    xlab("Year") +
+    ylab("Value (Billion(Vatu))")
 })
 ```
 
@@ -612,7 +655,8 @@ updateData_import_country <- reactive(
   importHistorysummary %>% 
     filter(CTY_Origin == input$importCountry) %>%
     group_by(Year) %>%
-    summarise(sum = Value_Sum, .groups = "drop")
+    summarise(sum = Value_Sum/1000000, .groups = "drop") 
+    
 )
 
 ```
@@ -627,7 +671,9 @@ renderPlot({
  updateData_import_country() %>%
   ggplot(aes(x=Year, y=sum)) +
   geom_col() +
-  theme(panel.background = element_rect(fill = '#cccccc', colour = 'red'))
+  theme(panel.background = element_rect(fill = '#cccccc', colour = 'red')) +
+  xlab("Year") +
+  ylab("Value (Billion(Vatu))")
 })
 ```
 
@@ -719,3 +765,14 @@ leaflet(worldImportsAndExports, options = leafletOptions(crs = leafletCRS(crsCla
                    options = layersControlOptions(collapsed=FALSE)) %>%
   hideGroup(c("Exports"))
 ```
+
+ Export Microdata {data-navmenu="Microdata Download"}
+==================================================================
+
+
+
+
+
+
+Import Microdata {data-navmenu="Microdata Download"}
+==================================================================
