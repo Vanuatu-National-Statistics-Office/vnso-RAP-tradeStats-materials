@@ -246,6 +246,10 @@ tradeAgreementValueProportionGDP<- (msgTradeAgreementProxyValue/mostRecentGrossD
 # ECO 1.7.1 Calculate Target: level of production of major commodities to include cocoa and copra- 2030 increase 10-15% of the proportion
 
 
+
+
+
+
 # Create the NSDP table
 nsdpIndicators <- data.frame(
   "Policy Objectives"=c("ECO 1.4: Increase trade and investment opportunities and reduce barriers, including through the use of Aid-for-Trade",
@@ -267,21 +271,28 @@ nsdpIndicators <- data.frame(
                    "By 2030 increase 10-15% of the proportion"),
   "Target Percentage (%)"=NA, 
   check.names=FALSE, stringsAsFactors=FALSE)
+
 # Initiailise a flextable object for NSDP table
 indicatorsTable <- flextable(nsdpIndicators)
+
 # Add a header row and set background colour
 indicatorsTable <- add_header_row(indicatorsTable, top=TRUE, 
                      values=c("NSDP Pillar 3: Economy Pillar\nECONOMY 1: A stable and prosperous economy, encouraging trade, investment and providing economic opportunities for all members of society throughout Vanuatu"), 
                      colwidths=ncol(nsdpIndicators))
 indicatorsTable <- bg(indicatorsTable, bg="coral1", part="header")
+
 # Set the vertical alignment to top
 indicatorsTable <- valign(indicatorsTable, valign="top", part="all")
+
 # Merge repeated values in columns
 indicatorsTable <- merge_v(indicatorsTable)
+
 # Set table width to 100%
 indicatorsTable <- set_table_properties(indicatorsTable, width=1, layout="autofit")
+
 # Set the theme
 indicatorsTable <- theme_booktabs(indicatorsTable)
+
 # Print table
 indicatorsTable
 ```

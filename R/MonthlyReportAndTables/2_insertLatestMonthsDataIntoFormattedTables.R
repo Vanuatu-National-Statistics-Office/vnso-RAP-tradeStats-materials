@@ -781,6 +781,7 @@ if(is.null(totalImportsbySITCTable) == FALSE){
 # Print progress
 cat("Finished formatting Table 13: Imports by SITC.\n")
 
+#### Table 14: Retained Imports by BEC ####
 #### Finish ####
 
 # Save the changes to the excel file
