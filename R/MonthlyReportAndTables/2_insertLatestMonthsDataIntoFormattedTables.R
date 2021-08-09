@@ -663,6 +663,25 @@ msgAgreementCommoditiesExcludeMerged <- merge(processedTradeStats, msgAgreementC
 tradeStatsForAllMSGCountryExports <- msgAgreementCommoditiesExcludeMerged[msgAgreementCommoditiesExcludeMerged$CP4 == 1000 & msgAgreementCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
 tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Inlcuded.in.MSG) == TRUE, ]
 
+# Order data for exports and imports (statistical value) by combined classifications 
+exportMSGOrderedValue<- tradeStatsForMSGExports[order(-tradeStatsForMSGExports$Stat..Value), ]
+importMSGOrderedValue<- tradeStatsForMSGImports[order(-tradeStatsForMSGImports$Stat..Value), ]
+
+# Group statistical values of exports by classifications 
+groupedExportsMSGValue<- exportMSGOrderedValue %>%
+  group_by(Calssifications.Combined) %>%
+  summarise(total = sum(Stat..Value))
+groupedExportMSGOrderedValue<- groupedExportsMSGValue[order(-groupedExportsMSGValue$total), ]
+
+# Group statistical values of imports by classifications 
+groupedImportsMSGValue<- importMSGOrderedValue %>%
+  group_by(Calssifications.Combined) %>%
+  summarise(total = sum(Stat..Value))
+groupedImportMSGOrderedValue<- groupedImportsMSGValue[order(-groupedImportsMSGValue$total), ]
+
+
+
+
 
 
 
