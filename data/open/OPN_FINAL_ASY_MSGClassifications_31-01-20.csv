@@ -1,61 +1,61 @@
-HS.Code_6,Description,Tariff.Rate
-20711,`Fresh or chilled whole chickens,30
-20712,Frozen whole chickens,30
-40310,Yoghurt,30
-40790,Birds eggs- other,30
-90111,Coffee not roasted,25
-90121,Coffee roasted,25
-160250,Canned beef,30
-190590,Breakfast crackers,20
-200911,Frozen orange juice,30
-200940,Pineapple juice,30
-200980,Juice of any other single fruit,30
-200990,Mixture of juices,30
-210500,Ice cream,30
-220110,Mineral water (unsweetened),30
-320810,Paint based on polyester,30
-320820,Paint based acrylic or vinyl polymers,30
-320890,Other paints,30
-320910,Paints based on acrylic or vinyl polymers,30
-320990,Other paints,30
-321000,Other paints and varnishes,30
-340111,Soap for toilet use,10
-340120,Soap in other forms,30
-340119,"(Coconut soap products) Soap and organic surface-active products in bars, etc, nes",30
-340210,Anionic-Organic Surface-active agents,30
-340212,Cationic,30
-340213,Non-ionic,30
-340219,Other,30
-392510,"poly tanks, Fiberglass water tanks and eskies",30
-440710,Sawn timber- Coniferous,30
-440724,"Sawn timber- other of tropical wood (viola, mahigany, imbuia and balsa)",30
-440725,"Dark red Meranti, Light Red Meranti and Meranti bakau",30
-440726,"White Lauan, white meranti, white seraya, yellow meranti and alain",30
-440729,Other,30
-440792,Of oak (ouercus spp),30
-440792,Of beech (fagus spp),30
-440799,Other,30
-481810,Toilet paper,30
-620442,Dresses- of cotton,15
-620443,Dresses- of synthetic fibres,15
-620444,Dresses- of artificial fibers,15
-620449,Dresses- of other textile material,15
-721041,Corrugated,15
-721049,Other corrugated,15
-721070,"Painted, varnished or coated with plastics ",15
-721090,Other plated or coated with aluminum,15
-730930,Doors windows and their frames and thresholds ,15
-730900,"Resrvoirs, tanks and similar containers of iron or steel",30
-731010,"Tanks, and similar containers of iron or steel",30
-731029,Tanks of iron or steel exceeding 300 litres,30
-761010,"Doors, windows and their frames and thresholds for doors",30
-761090,Aluminum structures and parts of structures,30
-761100,Aluminum reserviors and tanks,30
-890391,Aluminum & fiberglass boats,25
-890399,Aluminum & fiberglass boats (4-8 meters inclusive),30
-940180,Fiberglass furniture,30
-940330,Wooden furniture of a kind used in offices,30
-940340,Wooden furniture of a kind used in kitchen,30
-940350,Wooden furniture of a kind used in bedroom,30
-940360,Other wooden furniture,30
-940600,Prefabricated building of steel,30
+HS.Code_6,Not Inlcuded in MSG,Description,Tariff.Rate
+20711,Yes,`Fresh or chilled whole chickens,30
+20712,Yes,Frozen whole chickens,30
+40310,Yes,Yoghurt,30
+40790,Yes,Birds eggs- other,30
+90111,Yes,Coffee not roasted,25
+90121,Yes,Coffee roasted,25
+160250,Yes,Canned beef,30
+190590,Yes,Breakfast crackers,20
+200911,Yes,Frozen orange juice,30
+200940,Yes,Pineapple juice,30
+200980,Yes,Juice of any other single fruit,30
+200990,Yes,Mixture of juices,30
+210500,Yes,Ice cream,30
+220110,Yes,Mineral water (unsweetened),30
+320810,Yes,Paint based on polyester,30
+320820,Yes,Paint based acrylic or vinyl polymers,30
+320890,Yes,Other paints,30
+320910,Yes,Paints based on acrylic or vinyl polymers,30
+320990,Yes,Other paints,30
+321000,Yes,Other paints and varnishes,30
+340111,Yes,Soap for toilet use,10
+340120,Yes,Soap in other forms,30
+340119,Yes,"(Coconut soap products) Soap and organic surface-active products in bars, etc, nes",30
+340210,Yes,Anionic-Organic Surface-active agents,30
+340212,Yes,Cationic,30
+340213,Yes,Non-ionic,30
+340219,Yes,Other,30
+392510,Yes,"poly tanks, Fiberglass water tanks and eskies",30
+440710,Yes,Sawn timber- Coniferous,30
+440724,Yes,"Sawn timber- other of tropical wood (viola, mahigany, imbuia and balsa)",30
+440725,Yes,"Dark red Meranti, Light Red Meranti and Meranti bakau",30
+440726,Yes,"White Lauan, white meranti, white seraya, yellow meranti and alain",30
+440729,Yes,Other,30
+440792,Yes,Of oak (ouercus spp),30
+440792,Yes,Of beech (fagus spp),30
+440799,Yes,Other,30
+481810,Yes,Toilet paper,30
+620442,Yes,Dresses- of cotton,15
+620443,Yes,Dresses- of synthetic fibres,15
+620444,Yes,Dresses- of artificial fibers,15
+620449,Yes,Dresses- of other textile material,15
+721041,Yes,Corrugated,15
+721049,Yes,Other corrugated,15
+721070,Yes,"Painted, varnished or coated with plastics ",15
+721090,Yes,Other plated or coated with aluminum,15
+730930,Yes,Doors windows and their frames and thresholds ,15
+730900,Yes,"Resrvoirs, tanks and similar containers of iron or steel",30
+731010,Yes,"Tanks, and similar containers of iron or steel",30
+731029,Yes,Tanks of iron or steel exceeding 300 litres,30
+761010,Yes,"Doors, windows and their frames and thresholds for doors",30
+761090,Yes,Aluminum structures and parts of structures,30
+761100,Yes,Aluminum reserviors and tanks,30
+890391,Yes,Aluminum & fiberglass boats,25
+890399,Yes,Aluminum & fiberglass boats (4-8 meters inclusive),30
+940180,Yes,Fiberglass furniture,30
+940330,Yes,Wooden furniture of a kind used in offices,30
+940340,Yes,Wooden furniture of a kind used in kitchen,30
+940350,Yes,Wooden furniture of a kind used in bedroom,30
+940360,Yes,Other wooden furniture,30
+940600,Yes,Prefabricated building of steel,30
