@@ -16,17 +16,23 @@ library(sf) # Working with spatial data
 library(ggplot2) # Creating plots
 library(dplyr) # Working with data
 library(tidyr) # For pivoting data.frames
+
 # Set the table formatting defaults
 set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
                        text.align="left", table.layout="fixed", theme_fun="theme_booktabs")
+
 # Note where VNSO code/data is on current computer
 repository <- file.path("..", "..")
+
 # Note the open data path
 openDataFolder <- file.path(repository, "data", "open")
+
 # Note the secure data path
 secureDataFolder <- file.path(repository, "data", "secure")
+
 # Load the general R functions
 source(file.path(repository, "R", "functions.R"))
+
 # Load the processed trade statistics for month of interest
 processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-01-20.csv"))
 ```
@@ -38,17 +44,23 @@ processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_Proces
 
 
 ## ECO 1.5.2 Trade by trade agreement (value)
-## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports to MSG countries included)
+## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports aligned to MSG agreement included)
 
 # Calculate value of imports that are from countries that have signed the MSG and PICTA trade agreements
-tradeAgreementMonthlyImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
-tradeAgreementMonthlyImportValue<- sum(tradeAgreementImports$Stat..Value)
+tradeAgreementCurrentMonthlyImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
+tradeAgreementCurrentMonthlyImportValue<- sum(tradeAgreementCurrentMonthlyImports$Stat..Value)
 
 # Calculate value of all exports that are destined to countries that have signed the MSG trade agreement (proxy measure)
-tradeAgreementProxyCurrentMonthExportValue <- sum(processedTradeStats[processedTradeStats$CP4 == 1000 & processedTradeStats$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), "Stat..Value"], na.rm=TRUE) #need to exclude re-exports from this calculation
+msgCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
+msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
+msgCommoditiesExclude$HS.Code_6<- sapply(msgCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
+msgCommoditiesExcludeMerged <- merge(processedTradeStats, msgCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
+tradeStatsForAllMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
+tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Inlcuded.in.MSG) == TRUE, ]
+tradeAgreementCurrentMonthlyExportValue<- sum(tradeStatsForMSGExports$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
-proxyIndictaorCalucluated1.5.2<- tradeAgreementMonthlyImportValue + tradeAgreementProxyMonthlyExportValue
+proxyIndicatorCalculated1.5.2<- tradeAgreementCurrentMonthlyImportValue + tradeAgreementCurrentMonthlyExportValue
 
 # Insert values into table
 proxyIndictaor1.5.2DataFrame <- data.frame("Trade by Trade Agreement Value"= proxyIndictaorCalucluated1.5.2)
@@ -85,7 +97,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalMajorPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+majorPartnerCountryExportsValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Define the CP4 codes need for Imports table
 codesCP4 <- c(4000, 4071, 7100)
@@ -116,7 +128,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalPartnerCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+majorPartnerCountryImportValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Indicator calculated for NSDP indicator ECO 1.5.3 by subtracting total imports from exports 
 monthlyBalanceOfTradeByMajorPartnerCountries <- totalPartnerCountryExports - totalPartnerCountryImports
