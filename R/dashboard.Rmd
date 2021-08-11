@@ -448,8 +448,8 @@ majorTen_Exp <- majorTen_Extract_Class %>%
   select(HS.Code, Principle.Exports)
 
 majorTen_Exp_Select <- majorTen_Exp %>%
-  group_by(Principle.Exports) %>%
-  summarise()
+  distinct(Principle.Exports) %>%
+  pull(Principle.Exports)
 
 ```
 
@@ -474,7 +474,7 @@ updateData_export_commodity <- reactive(
 
 column
 ---------------------------------------------------------------
-### Bar Plot of Import by Commodity
+### Bar Plot of Export by Commodity
 
 ```{r}
 renderPlot({
@@ -493,7 +493,7 @@ column
 ### Table display of the selected commodity 
 ```{r}
 renderDT(
-  updateData_export_commodity(), rownames = F, extensions = 'Buttons', filter="top", editable=T,
+  updateData_export_commodity(), rownames = FALSE, extensions = 'Buttons', filter="top", editable=TRUE,
   options = list(
     dom = 'Blfrtip',
     buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
