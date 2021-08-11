@@ -46,24 +46,24 @@ processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_Proces
 ## ECO 1.5.2 Trade by trade agreement (value)
 ## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports aligned to MSG agreement included)
 
-# Calculate value of imports that are from countries that have signed the MSG and PICTA trade agreements
+# Calculate value of imports from countries that have signed the MSG and PICTA trade agreements
 tradeAgreementCurrentMonthlyImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
 tradeAgreementCurrentMonthlyImportValue<- sum(tradeAgreementCurrentMonthlyImports$Stat..Value)
 
 # Calculate value of all exports that are destined to countries that have signed the MSG trade agreement (proxy measure)
 msgCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
-msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
+msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile)
 msgCommoditiesExclude$HS.Code_6<- sapply(msgCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
 msgCommoditiesExcludeMerged <- merge(processedTradeStats, msgCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
 tradeStatsForAllMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
-tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Inlcuded.in.MSG) == TRUE, ]
+tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
 tradeAgreementCurrentMonthlyExportValue<- sum(tradeStatsForMSGExports$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
 proxyIndicatorCalculated1.5.2<- tradeAgreementCurrentMonthlyImportValue + tradeAgreementCurrentMonthlyExportValue
 
 # Insert values into table
-proxyIndictaor1.5.2DataFrame <- data.frame("Trade by Trade Agreement Value"= proxyIndictaorCalucluated1.5.2)
+proxyIndicator1.5.2DataFrame <- data.frame("Trade by Trade Agreement Value"= proxyIndicatorCalculated1.5.2)
 
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
@@ -139,7 +139,7 @@ indictaor1.5.3DataFrame <- data.frame("Balance of Trade by Major Partner Countri
 
 
 ## ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP
-## Proxy calculated: estimated value of trade agreements and use of 2018 GDP calculation  
+## Proxy calculated: estimated value of trade agreements and use of 2018 GDP   
 
 # Read in the data from the open folder of the repository for GDP
 grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
@@ -151,7 +151,7 @@ timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSerie
 
 # Proxy indicator calculated for NSDP ECO 1.6.2 by dividing latest GDP figure by Trade Agreement value
 mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
-proxyIndicatorCalucluated1.6.2<- (proxyIndictaorCalucluated1.5.2/mostRecentGrossDomesticProduct)*100
+proxyIndicatorCalculated1.6.2<- (proxyIndicatorCalculated1.5.2/mostRecentGrossDomesticProduct)*100
 
 # Insert values into table as a percentage to 2 decimal places
 proxyIndicatorCalucluated1.6.2<- round(proxyIndicatorCalucluated1.6.2, digits = 2)

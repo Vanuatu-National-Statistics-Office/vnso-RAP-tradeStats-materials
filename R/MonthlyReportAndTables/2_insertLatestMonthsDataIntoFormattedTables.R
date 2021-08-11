@@ -820,6 +820,48 @@ if(is.null(totalImportsbySITCTable) == FALSE){
 cat("Finished formatting Table 13: Imports by SITC.\n")
 
 #### Table 14: Retained Imports by BEC ####
+
+## Getting latest statistics ##
+# Calculate Retained imports by BEC 
+
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "BEC4"
+columnCategories <- list(
+  "Food and Beverage: Primary- Mainly for Industry"=c("111"),
+  "Food and Beverage: Processed- Mainly for Household consumption"=c("112"),
+  "Food and Beverage: Processed- Mainly for Industry"=c("121"),
+  "Food and Beverage: Processed- Mainly for Household consumption"=c("122"),
+  "Industrial Supplies Not Elsewhere Specified: Primary"=c("21"),
+  "Industrial Supplies Not Elsewhere Specified: Processed"=c("22"),
+  "Fuels And Lubricants: Primary"=c("31"),
+  "Fuels And Lubricants: Processed- Other"=c("322"),
+  "Capital Goods (Except Transport Equipment): Capital goods (except transport equipment)"=c("41"),
+  "Capital Goods (Except Transport Equipment): Parts and accessories"=c("42"),
+  "Transport Equipment And Parts And Accessories Thereof: Passenger motor cars"=c("51"),
+  "Transport Equipment And Parts And Accessories Thereof: Other- Industrial"=c("521"),
+  "Transport Equipment And Parts And Accessories Thereof: Other- Non-Industrial"=c("522"),
+  "Transport Equipment And Parts And Accessories Therefof: Parts and accessories"=c("53"),
+  "Consumer Goods Not Elsewhere Specified: Durable"=c("61"),
+  "Consumer Goods Not Elsewhere Specified: Semi-Durable"=c("62"),
+  "Consumer Goods Not Elsewhere Specified: Non-Durable"=c("63"),
+  "Goods Not Elsewhere Specifed"=c("7")
+)
+
+# Build the table
+becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+# Calculate Capital Goods- sum of categories 41 and 521
+
+# Calculate Intermediate Goods- sum of categories 111, 121, 21, 22, 31, 322, 42 and 53
+
+# Calculate Consumption Goods- sum of categories 112, 122, 522, 61, 62 and 63
+
+## Formatting the table ##
+
+
 #### Finish ####
 
 # Save the changes to the excel file
