@@ -60,10 +60,10 @@ tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsFor
 tradeAgreementCurrentMonthlyExportValue<- sum(tradeStatsForMSGExports$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
-proxyIndicatorCalculated1.5.2<- tradeAgreementCurrentMonthlyImportValue + tradeAgreementCurrentMonthlyExportValue
+proxyIndicator1.5.2CurrentMonth<- tradeAgreementCurrentMonthlyImportValue + tradeAgreementCurrentMonthlyExportValue
 
 # Insert values into table
-proxyIndicator1.5.2DataFrame <- data.frame("Trade by Trade Agreement Value"= proxyIndicatorCalculated1.5.2)
+proxyIndicatorCurrentMonth1.5.2DataFrame <- data.frame("Trade by Trade Agreement Value"= proxyIndicator1.5.2CurrentMonth)
 
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
@@ -97,7 +97,7 @@ columnCategories <- list(
 )
 
 # Build the table
-majorPartnerCountryExportsValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+majorPartnerCountryCurrentMonthExportValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Define the CP4 codes need for Imports table
 codesCP4 <- c(4000, 4071, 7100)
@@ -128,14 +128,14 @@ columnCategories <- list(
 )
 
 # Build the table
-majorPartnerCountryImportValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+majorPartnerCountryCurrentMonthImportValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Indicator calculated for NSDP indicator ECO 1.5.3 by subtracting total imports from exports 
-monthlyBalanceOfTradeByMajorPartnerCountries <- totalPartnerCountryExports - totalPartnerCountryImports
-indicator1.5.3Calculated<- monthlyBalanceOfTradeByMajorPartnerCountries$Total
+monthlyBalanceOfTradeByMajorPartnerCountries <- majorPartnerCountryCurrentMonthExportValue - majorPartnerCountryCurrentMonthImportValue
+indicator1.5.3CurrentMonthCalculated<- monthlyBalanceOfTradeByMajorPartnerCountries$Total
 
 # Insert values into table
-indictaor1.5.3DataFrame <- data.frame("Balance of Trade by Major Partner Countries"= indicator1.5.3Calculated)
+indicator1.5.3DataFrame <- data.frame("Balance of Trade by Major Partner Countries"= indicator1.5.3Calculated)
 
 
 ## ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP
@@ -154,8 +154,8 @@ mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeries
 proxyIndicatorCalculated1.6.2<- (proxyIndicatorCalculated1.5.2/mostRecentGrossDomesticProduct)*100
 
 # Insert values into table as a percentage to 2 decimal places
-proxyIndicatorCalucluated1.6.2<- round(proxyIndicatorCalucluated1.6.2, digits = 2)
-proxyIndictaor1.6.2DataFrame <- data.frame("Value of Trade Agreement as Proportion of GDP"= proxyIndicatorCalucluated1.6.2)
+proxyIndicatorCalculated1.6.2<- round(proxyIndicatorCalculated1.6.2, digits = 2)
+proxyIndictaor1.6.2DataFrame <- data.frame("Value of Trade Agreement as Proportion of GDP"= proxyIndicatorCalculated1.6.2)
 
 
 ## Calculate ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra
@@ -178,7 +178,7 @@ columnCategories <- list(
 )
 
 # Build the table
-totalMajorExportCommodities <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+majorExportCurrentMonthCommoditiesValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Proxy indicator for NSDP ECO 1.7.1
 aggregatedTotalPrincipleExports<- totalMajorExportCommodities$Total
@@ -534,6 +534,10 @@ Automated text to highlight trade balance; difference between value of imports a
 # Trade by Trade Agreement
 
 ```{r trade by trade agreement, ft.align="left"}
+
+
+
+
 # Create the NSDP table
 tradeByTradeAgreement <- data.frame(
   "SITC Description"=c("Food and live animals", "Beverages and tobacco", "Crude materials, inedible, except fuels", 
