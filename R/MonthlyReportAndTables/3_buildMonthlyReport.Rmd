@@ -56,14 +56,14 @@ msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile)
 msgCommoditiesExclude$HS.Code_6<- sapply(msgCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
 msgCommoditiesExcludeMerged <- merge(processedTradeStats, msgCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
 tradeStatsForAllMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
-tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+tradeAgreementCurrentMonthlyExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
 tradeAgreementCurrentMonthlyExportValue<- sum(tradeStatsForMSGExports$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
 proxyIndicator1.5.2CurrentMonth<- tradeAgreementCurrentMonthlyImportValue + tradeAgreementCurrentMonthlyExportValue
 
 # Insert values into table
-proxyIndicatorCurrentMonth1.5.2DataFrame <- data.frame("Trade by Trade Agreement Value"= proxyIndicator1.5.2CurrentMonth)
+proxyIndicatorCurrentMonth1.5.2DataFrame <- data.frame("Trade by Trade Agreement Monthly Value"= proxyIndicator1.5.2CurrentMonth)
 
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
@@ -98,6 +98,7 @@ columnCategories <- list(
 
 # Build the table
 majorPartnerCountryCurrentMonthExportValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+totalMajorPartnerCountryCurrentMonthExportValue<- majorPartnerCountryCurrentMonthExportValue$Total
 
 # Define the CP4 codes need for Imports table
 codesCP4 <- c(4000, 4071, 7100)
@@ -135,7 +136,7 @@ monthlyBalanceOfTradeByMajorPartnerCountries <- majorPartnerCountryCurrentMonthE
 indicator1.5.3CurrentMonthCalculated<- monthlyBalanceOfTradeByMajorPartnerCountries$Total
 
 # Insert values into table
-indicator1.5.3DataFrame <- data.frame("Balance of Trade by Major Partner Countries"= indicator1.5.3Calculated)
+indicator1.5.3CurrentMonthDataFrame <- data.frame("Current Month Balance of Trade by Major Partner Countries"= indicator1.5.3CurrentMonthCalculated)
 
 
 ## ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP
@@ -151,11 +152,11 @@ timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSerie
 
 # Proxy indicator calculated for NSDP ECO 1.6.2 by dividing latest GDP figure by Trade Agreement value
 mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
-proxyIndicatorCalculated1.6.2<- (proxyIndicatorCalculated1.5.2/mostRecentGrossDomesticProduct)*100
+proxyIndicator1.6.2CurrentMonth<- (proxyIndicator1.5.2CurrentMonth/mostRecentGrossDomesticProduct)*100
 
 # Insert values into table as a percentage to 2 decimal places
-proxyIndicatorCalculated1.6.2<- round(proxyIndicatorCalculated1.6.2, digits = 2)
-proxyIndictaor1.6.2DataFrame <- data.frame("Value of Trade Agreement as Proportion of GDP"= proxyIndicatorCalculated1.6.2)
+proxyIndicator1.6.2CurrentMonthRounded<- round(proxyIndicator1.6.2CurrentMonth, digits = 2)
+proxyIndictaor1.6.2CurrentMonthDataFrame <- data.frame("Value of Trade Agreement as Proportion of GDP for Current Month"= proxyIndicator1.6.2CurrentMonthRounded)
 
 
 ## Calculate ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra
@@ -181,9 +182,8 @@ columnCategories <- list(
 majorExportCurrentMonthCommoditiesValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Proxy indicator for NSDP ECO 1.7.1
-aggregatedTotalPrincipleExports<- totalMajorExportCommodities$Total
-proxyIndictaor1.7.1DataFrame <- data.frame("Level of production of major commodities to include Cocoa and Copra"= aggregatedTotalPrincipleExports)
-
+proxyIndicator1.7.1CurrentMonthValue<- majorExportCurrentMonthCommoditiesValue$Total
+proxyIndictaor1.7.1DataFrame <- data.frame("Level of production of major commodities to include Cocoa and Copra for Current Month"= proxyIndicator1.7.1CurrentMonthValue)
 
 
 ### Calculating Progress Against NSDP Indicator Targets
@@ -197,20 +197,28 @@ historicalExports <- read.csv(historicalExportsFile)
 
 # Create subset of all international exports to MSG countries in 2016 the baseline year
 tradeStatsMSGExports2016<- historicalExports[historicalExports$Year == 2016, ]
-tradeStatsMSGExports<- tradeStatsMSGExports2016[tradeStatsMSGExports2016$Procedure == 1000 &     tradeStatsMSGExports2016$CTY_Dest %in% c("FJ", "NC", "PG", "SB"), ]
+tradeStatsMSGBaselineExports<- tradeStatsMSGExports2016[tradeStatsMSGExports2016$Procedure == 1000 &     tradeStatsMSGExports2016$CTY_Dest %in% c("FJ", "NC", "PG", "SB"), ]
+tradeStatsMSGBaselineExports$HS<- sapply(tradeStatsMSGBaselineExports$HS, FUN=padWithZeros, "HS")
+tradeStatsMSGBaselineExports$HS.Code_6 <- extractCodeSubset(tradeStatsMSGBaselineExports$HS, nDigits=6)
+msgAgreementHistoricalCommoditiesExcludeMerged <- merge(tradeStatsMSGBaselineExports, msgAgreementCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
+msgHistoricalCommodities <- msgAgreementHistoricalCommoditiesExcludeMerged[is.na(msgAgreementHistoricalCommoditiesExcludeMerged$Not.Included.in.MSG) == TRUE, ]
 
 # Calculate value of Trade Agreements by month for baseline year
-tradeStatsMSGExports$Value <- as.numeric(gsub(",", "", tradeStatsMSGExports$Value))# Convert the statistical value to numeric
-totalMonthlyValueTradeAgreementsExports <- tradeStatsMSGExports %>%
+msgHistoricalCommodities$Value <- as.numeric(gsub(",", "", msgHistoricalCommodities$Value))# Convert the statistical value to numeric
+totalMonthlyValueTradeAgreementsExports <- msgHistoricalCommodities %>%
   group_by(Month) %>%
   summarise(total = sum(Value))
 
-# Calculate value of Trade Agreements for current month from baseline year
+# Calculate value of Trade Agreements for current month from baseline year (need to change from hard coding)
 tradeAgreementCurrentMonthBaselineValue <- sum(totalMonthlyValueTradeAgreementsExports[totalMonthlyValueTradeAgreementsExports$Month == 1, "total"], na.rm= TRUE)
 
 # Calculate ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15% 
-percentageChangeCurrentMonthMSGExports<- ((tradeAgreementProxyCurrentMonthExportValue - tradeAgreementCurrentMonthBaselineValue)/tradeAgreementCurrentMonthBaselineValue)*100 # needs to be 15% to meet Target
- 
+proxyIndicator1.5.2TargetCurrentMonth<- ((tradeAgreementCurrentMonthlyExportValue - tradeAgreementCurrentMonthBaselineValue)/tradeAgreementCurrentMonthBaselineValue)*100 # needs to be 15% to meet Target
+
+# Insert values into table as a percentage to 2 decimal places
+proxyIndicator1.5.2TargetCurrentMonthRounded<- round(proxyIndicator1.5.2TargetCurrentMonth, digits = 2)
+proxyIndictaor1.6.2CurrentMonthDataFrame <- data.frame("Percentage Chnage in exports for Current month compared to Baseline)"= proxyIndicator1.5.2TargetCurrentMonthRounded)
+
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
 
@@ -226,19 +234,24 @@ tradeStatsExports2016MergedWithClassifications <- merge(tradeStatsExports2016, c
 historicalTradeStatsExportsMajorPartnerCountries<- tradeStatsExports2016MergedWithClassifications[tradeStatsExports2016MergedWithClassifications$EXPORT.COUNTRY %in% c("AUSTRALIA", "CHINA, PEOPLES REPUBLIC OF", "FIJI", "FRANCE", "HONG KONG", "INDIA", "INDONESIA", "JAPAN", "KOREA, REPUBLIC OF", "MALAYSIA", "NETHERLANDS", "NEW CALEDONIA", "NEW ZEALAND", "PAPUA NEW GUINEA", "PHILIPPINES", "SINGAPORE", "SOLOMON ISLANDS", "THAILAND", "UNITED KINGDOM", "UNITED STATES OF AMERICA"), ]
 
 # Calculate monthly values of major partner countries for 2016 baseline year
-monthlyValueMajorPartnerCountryExports <- historicalTradeStatsExportsMajorPartnerCountries %>%
+historicalDataMonthlyValueMajorPartnerCountryExports <- historicalTradeStatsExportsMajorPartnerCountries %>%
   group_by(Month, EXPORT.COUNTRY) %>%
   summarise(total = sum(Value))
 
-totalMonthlyValueMajorPartnerCountryExports <- monthlyValueMajorPartnerCountryExports %>%
+totalMonthlyValueMajorPartnerCountryExports <- historicalDataMonthlyValueMajorPartnerCountryExports %>%
   group_by(Month) %>%
   summarise(total = sum(total))
 
 # Calculate current monthly value
-currentMonthlyValueMajorPartnerCountryExports<- totalMonthlyValueMajorPartnerCountryExports[totalMonthlyValueMajorPartnerCountryExports$Month == 1, ]
+historicalDataCurrentMonthlyValueMajorPartnerCountryExports<- totalMonthlyValueMajorPartnerCountryExports[totalMonthlyValueMajorPartnerCountryExports$Month == 1, ]
+historicalMonthlyExportValueproxyIndicator1.5.3Target<- historicalDataCurrentMonthlyValueMajorPartnerCountryExports$total
 
-# Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20% 
-percentageChangeCurrentMonthMajorPartnerCountries<- ((currentMonthlyValueMajorPartnerCountryExports$total - totalMajorPartnerCountryExports$Total)/totalMajorPartnerCountryExports$Total)*100 # needs to be 20% to meet Target
+# Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
+proxyIndicator1.5.3TargetCurrentMonth<- ((totalMajorPartnerCountryCurrentMonthExportValue - historicalMonthlyExportValueproxyIndicator1.5.3Target)/historicalMonthlyExportValueproxyIndicator1.5.3Target)*100 # needs to reach 20% Target
+
+# Insert values into table as a percentage to 2 decimal places
+proxyIndicator1.5.3TargetCurrentMonthRounded<- round(proxyIndicator1.5.3TargetCurrentMonth, digits = 2)
+proxyIndicator1.5.3TargetCurrentMonthDataFrame <- data.frame("Percentage Change in exports for Current month compared to Baseline)"= proxyIndicator1.5.3TargetCurrentMonthRounded)
 
 
 # ECO 1.6.2, proxy calculated: Total estimated value of trade agreement as proportion of GDP, all exports included to MSG countries- 2030 increase by 15%
