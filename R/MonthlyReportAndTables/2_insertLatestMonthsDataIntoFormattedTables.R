@@ -893,17 +893,13 @@ columnCategories <- list(
   "Consumer Goods Not Elsewhere Specified: Durable"=c("61"),
   "Consumer Goods Not Elsewhere Specified: Semi-Durable"=c("62"),
   "Consumer Goods Not Elsewhere Specified: Non-Durable"=c("63"),
-  "Goods Not Elsewhere Specifed"=c("7")
+  "Capital Goods"=c("41", "521"),
+  "Intermediate Goods"=c("111", "121", "21", "22", "31", "322", "42", "53"),
+  "Consumption Goods"=c("112", "122", "522", "61", "62", "63")
 )
 
 # Build the table
 becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
-
-# Calculate Capital Goods- sum of categories 41 and 521
-
-# Calculate Intermediate Goods- sum of categories 111, 121, 21, 22, 31, 322, 42 and 53
-
-# Calculate Consumption Goods- sum of categories 112, 122, 522, 61, 62 and 63
 
 ## Formatting the table ##
 
