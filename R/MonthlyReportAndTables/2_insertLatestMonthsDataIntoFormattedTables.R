@@ -648,7 +648,7 @@ if(is.null(tradeByModeOfTransportSubTables) == FALSE){
 # Print progress
 cat("Finished formatting Table 10: Trade by Mode of Transport.\n")
 
-#### Table 11: Trade by Trade Agreement (INCOMPLETE) ####
+#### Table 11: Trade by Trade Agreement ####
 
 ## Getting latest statistics ##
 
