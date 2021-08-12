@@ -870,6 +870,15 @@ ggplot(data=dummyData, aes(x=Commodity, y=Value, fill=Type)) +
 
 Automated text to say here where the principle imports are destined for, their weight and the unit value of the commodity and make a comparison to last month.
 
+# Imports of Products related to Health
+
+```{r principle imports through time, fig.height=1.75}
+
+
+```
+
+Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
+
 # Concluding remarks
 
 This section not automated, instead analysis of the information in partnership with the Ministry of Trades.
