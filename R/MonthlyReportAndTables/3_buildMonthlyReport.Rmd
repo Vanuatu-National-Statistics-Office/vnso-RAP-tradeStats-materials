@@ -712,11 +712,11 @@ columnCategories <- list(
   "Coconut oil"=c("Coconut Oil"),
   "Copra"=c("Copra"),
   "Kava"=c("Kava"))
+majorExportsCurrentMonth <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Take data-frame and add to historical "majorMonthlyExports" 
 
 # Build the table
-majorExportsCurrentMonth <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
                         Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
                         Value=c(6.8, 15, 33, 42, 35, 4.2, 10, 29.5, 31, 25))
@@ -804,12 +804,22 @@ majorMonthlyImports$Medicaments <- as.numeric(majorMonthlyImports$Medicaments)
 majorMonthlyImports$Petroleum.Oils.and.oils.obtained.from.bituminous.minerals <- as.numeric(majorMonthlyImports$Petroleum.Oils.and.oils.obtained.from.bituminous.minerals)
 majorMonthlyImports$Rice <- as.numeric(majorMonthlyImports$Rice)
 
-# Calculate current monthly values for principle imports
+# Calculate value of commodities for current month
+codesCP4 <- c(4000, 4071, 7100)
+categoryColumn <- "Principle.Imports"
+columnCategories <- list(
+  "Alcoholic drinks"=c("Alcoholic drinks"),
+  "Articles of iron or steel"=c("Articles of iron or steel"),
+  "Medicaments"=c("Medicaments"),
+  "Petroleum oils and oils obtained from bituminous minerals"=c("Petroleum oils and oils obtained from bituminous minerals"),
+  "Rice"=c("Rice"))
+majorImportsCurrentMonth <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+# Take data-frame and add to historical "majorMonthlyImports"
 
 
 
 # Build the table
-majorExportsCurrentMonth <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
                         Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
                         Value=c(50, 76, 96, 65, 86, 30, 60, 45, 75, 80))
@@ -851,7 +861,7 @@ orderedPrincipleImportType <- otherPrincipleImports %>%
 importsOtherandNA <- orderedPrincipleImportType %>%
   filter(principleImportCategory %in% c("Other Imports"))
 
-# Select top 5 new exports
+# Select top 5 new imports
 top5OtherImports<- importsOtherandNA %>% 
   select()
 
