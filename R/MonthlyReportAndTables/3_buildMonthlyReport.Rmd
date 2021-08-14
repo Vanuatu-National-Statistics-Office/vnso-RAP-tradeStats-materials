@@ -185,6 +185,26 @@ majorExportCurrentMonthCommoditiesValue <- buildRawSummaryTable(processedTradeSt
 proxyIndicator1.7.1CurrentMonthValue<- majorExportCurrentMonthCommoditiesValue$Total
 proxyIndictaor1.7.1DataFrame <- data.frame("Level of production of major commodities to include Cocoa and Copra for Current Month"= proxyIndicator1.7.1CurrentMonthValue)
 
+## ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports
+
+# Read in the data from the open folder of the repository for processed & raw Commodities (coconut, kava, cocoa and coffee)
+processedRawCommoditiesFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawCommodityClassifications_31-01-20.csv")
+processedRawCommodities <- read.csv(processedRawCommoditiesFile)
+
+# Merge raw and processed commodity classifications with cleaned data
+processedRawCommodities$HS.Code <- sapply(processedRawCommodities$HS.Code, FUN=padWithZeros, "HS")
+processedRawCommoditiesMergedWithClassifications <- merge(processedTradeStats, processedRawCommodities, by="HS.Code", all.x=TRUE)
+
+# Create data-frame for all raw and processed export commodities for current month
+processedRawCommoditiesFiltered <- processedRawCommoditiesMergedWithClassifications[is.na(processedRawCommoditiesMergedWithClassifications$Source) == FALSE, ]
+processedRawCommoditiesExported<- processedRawCommoditiesFiltered[processedRawCommoditiesFiltered$CP4 %in% c(1000, 3071), ]
+
+# Calculate ratio of processed to raw commodities 
+processedtoRawDataFrame<- processedRawCommoditiesExported %>%
+  group_by(Export.Type) %>%
+  summarise(total = sum(Stat..Value))
+indicator4.3.2<- (110333195/35106247)
+
 
 ### Calculating Progress Against NSDP Indicator Targets
 
@@ -930,7 +950,7 @@ ggplot(historalAndCurrentMonthFood, aes(x=Year)) +
   geom_line(aes(y = ), color = "darkred") + 
   geom_line(aes(y = ), color="steelblue", linetype="twodash")
 
-
+# Divide monthly values by actual and estimated population data from the Census
 
 
 

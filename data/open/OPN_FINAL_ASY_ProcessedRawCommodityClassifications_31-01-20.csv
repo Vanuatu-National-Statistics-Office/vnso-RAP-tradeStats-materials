@@ -1,1 +1,27 @@
-Commodity,Export Type,HS.Code
+Source,Commodity,Export Type,HS.Code
+Coconut,Copra,Processed,12030000
+Coconut,Coconut Oil,Processed,15131100
+Coconut,Coconut Oil,Processed,15131900
+Coconut,Coconut Oil,Processed,15132100
+Coconut,Coconut Oil,Processed,15132900
+Coconut,Coconut Meal,Processed,23065000
+Coconut,Coconut Floor Coverings,Processed,57022000
+Kava,Kava Dried Chips,Processed,12119010
+Kava,Kava Powder,Processed,12119020
+Kava,Other,Raw,12119090
+Coffee,Unroasted Coffee,Raw,9011100
+Coffee,Unroasted Coffee,Raw,9011200
+Coffee,Roasted Coffee,Processed,9012200
+Coffee,Roasted Coffee,Processed,9012200
+Coffee,Roasted Coffee,Processed,9019000
+Cocoa,Cocoa Beans,Raw,18010000
+Cocoa,Cocoa shells,Raw,18020000
+Cocoa,Cocoa Paste,Processed,18031000
+Cocoa,Cocoa Paste,Processed,18032000
+Cocoa,Cocoa Butter,Processed,18040000
+Cocoa,Cocoa Powder,Processed,18050000
+Cocoa,Chocolate,Processed,18061000
+Cocoa,Chocolate,Processed,18062000
+Cocoa,Chocolate,Processed,18063100
+Cocoa,Chocolate,Processed,18063200
+Cocoa,Chocolate,Processed,18069000
