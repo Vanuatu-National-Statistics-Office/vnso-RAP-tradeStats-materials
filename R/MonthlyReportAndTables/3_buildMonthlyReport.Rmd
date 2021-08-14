@@ -884,6 +884,83 @@ Automated text to say here where the principle imports are destined for, their w
 
 ```{r principle imports through time, fig.height=1.75}
 
+# Read in the data from the open folder of the repository 
+productsRelatedHealthFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
+productsRelatedHealth <- read.csv(productsRelatedHealthFile)
+
+# Merge unhealthy commodity classifications with cleaned data
+productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWithZeros, "HS")
+productsRelatedHealthMergedWithClassifications <- merge(processedTradeStats, productsRelatedHealth, by="HS.Code", all.x=TRUE)
+
+# Create data-frame for all unhealthy imports for current month
+unhealthlyCommodities <- productsRelatedHealthMergedWithClassifications[is.na(productsRelatedHealthMergedWithClassifications$Unhealthy.Focus.Food.Category) == FALSE, ]
+unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000, 4071, 7100), ]
+
+# Calculate value of Food Sub-Category for current month
+foodSubCategoryValue <- unhealthyImportCommodities %>%
+  group_by(Year, Month, Food.sub.category) %>%
+  summarise(total = sum(Stat..Value)) %>%
+  arrange(desc(total))
+
+# Create data-frame for all unhealthy imports from historical data 
+historicalImportsFile <- file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv")
+historicalImports <- read.csv(historicalImportsFile)
+colnames(historicalImports)[6] <- "HS.Code"
+historicalImports$HS.Code <- sapply(historicalImports$HS.Code, FUN=padWithZeros, "HS")
+historicalHealthMergedWithClassifications <- merge(historicalImports, productsRelatedHealth, by="HS.Code", all.x=TRUE)
+unhealthlyHistoricalCommodities <- historicalHealthMergedWithClassifications[is.na(historicalHealthMergedWithClassifications$Unhealthy.Focus.Food.Category) == FALSE, ]
+
+# Calculate value of Food Sub-Category for historical data
+foodSubCategoryHistoricalValue <- unhealthlyHistoricalCommodities %>%
+  group_by(Year, Month, Food.sub.category) %>%
+  summarise(total = sum(Value))
+
+# Calculate value of Food Sub-Category current month value for historical data
+foodSubCategoryHistoricalMonthlyValue <- foodSubCategoryHistoricalValue %>%
+  group_by(Year, Month, Food.sub.category) %>%
+    filter(Month == 1) 
+
+# Join current month data-frame to historical data
+foodSubCategoryHistoricalMonthlyValue$Month<- as.character(foodSubCategoryHistoricalMonthlyValue$Month)
+historalAndCurrentMonthFood<- rbind(foodSubCategoryHistoricalMonthlyValue, foodSubCategoryValue)
+
+# Create a line graph
+
+
+
+
+
+
+
+### Code below not working not sure why
+# Calculate value of unhealthy commodities for current month
+codesCP4 <- c(4000, 4071, 7100)
+categoryColumn <- "Food sub-category"
+columnCategories <- list(
+  "Processed Meats"=c("Processed Meats"),
+  "Canned Meats"=c("Canned Meats"),
+  "Cordial"=c("Cordial"),
+  "Soft Drinks"=c("Soft Drinks"),
+  "Electrolyte drinks"=c("Electrolyte drinks"),
+  "Sugar"=c("Sugar"),
+  "Crisps and snacks"=c("Crisps and snacks"),
+  "Noodles"=c("Noodles"),
+  "Confectionary"=c("Confectionary"),
+  "Bakery products"=c("Bakery products")
+  )
+importsUnhealthyFoodCurrentMonth <- buildRawSummaryTable(unhealthlyCommodities, codesCP4, categoryColumn, columnCategories)
+
+```
+
+Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
+
+# Imports of food and products targeted as those that can be produced domestically
+
+```{r principle imports through time, fig.height=1.75}
+
+# Read in the data from the open folder of the repository 
+majorMonthlyImportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyImportCalculations_31-12-20.csv")
+majorMonthlyImports <- read.csv(majorMonthlyImportsFile)
 
 
 
