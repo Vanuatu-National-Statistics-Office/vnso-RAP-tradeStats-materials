@@ -42,6 +42,7 @@ processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_Proces
 ```{r NSDP indicators}
 ### Calculating NSDP Indicators
 
+## ENV 1.3.1  Total annual volume of imports of food and products targeted by DARD as those that can be produced domestically (including ‘value-added products)
 
 ## ECO 1.5.2 Trade by trade agreement (value)
 ## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports aligned to MSG agreement included)
