@@ -904,10 +904,11 @@ foodSubCategoryValue <- unhealthyImportCommodities %>%
 
 # Create data-frame for all unhealthy imports from historical data 
 historicalImportsFile <- file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv")
-historicalImports <- read.csv(historicalImportsFile)
-colnames(historicalImports)[6] <- "HS.Code"
-historicalImports$HS.Code <- sapply(historicalImports$HS.Code, FUN=padWithZeros, "HS")
-historicalHealthMergedWithClassifications <- merge(historicalImports, productsRelatedHealth, by="HS.Code", all.x=TRUE)
+historicalImports<- read.csv(historicalImportsFile)
+historicalImportsTenYears<- historicalImports[historicalImports$Year %in% c("2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020"), ]
+colnames(historicalImportsTenYears)[6] <- "HS.Code"
+historicalImportsTenYears$HS.Code <- sapply(historicalImportsTenYears$HS.Code, FUN=padWithZeros, "HS")
+historicalHealthMergedWithClassifications <- merge(historicalImportsTenYears, productsRelatedHealth, by="HS.Code", all.x=TRUE)
 unhealthlyHistoricalCommodities <- historicalHealthMergedWithClassifications[is.na(historicalHealthMergedWithClassifications$Unhealthy.Focus.Food.Category) == FALSE, ]
 
 # Calculate value of Food Sub-Category for historical data
@@ -925,7 +926,9 @@ foodSubCategoryHistoricalMonthlyValue$Month<- as.character(foodSubCategoryHistor
 historalAndCurrentMonthFood<- rbind(foodSubCategoryHistoricalMonthlyValue, foodSubCategoryValue)
 
 # Create a line graph
-
+ggplot(historalAndCurrentMonthFood, aes(x=Year)) + 
+  geom_line(aes(y = ), color = "darkred") + 
+  geom_line(aes(y = ), color="steelblue", linetype="twodash")
 
 
 
