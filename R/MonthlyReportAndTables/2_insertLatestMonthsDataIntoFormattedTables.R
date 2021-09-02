@@ -673,6 +673,9 @@ groupedExportsMSGValue<- exportMSGOrderedValue %>%
   summarise(total = sum(Stat..Value))
 groupedExportMSGOrderedValue<- groupedExportsMSGValue[order(-groupedExportsMSGValue$total), ]
 
+# Insert export values into table
+tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Export"=totalExports, "Imports CIF"=imports, "Trade Balance"=balance)
+
 # Group statistical values of imports by classifications 
 groupedImportsMSGValue<- importMSGOrderedValue %>%
   group_by(Classifications.Combined) %>%

@@ -23,13 +23,9 @@ openDataFolder <- file.path(repository, "data", "open")
 # Read in the raw trade data from secure folder of the repository 
 tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+# tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null"), skip = 1)
 
 #### Clean and process the latest month's data ####
-
-# Delete header row from raw data
-names(tradeStats)<- NULL
-tradeStats<- tradeStats[-c(1), ]
-colnames(tradeStats) <- tradeStats[c(1), ]
 
 # Initial re-formatting of the data
 
@@ -83,9 +79,6 @@ numberMissing
 
 # Convert the counts to a proportion
 proportionMissing <- numberMissing / nrow(tradeStatsCommodities)
-
-# Set the plotting margins
-par(mar=c(10, 4, 4, 1))
 
 # Check for columns with high amounts of NA values
 colsWithManyMissingValues <- names(proportionMissing)[proportionMissing > 0.1]
