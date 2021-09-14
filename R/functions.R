@@ -732,7 +732,7 @@ calculateSummaryStatistics <- function(values){
 #' @param columsnOfInterest A vector of columns of interest to include in summary statistics table (merge by) to go alongside "Stat..Value" column
 #' @return Returns an numeric labeled vector containing the summary statistics
 checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, historicExportsSummaryStats,
-                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000), useUnitValue=FALSE,
+                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000, 3071), useUnitValue=FALSE,
                                  columnsOfInterest=c("HS.Code", "Type", "Reg..Date", 
                                                      "CP4", "Itm..")){
   

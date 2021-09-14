@@ -75,7 +75,6 @@ numberMissing <- apply(tradeStatsCommodities, MARGIN=2,
                        FUN=function(columnValues){
                          return(sum(is.na(columnValues)))
                        })
-numberMissing
 
 # Convert the counts to a proportion
 proportionMissing <- numberMissing / nrow(tradeStatsCommodities)

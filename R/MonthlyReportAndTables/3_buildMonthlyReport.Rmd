@@ -58,33 +58,32 @@ importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Imp
 importSubstitutionValue<- sum(importSubstitutionDataFrame$Stat..Value)
 
 # Insert values into table
-proxyCurrentMonthIndicator1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"= tradeAgreementCurrentMonthlyExportValue)
+ENV1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"= importSubstitutionValue)
 
 
 ## ECO 1.5.2 Trade by trade agreement (value)
 ## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports aligned to MSG agreement included)
 
 # Calculate value of imports from countries that have signed the MSG and PICTA trade agreements
-tradeAgreementCurrentMonthlyImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
-tradeAgreementCurrentMonthlyImportValue<- sum(tradeAgreementCurrentMonthlyImports$Stat..Value)
+importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
+importTradeAgreementValue<- sum(tradeAgreementCurrentMonthlyImports$Stat..Value)
 
 # Merge commodities to be excluded from MSG Trade Agreement
 msgCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
 msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile)
 msgCommoditiesExclude$HS.Code_6<- sapply(msgCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
-processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
 msgCommoditiesExcludeMerged <- merge(processedTradeStats, msgCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
 
 # Calculate value of all exports that are destined to countries that have signed the MSG trade agreement
-allMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
-tradeAgreementCurrentMonthlyExports <- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
-tradeAgreementCurrentMonthlyExportValue<- sum(tradeAgreementCurrentMonthlyExports$Stat..Value)
+allMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
+exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+exportTradeAgreementValue<- sum(exportTradeAgreement$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
-proxyIndicatorCurrentMonth1.5.2<- tradeAgreementCurrentMonthlyImportValue + tradeAgreementCurrentMonthlyExportValue
+totalTradeAgreementValue<- importTradeAgreementValue + exportTradeAgreementValue
 
 # Insert values into table
-proxyCurrentMonthIndicator1.5.2 <- data.frame("Trade by Trade Agreement Monthly Value"= proxyIndicatorCurrentMonth1.5.2)
+ECO1.5.2 <- data.frame("Trade by Trade Agreement Value"= totalTradeAgreementValue)
 
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
@@ -118,8 +117,8 @@ columnCategories <- list(
 )
 
 # Build the table
-majorPartnerCountryCurrentMonthExportValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
-totalMajorPartnerCountryCurrentMonthExportValue<- majorPartnerCountryCurrentMonthExportValue$Total
+exportMajorPartnerCountry <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+totalMajorPartnerCountryExportValue<- exportMajorPartnerCountry$Total
 
 # Define the CP4 codes need for Imports table
 codesCP4 <- c(4000, 4071, 7100)
@@ -150,18 +149,18 @@ columnCategories <- list(
 )
 
 # Build the table
-majorPartnerCountryCurrentMonthImportValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
-totalMajorPartnerCountryCurrentMonthImportValue<- majorPartnerCountryCurrentMonthImportValue$Total
+importMajorPartnerCountry <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+totalMajorPartnerCountryImportValue<- importMajorPartnerCountry$Total
 
 # Indicator calculated for NSDP indicator ECO 1.5.3 by subtracting total imports from exports 
-monthlyBalanceOfTradeByMajorPartnerCountries <- totalMajorPartnerCountryCurrentMonthExportValue - totalMajorPartnerCountryCurrentMonthImportValue
+balanceTradeByMajorPartnerCountry <- totalMajorPartnerCountryExportValue - totalMajorPartnerCountryImportValue
 
 # Insert values into table
-currentMonthindicator1.5.3 <- data.frame("Current Month Balance of Trade by Major Partner Countries"= monthlyBalanceOfTradeByMajorPartnerCountries)
+ECO1.5.3 <- data.frame("Balance of Trade by Major Partner Countries"= balanceTradeByMajorPartnerCountry)
 
 
 ## ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP
-## Proxy calculated: estimated value of trade agreements and use of 2018 GDP   
+## Proxy calculated: estimated value of trade agreement and use of 2018 GDP   
 
 # Read in the data from the open folder of the repository for GDP
 grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
@@ -173,11 +172,11 @@ timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSerie
 
 # Proxy indicator calculated for NSDP ECO 1.6.2 by dividing latest GDP figure by Trade Agreement value
 mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
-proxyCurrentMonthIndicator1.6.2<- (proxyIndicatorCurrentMonth1.5.2/mostRecentGrossDomesticProduct)*100
+tradeAgreementGDPProportion<- (totalTradeAgreementValue/mostRecentGrossDomesticProduct)*100
 
 # Insert values into table as a percentage to 2 decimal places
-proxyCurrentMonthIndicator1.6.2Rounded<- round(proxyCurrentMonthIndicator1.6.2, digits = 2)
-proxyCurrentMonthIndictaor1.6.2<- data.frame("Value of Trade Agreement as Proportion of GDP for Current Month"= proxyCurrentMonthIndicator1.6.2Rounded)
+tradeAgreementGDPProportionRounded<- round(tradeAgreementGDPProportion, digits = 2)
+ECO1.6.2<- data.frame("Value of Trade Agreement as Proportion of GDP"= tradeAgreementGDPProportionRounded)
 
 
 ## Calculate ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra
@@ -199,11 +198,11 @@ columnCategories <- list(
 )
 
 # Build the table
-majorExportCurrentMonthCommoditiesValue <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+majorExportCommodities <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Proxy indicator for NSDP ECO 1.7.1
-proxyIndicator1.7.1CurrentMonthValue<- majorExportCurrentMonthCommoditiesValue$Total
-proxyCurrentMonthIndicator1.7.1 <- data.frame("Level of production of major commodities to include Cocoa and Copra for Current Month"= proxyIndicator1.7.1CurrentMonthValue)
+majorExportCommoditiesValue<- majorExportCommodities$Total
+ECO1.7.1 <- data.frame("Level of production of major commodities to include Cocoa and Copra"= majorExportCommoditiesValue)
 
 
 ## ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports
@@ -214,11 +213,10 @@ processedRawCommodities <- read.csv(processedRawCommoditiesFile)
 
 # Merge raw and processed commodity classifications with cleaned data
 processedRawCommodities$HS.Code <- sapply(processedRawCommodities$HS.Code, FUN=padWithZeros, "HS")
-processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
-processedRawCommoditiesMergedWithClassifications <- merge(processedTradeStats, processedRawCommodities, by="HS.Code", all.x=TRUE)
+processedRawCommoditiesMerged<- merge(processedTradeStats, processedRawCommodities, by="HS.Code", all.x=TRUE)
 
 # Create data-frame for all raw and processed export commodities for current month
-processedRawCommoditiesFiltered <- processedRawCommoditiesMergedWithClassifications[is.na(processedRawCommoditiesMergedWithClassifications$Source) == FALSE, ]
+processedRawCommoditiesFiltered <- processedRawCommoditiesMerged[is.na(processedRawCommoditiesMerged$Source) == FALSE, ]
 processedRawCommoditiesExported<- processedRawCommoditiesFiltered[processedRawCommoditiesFiltered$CP4 %in% c(1000), ]
 
 # Calculate ratio of processed to raw commodities 
@@ -229,7 +227,11 @@ processedtoRawDataFrame<- processedRawCommoditiesExported %>%
 # Indicator for NSDP ECO 4.3.2
 processed<- processedtoRawDataFrame[1, 2]
 raw<- processedtoRawDataFrame[2,2]
-proxyCurrentMonthIndicator4.3.2Calculated<- (processed/raw)
+processedRawProportion<- (processed/raw)
+
+# Insert values into table as a percentage to 2 decimal places
+processedRawProportionRounded<- round(processedRawProportion$total, digits = 2)
+ECO4.3.2<- data.frame("Ratio of Processed Export Commodities"= processedRawProportionRounded)
 
 ```
 
@@ -239,7 +241,6 @@ proxyCurrentMonthIndicator4.3.2Calculated<- (processed/raw)
 ### Calculating Progress Against NSDP Indicator Targets
 
 ## ENV 1.1.3 Total annual volume of imports of food and products targeted by DARD as those that can be produced domestically (including ‘value-added products), Target to be decided after baseline established (baseline taken from 2016) 
-## Proxy calculated: Value of imports of food and products targeted by DARD, no target given
 
 # Read in the data from the baseline data (2016) from the open folder of the repository 
 baselineDARDImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDTargettedImportsMonthlyValue_31-12-16.csv")
@@ -249,29 +250,28 @@ baselineDARDImports <- read.csv(baselineDARDImportsFile)
 baselineDARDImportsCurrentMonth <- sum(baselineDARDImports[baselineDARDImports$Month == "January", "Total.VT"], na.rm= TRUE)
 
 # Calculate ENV 1.1.3 Value of imports of food and products targeted by DARD,  
-proxyIndicatorENV1.1.3TargetCurrentMonth<- ((importSubstitutionValue - baselineDARDImportsCurrentMonth)/baselineDARDImportsCurrentMonth)*100 # needs to be 15% to meet Target
+targetValueENV1.1.3<- ((importSubstitutionValue - baselineDARDImportsCurrentMonth)/baselineDARDImportsCurrentMonth)*100 # needs to be 15% to meet Target
 
 # Insert values into table as a percentage to 2 decimal places
-proxyIndicatorENV1.1.3TargetCurrentMonthRounded<- round(proxyIndicatorENV1.1.3TargetCurrentMonth, digits = 2)
-proxyIndicatorENV1.1.3TargetCurrentMonthDataFrame <- data.frame("Percentage Change in DARD targetted imports)"= proxyIndicatorENV1.1.3TargetCurrentMonthRounded)
+targetValueENV1.1.3Rounded<- round(targetValueENV1.1.3, digits = 2)
+targetENV1.1.3<- data.frame("Percentage change in DARD targetted imports)"= targetValueENV1.1.3Rounded)
 
 
 ## ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15%
-## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports to MSG countries included)
 
 # Read in the data from the baseline data (2016) from the open folder of the repository 
 baselineMSGExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_TradeAgreementExportMonthlyValue_31-12-16.csv")
 baselineMSGExports <- read.csv(baselineMSGExportsFile)
 
 # Calculate value of Trade Agreements for current month from baseline year 
-tradeAgreementCurrentMonthBaselineValue <- sum(baselineMSGExports[baselineMSGExports$Month == "January", "Total.VT"], na.rm= TRUE)
+baselineExportsTradeAgreementCurrentMonth <- sum(baselineMSGExports[baselineMSGExports$Month == "January", "Total.VT"], na.rm= TRUE)
 
 # Calculate ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15% 
-proxyIndicator1.5.2TargetCurrentMonth<- ((proxyIndicatorCurrentMonth1.5.2 - tradeAgreementCurrentMonthBaselineValue)/tradeAgreementCurrentMonthBaselineValue)*100 # needs to be 15% to meet Target
+targetValueECO1.5.2<- ((exportTradeAgreementValue - baselineExportsTradeAgreementCurrentMonth)/baselineExportsTradeAgreementCurrentMonth)*100 # needs to be 15% to meet Target
 
 # Insert values into table as a percentage to 2 decimal places
-proxyIndicator1.5.2TargetCurrentMonthRounded<- round(proxyIndicator1.5.2TargetCurrentMonth, digits = 2)
-proxyIndicator1.6.2CurrentMonthDataFrame <- data.frame("Percentage Change in exports for Current month compared to Baseline)"= proxyIndicator1.5.2TargetCurrentMonthRounded)
+targetValueECO1.5.2Rounded<- round(targetValueECO1.5.2, digits = 2)
+targetECO1.5.2 <- data.frame("Percentage Change in trade agreement exports)"= targetValueECO1.5.2Rounded)
 
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
@@ -281,15 +281,15 @@ baselineBalanceTradeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorPartne
 baselineBalanceTrade <- read.csv(baselineBalanceTradeFile)
 
 # Calculate current monthly value
-historicalDataCurrentMonthlyValueMajorPartnerCountryExports<- baselineBalanceTrade[baselineBalanceTrade$Month == "January", ]
-historicalMonthlyExportValueproxyIndicator1.5.3Target<- historicalDataCurrentMonthlyValueMajorPartnerCountryExports$Total.VT
+baselineMajorPartnerCountryExportValue<- sum(baselineBalanceTrade[baselineBalanceTrade$Month == "January", "Total.VT" ], na.rm= TRUE)
+
 
 # Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
-proxyIndicator1.5.3TargetCurrentMonth<- ((monthlyBalanceOfTradeByMajorPartnerCountries - historicalMonthlyExportValueproxyIndicator1.5.3Target)/historicalMonthlyExportValueproxyIndicator1.5.3Target)*100 # needs to reach 20% Target
+targetValueECO1.5.3<- ((totalMajorPartnerCountryExportValue - baselineMajorPartnerCountryExportValue)/baselineMajorPartnerCountryExportValue)*100 # needs to reach 20% Target
 
 # Insert values into table as a percentage to 2 decimal places
-proxyIndicator1.5.3TargetCurrentMonthRounded<- round(proxyIndicator1.5.3TargetCurrentMonth, digits = 2)
-proxyIndicator1.5.3TargetCurrentMonthDataFrame <- data.frame("Percentage Change in exports for Current month compared to Baseline)"= proxyIndicator1.5.3TargetCurrentMonthRounded)
+targetValueECO1.5.3Rounded<- round(targetValueECO1.5.3, digits = 2)
+targetECO1.5.3 <- data.frame("Percentage Change in Major Partner Country Exports"= targetValueECO1.5.3Rounded)
 
 
 # ECO 1.6.2, proxy calculated: Total estimated value of trade agreement as proportion of GDP, 2030 increase by 15%
@@ -299,36 +299,34 @@ baselineMSGExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_TradeAgreemen
 baselineMSGExports <- read.csv(baselineMSGExportsFile)
 
 # Calculate value of Trade Agreements of GDP for baseline year for current month
-GDP <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] 
-GDP2016<- timeSeriesGrossDomesticProduct[timeSeriesGrossDomesticProduct$Year == "2016", "Value" ]
-tradeAgreementCurrentMonthBaselineValue <- sum(baselineMSGExports[baselineMSGExports$Month == "January", "Total.VT"], na.rm= TRUE)
-proxyIndicator1.6.2CurrentMonthBaseline<- (tradeAgreementCurrentMonthBaselineValue/GDP2016)*100
+baselineTradeAgreementCurrentMonth <- sum(baselineMSGExports[baselineMSGExports$Month == "January", "Total.VT"], na.rm= TRUE)
+baselineGDP2016<- timeSeriesGrossDomesticProduct[timeSeriesGrossDomesticProduct$Year == "2016", "Value" ]
+baselineECO1.6.2Value<- (baselineTradeAgreementCurrentMonth/baselineGDP2016)*100
+
 
 # Calculate ECO 1.6.2 Total estimated value of trade agreement as proportion of GDP, Target sets an increase by 15% by 2030
-proxyIndicator1.6.2TargetCurrentMonth<- ((proxyCurrentMonthIndicator1.6.2 - proxyIndicator1.6.2CurrentMonthBaseline)/proxyIndicator1.6.2CurrentMonthBaseline)*100 # needs to be 15% to meet Target
+targetECO1.6.2Value<- ((tradeAgreementGDPProportion - baselineECO1.6.2Value)/baselineECO1.6.2Value)*100 # needs to be 15% to meet Target
 
 # Insert values into table as a percentage to 2 decimal places
-proxyIndicator1.6.2TargetCurrentMonthRounded<- round(proxyIndicator1.6.2TargetCurrentMonth, digits = 2)
-proxyIndicator1.6.2TargetCurrentMonthDataFrame <- data.frame("Percentage Change in total estimated value of trade agreement as proportion of GDP for Current month compared to Baseline)"= proxyIndicator1.6.2TargetCurrentMonthRounded)
+targetECO1.6.2ValueRounded<- round(targetECO1.6.2Value, digits = 2)
+targetECO1.6.2 <- data.frame("Percentage Change in total estimated value of trade agreement as proportion of GDP"= targetECO1.6.2ValueRounded)
 
 
 # ECO 1.7.1 Calculate Target: level of production of major commodities to include cocoa and copra- 2030 increase 10-15% of the proportion
-## Proxy calculated: level of production of major exported commodities to include beef, cocoa, coconut oil, coffee, copra, fish tuna, kava and wood 
 
 # Read in the data from the baseline data (2016) from the open folder of the repository 
 baselineProductionExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorExportsMonthlyValue_31-12-16.csv")
 baselineProductionExports <- read.csv(baselineProductionExportsFile)
 
 # Calculate current monthly value
-historicalDataCurrentMonthlyValueMajorProductionExports<- baselineProductionExports[baselineProductionExports$Month == "January", ]
-historicalMonthlyExportValueproxyIndicator1.7.1Target<- historicalDataCurrentMonthlyValueMajorPartnerCountryExports$Total.VT
+baselineMajorProductionExports <- sum(baselineProductionExports[baselineProductionExports$Month == "January", "Total.VT"], na.rm= TRUE)
 
 # Calculate ECO 1.7.1 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
-proxyIndicator1.7.1TargetCurrentMonth<- ((proxyIndicator1.7.1CurrentMonthValue - historicalMonthlyExportValueproxyIndicator1.7.1Target)/historicalMonthlyExportValueproxyIndicator1.7.1Target)*100 # needs to reach 20% Target
+targetECO1.7.1Value<- ((majorExportCommoditiesValue - baselineMajorProductionExports)/baselineMajorProductionExports)*100 # needs to reach 20% Target
 
 # Insert values into table as a percentage to 2 decimal places
-proxyIndicator1.7.1TargetCurrentMonthRounded<- round(proxyIndicator1.7.1TargetCurrentMonth, digits = 2)
-proxyIndicator1.7.1TargetCurrentMonthDataFrame <- data.frame("Percentage Change in exports for Current month compared to Baseline)"= proxyIndicator1.7.1TargetCurrentMonthRounded)
+targetECO1.7.1ValueRounded<- round(targetECO1.7.1Value, digits = 2)
+targetECO1.7.1 <- data.frame("Percentage Change in major commodity exports"= targetECO1.7.1ValueRounded)
 
 
 ## ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports, Target by 2020 increase 15%
@@ -341,14 +339,14 @@ baselineProcessedRaw <- read.csv(baselineProcessedRawFile)
 historicalProcessedRaw<- baselineProcessedRaw[baselineProcessedRaw$Month == "January", ]
 historicProcessed<- historicalProcessedRaw[1, 3]
 historicRaw<- historicalProcessedRaw[2,3]
-historicProxyCurrentMonthIndicator4.3.2Calculated<- (processed/raw)
+baselineProcessedRawValue<- (historicProcessed/historicRaw)
 
 # Calculate ECO 4.3.2, Target by 2020 increase 15%
-proxyIndicator4.3.2TargetCurrentMonth<- ((proxyCurrentMonthIndicator4.3.2Calculated - historicProxyCurrentMonthIndicator4.3.2Calculated)/historicProxyCurrentMonthIndicator4.3.2Calculated)*100 # needs to reach 20% Target
+targetECO4.3.2Value<- ((processedRawProportion - baselineProcessedRawValue)/baselineProcessedRawValue)*100 # needs to reach 20% Target
 
 # Insert values into table as a percentage to 2 decimal places
-proxyIndicator4.3.2TargetCurrentMonthRounded<- round(proxyIndicator4.3.2TargetCurrentMonth, digits = 2)
-proxyIndicator4.3.2TargetCurrentMonthDataFrame <- data.frame("Percentage Change in exports for Current month compared to Baseline)"= proxyIndicator4.3.2TargetCurrentMonthRounded)
+targetECO4.3.2ValueRounded<- round(targetECO4.3.2Value$total, digits = 2)
+targetECO4.3.2 <- data.frame("Percentage change in processed export commodities"= targetECO4.3.2ValueRounded)
 
 ```
 
@@ -566,14 +564,6 @@ columnCategories <- list(
 # Build the table
 totalPacificCountryImports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-# Select top five Pacific Islands 
-orderedtotalPacificCountryImports<- head(sort(totalPacificCountryImports, decreasing= TRUE))
-top5PacificCountryImports<- orderedtotalPacificCountryImports %>% select(2:6)
-
-# Calculate Trade Balance of Pacific Islands
-tradeBalancePacificIslands<- totalPacificCountryExports - totalPacificCountryImports
-orderedtradeBalancePacificIslands<- head(sort(tradeBalancePacificIslands, decreasing= TRUE))
-
 # Combine Imports and Exports into single table
 totalPacificCountryImportsTransposed <- as.data.frame(t(totalPacificCountryImports))
 totalPacificCountryImportsTransposed$Country <- gsub(": Exports|: Imports", "", rownames(totalPacificCountryImportsTransposed))
@@ -666,7 +656,7 @@ msgAgreementCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_M
 msgAgreementCommoditiesExclude <- read.csv(msgAgreementCommoditiesExcludeFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
 msgAgreementCommoditiesExclude$HS.Code_6<- sapply(msgAgreementCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
 msgAgreementCommoditiesExcludeMerged <- merge(processedTradeStats, msgAgreementCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
-tradeStatsForAllMSGCountryExports <- msgAgreementCommoditiesExcludeMerged[msgAgreementCommoditiesExcludeMerged$CP4 == 1000 & msgAgreementCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
+tradeStatsForAllMSGCountryExports <- msgAgreementCommoditiesExcludeMerged[msgAgreementCommoditiesExcludeMerged$CP4 == 1000 & msgAgreementCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
 tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
 
 
@@ -791,9 +781,7 @@ exportsOtherandNA <- orderedPrincipleExportType %>%
 
 # Select top 5 new exports
 top5OtherExports<- exportsOtherandNA %>% 
-  select()
-
-
+  head(5)
 
 # Create some dummy data
 dummyData <- data.frame("Value"=c(rnorm(5, mean=9000, sd=250), rnorm(5, mean=9500, sd=250)), 
@@ -892,7 +880,7 @@ importsOtherandNA <- orderedPrincipleImportType %>%
 
 # Select top 5 new imports
 top5OtherImports<- importsOtherandNA %>% 
-  select()
+  head(5)
 
 # Create some dummy data
 dummyData <- data.frame("Value"=c(rnorm(5, mean=9000, sd=250), rnorm(5, mean=9500, sd=250)), 
@@ -991,8 +979,8 @@ Automated text to say here where the principle exports are destined for, their w
 ```{r principle imports through time, fig.height=1.75}
 
 # Read in the data from the open folder of the repository 
-majorMonthlyImportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyImportCalculations_31-12-20.csv")
-majorMonthlyImports <- read.csv(majorMonthlyImportsFile)
+importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
+importsSubstitution <- read.csv(importsSubstitutionFile)
 
 
 
