@@ -271,7 +271,7 @@ targetValueECO1.5.2<- ((exportTradeAgreementValue - baselineExportsTradeAgreemen
 
 # Insert values into table as a percentage to 2 decimal places
 targetValueECO1.5.2Rounded<- round(targetValueECO1.5.2, digits = 2)
-targetECO1.5.2 <- data.frame("Percentage Change in trade agreement exports)"= targetValueECO1.5.2Rounded)
+targetECO1.5.2 <- data.frame("Percentage Change in trade agreement exports"= targetValueECO1.5.2Rounded)
 
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
@@ -648,30 +648,30 @@ Automated text to highlight trade balance; difference between value of imports a
 
 ```{r trade by trade agreement, ft.align="left"}
 
-# Get the trade stats for the imports aligned to the MSG agreement
-tradeStatsForMSGImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
+# Commodities (imports and exports) included in Trade Agreements 
+importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
+exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
 
-# Get the trade stats for the exports aligned to the MSG agreement
-msgAgreementCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
-msgAgreementCommoditiesExclude <- read.csv(msgAgreementCommoditiesExcludeFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
-msgAgreementCommoditiesExclude$HS.Code_6<- sapply(msgAgreementCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
-msgAgreementCommoditiesExcludeMerged <- merge(processedTradeStats, msgAgreementCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
-tradeStatsForAllMSGCountryExports <- msgAgreementCommoditiesExcludeMerged[msgAgreementCommoditiesExcludeMerged$CP4 == 1000 & msgAgreementCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
-tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+# Calculate exports by SITC to MSG countries
+sitcExportMSGValue<- exportTradeAgreement %>%
+  group_by(SITC.description, EXPORT.PARTNER.COUNTRIES) %>%
+  summarise(total = sum(Stat..Value))
+  
+# Calculate imports by SITC to MSG countries
+sitcImportMSGValue<- importTradeAgreement %>%
+  group_by(SITC.description, IMPORT.PARTNER.COUNTRIES) %>%
+  summarise(total = sum(Stat..Value))
 
+# Transpose the tables for exports and imports
 
-
-
-
-
-# Create the NSDP table
+# Create the Trade by Trade Agreement table
 tradeByTradeAgreement <- data.frame(
   "SITC Description"=c("Food and live animals", "Beverages and tobacco", "Crude materials, inedible, except fuels", 
                        "Mineral fuels, lubricants and related materials", "Animal and vegetable oils, fats and waxes", 
                        "Chemicals and related products, not elsewhere specified", "Manufactured goods classified chiefly by material", 
                        "Machinery and transport equipment", "Miscellaneous manufactured goods",
                        "Commodities and transactions not classified elsewhere in SITC", "Grand Total"),
-  "FIJI"=NA, "PAPUA NEW GUINEA"=NA, "SOLOMON ISLANDS"=NA, "Total"=NA,
+  "FIJI EXPORTS"=NA, "FIJI IMPORTS"=NA,"PAPUA NEW GUINEA EXPORTS"=NA, "PAPUA NEW GUINEA IMPORTS"=NA, "SOLOMON ISLANDS EXPORTS"=NA,"SOLOMON ISLANDS IMPORTS"=NA, "Total"=NA,
   check.names=FALSE, stringsAsFactors=FALSE)
 
 # Initiailise a flextable object for NSDP table
@@ -680,7 +680,7 @@ tradeByTradeTable <- flextable(tradeByTradeAgreement)
 # Add a header row and set background colour
 tradeByTradeTable <- add_header_row(tradeByTradeTable, top=TRUE, 
                                   values=c("", "Mellanisain Spearhead Group (MSG)- Trade by Trade Agreement"), 
-                                  colwidths=c(1, 4))
+                                  colwidths=c(1, 7))
 tradeByTradeTable <- bg(tradeByTradeTable, bg="coral1", part="header")
 
 # Set the vertical alignment to top
@@ -722,18 +722,38 @@ majorMonthlyExports$Beef <- as.numeric(majorMonthlyExports$Beef)
 majorMonthlyExports$Cocoa <- as.numeric(majorMonthlyExports$Cocoa)
 majorMonthlyExports$Kava <- as.numeric(majorMonthlyExports$Kava)
 
-# Calculate value of commodities for current month
-codesCP4 <- c(1000)
+# Calculate value of major exports commodities for current month for historical data
+majorExportsValue<- majorMonthlyExports %>%
+  filter(Month == "January") %>%
+  group_by(Year, Month, Copra, Coconut.Oil, Beef, Cocoa, Kava) 
+
+# Calculate current month major export commodities 
+# CP4 code for exports
+codesCP4 <- c(1000) 
+
+# Define the categories used for each column
 categoryColumn <- "Principle.Exports"
 columnCategories <- list(
-  "Beef fresh, chilled, frozen and preserved"=c("Beef fresh, chilled, frozen and preserved"),
-  "Cocoa"=c("Cocoa"),
-  "Coconut oil"=c("Coconut Oil"),
   "Copra"=c("Copra"),
-  "Kava"=c("Kava"))
-majorExportsCurrentMonth <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+  "CoconutOil"=c("Coconut Oil"),
+  "Beef"=c("Beef fresh, chilled, frozen and preserved"),
+  "Cocoa"=c("Cocoa"),
+  "Kava"=c("Kava")
+)
 
-# Take data-frame and add to historical "majorMonthlyExports" 
+# Build the table
+majorExportCommoditiesValues <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+# Create dataframe of current month major exports
+copra<- sum(majorExportCommoditiesValues$Copra)
+coconutOil<- sum(majorExportCommoditiesValues$CoconutOil)
+beef<- sum(majorExportCommoditiesValues$Beef)
+cocoa<- sum(majorExportCommoditiesValues$Cocoa)
+kava<- sum(majorExportCommoditiesValues$Kava)
+majorExportCurrentMonth <- data.frame("Year"= "2021", "Month"= "January", "Copra"= copra, "Coconut Oil"=coconutOil, "Beef"=beef, "Cocoa"=cocoa, "Kava"=kava)
+
+# Add current month to historical data before visualising 
+totalMajorExports<- rbind(majorExportsValue, majorExportCurrentMonth)
 
 # Build the table
 dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
