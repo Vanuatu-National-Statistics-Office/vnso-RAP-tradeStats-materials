@@ -550,7 +550,17 @@ extractCodeSubset <- function(codes, nDigits){
 #' @param categoryColumn A column header used to define the subset of data that needs to be summed  
 #' @param columnCategories A list providing a vector of categories to be used to select data in \code{categoryColumn} for each column 
 #' @return Returns an integer vector representing a subset of the dataframe processedTradeStats
-buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, columnCategories){
+buildRawSummaryTable <- function(processedTradeStats, codesCP4, categoryColumn, columnCategories){
+  
+  # Check the categoryColumn exists
+  if(categoryColumn %in% colnames(processedTradeStats) == FALSE){
+    stop(paste0("ERROR! The category column (", categoryColumn, ") provided does not exist in table!"))
+  }
+  
+  # Check CP4 column exists
+  if("CP4" %in% colnames(processedTradeStats) == FALSE){
+    stop(paste0("ERROR! The \"CP4\" column does not exist in table!"))
+  }
   
   # Initialise a dataframe to store the calculated statistics
   summaryTable <- data.frame(matrix(NA, nrow=1, ncol=length(columnCategories)), check.names=FALSE, stringsAsFactors=FALSE)
