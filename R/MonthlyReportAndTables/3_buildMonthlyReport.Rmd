@@ -16,6 +16,7 @@ library(sf) # Working with spatial data
 library(ggplot2) # Creating plots
 library(dplyr) # Working with data
 library(tidyr) # For pivoting data.frames
+library(janitor) # Adding row and column totals
 
 # Set the table formatting defaults
 set_flextable_defaults(font.family="Times New Roman", font.size=5, font.color="black",
@@ -654,26 +655,38 @@ importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FA
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
 
 # Calculate exports by SITC to MSG countries
-sitcExportMSGValue<- exportTradeAgreement %>%
+sitcExportMSGValue <- exportTradeAgreement %>%
   group_by(SITC.description, EXPORT.PARTNER.COUNTRIES) %>%
-  summarise(total = sum(Stat..Value), .groups = "drop")
+  summarise(total = sum(Stat..Value), .groups = "drop") %>%
+  pivot_wider(names_from = EXPORT.PARTNER.COUNTRIES, values_from = total)
+colnames(sitcExportMSGValue)[-1] <- paste(colnames(sitcExportMSGValue)[-1], "EXPORTS")
   
 # Calculate imports by SITC to MSG countries
-sitcImportMSGValue<- importTradeAgreement %>%
+sitcImportMSGValue <- importTradeAgreement %>%
   group_by(SITC.description, IMPORT.PARTNER.COUNTRIES) %>%
-  summarise(total = sum(Stat..Value), .groups = "drop")
+  summarise(total = sum(Stat..Value), .groups = "drop") %>%
+  pivot_wider(names_from = IMPORT.PARTNER.COUNTRIES, values_from = total)
+colnames(sitcImportMSGValue)[-1] <- paste(colnames(sitcImportMSGValue)[-1], "IMPORTS")
 
 # Transpose the tables for exports and imports
+tradeByTradeAgreement <- merge(sitcExportMSGValue, sitcImportMSGValue, by = "SITC.description")
 
-# Create the Trade by Trade Agreement table
-tradeByTradeAgreement <- data.frame(
-  "SITC Description"=c("Food and live animals", "Beverages and tobacco", "Crude materials, inedible, except fuels", 
-                       "Mineral fuels, lubricants and related materials", "Animal and vegetable oils, fats and waxes", 
-                       "Chemicals and related products, not elsewhere specified", "Manufactured goods classified chiefly by material", 
-                       "Machinery and transport equipment", "Miscellaneous manufactured goods",
-                       "Commodities and transactions not classified elsewhere in SITC", "Grand Total"),
-  "FIJI EXPORTS"=NA, "FIJI IMPORTS"=NA,"PAPUA NEW GUINEA EXPORTS"=NA, "PAPUA NEW GUINEA IMPORTS"=NA, "SOLOMON ISLANDS EXPORTS"=NA,"SOLOMON ISLANDS IMPORTS"=NA, "Total"=NA,
-  check.names=FALSE, stringsAsFactors=FALSE)
+# Add and reorder columns
+countryColumnNames <- c("FIJI EXPORTS", "FIJI IMPORTS",
+               "PAPUA NEW GUINEA EXPORTS", "PAPUA NEW GUINEA IMPORTS",
+               "SOLOMON ISLANDS EXPORTS", "SOLOMON ISLANDS IMPORTS")
+for(columnName in countryColumnNames){
+  if(columnName %in% colnames(tradeByTradeAgreement) == FALSE){
+    tradeByTradeAgreement[, columnName] <- NA
+  }
+}
+tradeByTradeAgreement <- tradeByTradeAgreement[, c("SITC.description", countryColumnNames)]
+colnames(tradeByTradeAgreement)[1] <- "SITC Description"
+
+# Add totol column and row
+tradeByTradeAgreement <- tradeByTradeAgreement %>%
+  adorn_totals("col") %>%
+  adorn_totals("row", name = "Grand Total")
 
 # Initiailise a flextable object for NSDP table
 tradeByTradeTable <- flextable(tradeByTradeAgreement)
