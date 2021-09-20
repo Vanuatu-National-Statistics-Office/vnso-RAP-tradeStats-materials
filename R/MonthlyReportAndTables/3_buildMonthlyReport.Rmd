@@ -419,9 +419,11 @@ indicatorsTable <- theme_booktabs(indicatorsTable)
 indicatorsTable
 ```
 
+<br>
+
 # Trade Balance by Major Partner Countries
 
-```{r major partner country trade, warning=FALSE, fig.width=5.5, fig.height=2.5}
+```{r major partner country trade, warning=FALSE, fig.width=5.5, fig.height=2.4}
 
 ## Getting latest statistics ##
 # Define the CP4 codes need for table
@@ -509,7 +511,7 @@ ggplot(data = world) +
 
 # Trade Balance of Pacific Islands (excluding Melanesian Islands, Australia and New Zealand) 
 
-```{r trade balance of top 5, fig.height=1.75}
+```{r trade balance of top 5, fig.height=2}
 
 ## Calculate exports 
 # Define the CP4 codes need for table
@@ -589,12 +591,14 @@ ggplot(pacificCountryTotalsLong, aes(x=Country, y=Value, fill=Type)) +
   theme_minimal() + 
   scale_fill_brewer(palette="Blues") +
   theme(legend.title=element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+        axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+        axis.title.y = element_text(size = 9),
+        axis.title.x = element_blank())
 ```
 
 # Trade Balance of New Emerging Markets
 
-```{r trade balance of new emerging markets, fig.height=1.75}
+```{r trade balance of new emerging markets, fig.height=2}
 
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
