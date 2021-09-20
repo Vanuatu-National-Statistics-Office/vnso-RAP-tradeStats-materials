@@ -436,11 +436,7 @@ indicatorsTable <- theme_booktabs(indicatorsTable)
 indicatorsTable
 ```
 
-Automated text which states the growth rate that is needed for the policy objectives to meet their target indicators. If the country is on course to achieve the trade related NSDP goals.
-
 # Trade Balance by Major Partner Countries
-
-Automated text of grow of exports and imports over last 1, 5 and 10 years by major countries.
 
 ```{r major partner country trade, warning=FALSE, fig.width=5.5, fig.height=2.5}
 
@@ -614,8 +610,6 @@ ggplot(pacificCountryTotalsLong, aes(x=Country, y=Value, fill=Type)) +
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
 
-Automated text to highlight trade balance; difference between value of imports and exports comparing this month to same month in previous year.
-
 # Trade Balance of New Emerging Markets
 
 ```{r trade balance of new emerging markets, fig.height=1.75}
@@ -664,8 +658,6 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank())
 ```
-
-Automated text to highlight trade balance; difference between value of imports and exports comparing this month to same month in previous year.
 
 # Trade by Trade Agreement
 
@@ -777,8 +769,6 @@ ggplot(data=dummyData, aes(x=Time, y=Value, group=Commodity)) +
 
 ```
 
-Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
-
 # Top 5 New Major Exports
 
 ```{r new major exports, fig.height=1.75}
@@ -826,14 +816,6 @@ ggplot(data=dummyData, aes(x=Commodity, y=Value, fill=Type)) +
   coord_cartesian(ylim=range(dummyData$Value))
 ```
 
-Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to last month.
-
-<br><br><br><br>
-
-<br><br><br><br>
-
-<br><br><br><br>
-
 # Principle Imports
 
 ```{r principle imports through time, fig.height=1.75}
@@ -871,8 +853,6 @@ ggplot(data=dummyData, aes(x=Time, y=Value, group=Commodity)) +
   geom_line(aes(color=Commodity), size=1.5) +
   theme_minimal()
 ```
-
-Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
 
 # Top 5 New Major Imports
 
@@ -920,8 +900,6 @@ ggplot(data=dummyData, aes(x=Commodity, y=Value, fill=Type)) +
   theme(legend.title=element_blank()) + 
   coord_cartesian(ylim=range(dummyData$Value))
 ```
-
-Automated text to say here where the principle imports are destined for, their weight and the unit value of the commodity and make a comparison to last month.
 
 # Imports of Products related to Health
 
@@ -992,8 +970,6 @@ importsUnhealthyFoodCurrentMonth <- buildRawSummaryTable(unhealthlyCommodities, 
 
 ```
 
-Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
-
 # Imports of food and products targeted as those that can be produced domestically
 
 ```{r food and products imports through time, fig.height=1.75}
@@ -1003,8 +979,6 @@ Automated text to say here where the principle exports are destined for, their w
 
 
 ```
-
-Automated text to say here where the principle exports are destined for, their weight and the unit value of the commodity and make a comparison to same month previous year.
 
 # Concluding remarks
 
