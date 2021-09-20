@@ -304,25 +304,13 @@ baselineDARDImportsCurrentMonth <- sum(baselineDARDImports[baselineDARDImports$M
 # Calculate ENV 1.1.3 Value of imports of food and products targeted by DARD,  
 targetValueENV1.1.3<- ((importSubstitutionValue - baselineDARDImportsCurrentMonth)/baselineDARDImportsCurrentMonth)*100 # needs to be 15% to meet Target
 
-# Insert values into table as a percentage to 2 decimal places
-targetValueENV1.1.3Rounded<- round(targetValueENV1.1.3, digits = 2)
-targetENV1.1.3<- data.frame("Percentage change in DARD targetted imports)"= targetValueENV1.1.3Rounded)
-
-
 ## ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15%
-
-
 
 # Calculate value of Trade Agreements for current month from baseline year 
 baselineExportsTradeAgreementCurrentMonth <- sum(baselineMSGExports[baselineMSGExports$Month == "January", "Total.VT"], na.rm= TRUE)
 
 # Calculate ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15% 
 targetValueECO1.5.2<- ((exportTradeAgreementValue - baselineExportsTradeAgreementCurrentMonth)/baselineExportsTradeAgreementCurrentMonth)*100 # needs to be 15% to meet Target
-
-# Insert values into table as a percentage to 2 decimal places
-targetValueECO1.5.2Rounded<- round(targetValueECO1.5.2, digits = 2)
-targetECO1.5.2 <- data.frame("Percentage Change in trade agreement exports"= targetValueECO1.5.2Rounded)
-
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
 
@@ -333,11 +321,6 @@ baselineMajorPartnerCountryExportValue<- sum(baselineBalanceTrade[baselineBalanc
 # Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
 targetValueECO1.5.3<- ((totalMajorPartnerCountryExportValue - baselineMajorPartnerCountryExportValue)/baselineMajorPartnerCountryExportValue)*100 # needs to reach 20% Target
 
-# Insert values into table as a percentage to 2 decimal places
-targetValueECO1.5.3Rounded<- round(targetValueECO1.5.3, digits = 2)
-targetECO1.5.3 <- data.frame("Percentage Change in Major Partner Country Exports"= targetValueECO1.5.3Rounded)
-
-
 # ECO 1.6.2, proxy calculated: Total estimated value of trade agreement as proportion of GDP, 2030 increase by 15%
 
 # Calculate value of Trade Agreements of GDP for baseline year for current month
@@ -345,14 +328,8 @@ baselineTradeAgreementCurrentMonth <- sum(baselineMSGExports[baselineMSGExports$
 baselineGDP2016<- timeSeriesGrossDomesticProduct[timeSeriesGrossDomesticProduct$Year == "2016", "Value" ]
 baselineECO1.6.2Value<- (baselineTradeAgreementCurrentMonth/baselineGDP2016)*100
 
-
 # Calculate ECO 1.6.2 Total estimated value of trade agreement as proportion of GDP, Target sets an increase by 15% by 2030
 targetECO1.6.2Value<- ((tradeAgreementGDPProportion - baselineECO1.6.2Value)/baselineECO1.6.2Value)*100 # needs to be 15% to meet Target
-
-# Insert values into table as a percentage to 2 decimal places
-targetECO1.6.2ValueRounded<- round(targetECO1.6.2Value, digits = 2)
-targetECO1.6.2 <- data.frame("Percentage Change in total estimated value of trade agreement as proportion of GDP"= targetECO1.6.2ValueRounded)
-
 
 # ECO 1.7.1 Calculate Target: level of production of major commodities to include cocoa and copra- 2030 increase 10-15% of the proportion
 
@@ -361,11 +338,6 @@ baselineMajorProductionExports <- sum(baselineProductionExports[baselineProducti
 
 # Calculate ECO 1.7.1 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
 targetECO1.7.1Value<- ((majorExportCommoditiesValue - baselineMajorProductionExports)/baselineMajorProductionExports)*100 # needs to reach 20% Target
-
-# Insert values into table as a percentage to 2 decimal places
-targetECO1.7.1ValueRounded<- round(targetECO1.7.1Value, digits = 2)
-targetECO1.7.1 <- data.frame("Percentage Change in major commodity exports"= targetECO1.7.1ValueRounded)
-
 
 ## ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports, Target by 2020 increase 15%
 
@@ -376,12 +348,7 @@ historicRaw<- historicalProcessedRaw[2,3]
 baselineProcessedRawValue<- (historicProcessed/historicRaw)
 
 # Calculate ECO 4.3.2, Target by 2020 increase 15%
-targetECO4.3.2Value<- ((processedRawProportion - baselineProcessedRawValue)/baselineProcessedRawValue)*100 # needs to reach 20% Target
-
-# Insert values into table as a percentage to 2 decimal places
-targetECO4.3.2ValueRounded<- round(targetECO4.3.2Value$total, digits = 2)
-targetECO4.3.2 <- data.frame("Percentage change in processed export commodities"= targetECO4.3.2ValueRounded)
-
+targetECO4.3.2Value<- ((processedRawProportion[1,1] - baselineProcessedRawValue)/baselineProcessedRawValue)*100 # needs to reach 20% Target
 ```
 
 
@@ -408,8 +375,24 @@ nsdpIndicators <- data.frame(
                    "By 2030 increase by 15%",
                    "By 2030 increase 10-15% of the proportion",
                    "By 2020 increase 15%"),
-  "Target Percentage (%)"=NA, 
+  "Target Percentage (%)"=c(
+    targetValueENV1.1.3,
+    targetValueECO1.5.2,
+    targetValueECO1.5.3,
+    targetECO1.6.2Value,
+    targetECO1.7.1Value,
+    targetECO4.3.2Value), 
   check.names=FALSE, stringsAsFactors=FALSE)
+
+# Round the target percentages
+nsdpIndicators$`Target Percentage (%)` <- round(nsdpIndicators$`Target Percentage (%)`, digits = 2)
+
+# Add indicator direction
+nsdpIndicators$`Indicator Value (Increased/Decreased)` <- ifelse(nsdpIndicators$`Target Percentage (%)` > 0, 
+                                                                 "Increase",
+                                                                 ifelse(nsdpIndicators$`Target Percentage (%)` < 0,
+                                                                        "Decrease",
+                                                                        NA))
 
 # Initiailise a flextable object for NSDP table
 indicatorsTable <- flextable(nsdpIndicators)
@@ -423,8 +406,8 @@ indicatorsTable <- bg(indicatorsTable, bg="coral1", part="header")
 # Set the vertical alignment to top
 indicatorsTable <- valign(indicatorsTable, valign="top", part="all")
 
-# Merge repeated values in columns
-indicatorsTable <- merge_v(indicatorsTable)
+# Merge repeated values in the Policy Objectives column
+indicatorsTable <- merge_v(indicatorsTable, j = "Policy Objectives")
 
 # Set table width to 100%
 indicatorsTable <- set_table_properties(indicatorsTable, width=1, layout="autofit")
