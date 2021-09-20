@@ -389,9 +389,9 @@ nsdpIndicators$`Target Percentage (%)` <- round(nsdpIndicators$`Target Percentag
 
 # Add indicator direction
 nsdpIndicators$`Indicator Value (Increased/Decreased)` <- ifelse(nsdpIndicators$`Target Percentage (%)` > 0, 
-                                                                 "Increase",
+                                                                 "Increased",
                                                                  ifelse(nsdpIndicators$`Target Percentage (%)` < 0,
-                                                                        "Decrease",
+                                                                        "Decreased",
                                                                         NA))
 
 # Initiailise a flextable object for NSDP table
@@ -431,14 +431,14 @@ codesCP4 <- c(1000, 3071)
 categoryColumn <- "EXPORT.COUNTRY"
 columnCategories <- list(
   "Australia: Exports"=c("AUSTRALIA"),
-  "China, People's Republic of: Exports"=c("CHINA, PEOPLES REPUBLIC OF"),
+  "China: Exports"=c("CHINA, PEOPLES REPUBLIC OF"),
   "Fiji: Exports"=c("FIJI"),
   "France: Exports"=c("FRANCE"),
-  "Hong Kong: Exports"=c("HONG KONG"),
+  "Hong Kong S.A.R.: Exports"=c("HONG KONG"),
   "India: Exports"=c("INDIA"),
   "Indonesia: Exports"=c("INDONESIA"),
   "Japan: Exports"=c("JAPAN"),
-  "Korea, Republic Of: Exports"=c("KOREA, REPUBLIC OF"),
+  "South Korea: Exports"=c("KOREA, REPUBLIC OF"),
   "Malaysia: Exports"=c("MALAYSIA"),
   "Netherlands: Exports"=c("NETHERLANDS"),
   "New Caledonia: Exports"=c("NEW CALEDONIA"),
@@ -462,14 +462,14 @@ codesCP4 <- c(4000, 4071, 7100)
 categoryColumn <- "IMPORT.COUNTRY"
 columnCategories <- list(
   "Australia: Imports"=c("AUSTRALIA"),
-  "China, People's Republic of: Imports"=c("CHINA, PEOPLES REPUBLIC OF"),
+  "China: Imports"=c("CHINA, PEOPLES REPUBLIC OF"),
   "Fiji: Imports"=c("FIJI"),
   "France: Imports"=c("FRANCE"),
-  "Hong Kong: Imports"=c("HONG KONG"),
+  "Hong Kong S.A.R.: Imports"=c("HONG KONG"),
   "India: Imports"=c("INDIA"),
   "Indonesia: Imports"=c("INDONESIA"),
   "Japan: Imports"=c("JAPAN"),
-  "Korea, Republic Of: Imports"=c("KOREA, REPUBLIC OF"),
+  "South Korea"=c("KOREA, REPUBLIC OF"),
   "Malaysia: Imports"=c("MALAYSIA"),
   "Netherlands: Imports"=c("NETHERLANDS"),
   "New Caledonia: Imports"=c("NEW CALEDONIA"),
@@ -492,20 +492,19 @@ colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTrad
                                                           FUN=function(colName){
                                                             return(strsplit(colName, split=":")[[1]][1])
                                                           })
+balanceOfTradeByMajorPartnerCountries <- data.frame("Country" = colnames(balanceOfTradeByMajorPartnerCountries),
+                                                    "Balance_of_trade" = as.numeric(balanceOfTradeByMajorPartnerCountries[1, ]))
 
 # Get the polygons for the world
-world <- rnaturalearth::ne_countries(type = "countries", scale = "small", returnclass = "sf")
-
-# Generate some example data
-countryRecords <- data.frame("ISO3" = sample(world$sov_a3, size = 50),
-                             "RandomValue" = runif(50))
+world <- rnaturalearth::ne_countries(type = "countries", scale = "medium", returnclass = "sf")
 
 # Merge in my example data
-world <- merge(world, countryRecords, by.x = "sov_a3", by.y = "ISO3", all.x = TRUE)
+world <- merge(world, balanceOfTradeByMajorPartnerCountries, by.x = "admin", by.y = "Country", all.x = TRUE)
 
 # Plot with ggplot
 ggplot(data = world) +
-    geom_sf(aes(fill = RandomValue))
+  geom_sf(aes(fill = Balance_of_trade / 1000000)) + 
+  guides(fill=guide_legend(title="Balance of trade\n(millions)"))
 ```
 
 # Trade Balance of Pacific Islands (excluding Melanesian Islands, Australia and New Zealand) 
