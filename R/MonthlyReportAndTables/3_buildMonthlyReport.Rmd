@@ -776,7 +776,7 @@ totalMajorExports$name_shortened <- sapply(totalMajorExports$name,
                                            word_separator = "\\.")
 
 # Create a line graph
-ggplot(data = totalMajorExports, aes(x = Year, y = value)) +
+ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_shortened))) +
   geom_line(aes(color = factor(name_shortened)), size = 1.5) +
   ylab("Total export value") +
   theme_minimal() +
@@ -790,7 +790,6 @@ ggplot(data = totalMajorExports, aes(x = Year, y = value)) +
 # Top 5 New Major Exports
 
 ```{r new major exports, fig.height=1.75}
-
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
   mutate(CommodityType = case_when(CP4 %in% c(4000, 4071, 7100) ~ "IMPORT",
@@ -871,7 +870,7 @@ totalMajorImports$name_shortened <- sapply(totalMajorImports$name,
                                            word_separator = "\\.")
 
 # Create a line graph
-ggplot(data = totalMajorImports, aes(x = Year, y = value)) +
+ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_shortened))) +
   geom_line(aes(color = factor(name_shortened)), size = 1.5) +
   ylab("Total import value") +
   theme_minimal() +
@@ -884,7 +883,6 @@ ggplot(data = totalMajorImports, aes(x = Year, y = value)) +
 # Top 5 New Major Imports
 
 ```{r new major imports, fig.height=1.75}
-
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
   mutate(CommodityType = case_when(CP4 %in% c(4000, 4071, 7100) ~ "IMPORT",
@@ -907,25 +905,20 @@ otherPrincipleImports <- totalCommodityValueByPrincipleImportType %>%
 orderedPrincipleImportType <- otherPrincipleImports %>%
   arrange(desc(total))
 
-# Select only exports falling into the OTHER or NA category
-importsOtherandNA <- orderedPrincipleImportType %>%
+# Select only exports falling into the OTHER category
+importsOther <- orderedPrincipleImportType %>%
   filter(principleImportCategory %in% c("Other Imports"))
 
-# Select top 5 new imports
-top5OtherImports<- importsOtherandNA %>% 
-  head(5)
-
-# Create some dummy data
-dummyData <- data.frame("Value"=c(rnorm(5, mean=9000, sd=250), rnorm(5, mean=9500, sd=250)), 
-                        "Commodity"=c("A", "B", "C", "D", "E"),
-                        "Type"=c(rep("Previous", 5), rep("Current", 5)))
-# Create a bar chart
-ggplot(data=dummyData, aes(x=Commodity, y=Value, fill=Type)) +
-  geom_bar(stat="identity", color="black", position=position_dodge()) +
-  theme_minimal() + 
-  scale_fill_brewer(palette="Blues") +
-  theme(legend.title=element_blank()) + 
-  coord_cartesian(ylim=range(dummyData$Value))
+# Plot the top five exports
+importsOther %>%
+  head(5) %>%
+  ggplot(aes(x = reorder(Goods.Comm..Dsc., -total), y = total)) +
+    geom_bar(stat = "identity") +
+    ylab("Total import value") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+          axis.title.y = element_text(size = 9),
+          axis.title.x = element_blank())
 ```
 
 # Imports of Products related to Health
