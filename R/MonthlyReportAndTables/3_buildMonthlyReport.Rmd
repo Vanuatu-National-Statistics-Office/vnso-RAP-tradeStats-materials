@@ -97,6 +97,7 @@ colnames(majorMonthlyExports)[1] <- "Year"
 # Read in the data for monthly major imports
 majorMonthlyImportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyImportCalculations_31-12-20.csv")
 majorMonthlyImports <- read.csv(majorMonthlyImportsFile)
+colnames(majorMonthlyImports)[1] <- "Year"
 
 # Read in the data from the open folder of the repository 
 productsRelatedHealthFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
@@ -732,7 +733,7 @@ tradeByTradeTable
 ```{r principle exports through time, fig.height=1.75}
 # Calculate value of major exports commodities for current month for historical data
 majorExportsValue <- majorMonthlyExports %>%
-  filter(Month == "January")
+  filter(Month == currentMonth)
 
 # Calculate current month major export commodities 
 # CP4 code for exports
@@ -826,15 +827,9 @@ exportsOtherandNA %>%
 # Principle Imports
 
 ```{r principle imports through time, fig.height=1.75}
-
-# Convert values
-majorMonthlyImports$Year <- as.factor(majorMonthlyExports$Year)
-majorMonthlyImports$Month <- as.factor(majorMonthlyExports$Month)
-majorMonthlyImports$Alcoholic.Drinks <- as.numeric(majorMonthlyImports$Alcoholic.Drinks)
-majorMonthlyImports$Articles.Iron.and.Steel <- as.numeric(majorMonthlyImports$Articles.Iron.and.Steel)
-majorMonthlyImports$Medicaments <- as.numeric(majorMonthlyImports$Medicaments)
-majorMonthlyImports$Petroleum.Oils.and.oils.obtained.from.bituminous.minerals <- as.numeric(majorMonthlyImports$Petroleum.Oils.and.oils.obtained.from.bituminous.minerals)
-majorMonthlyImports$Rice <- as.numeric(majorMonthlyImports$Rice)
+# Calculate value of major imports commodities for current month for historical data
+majorImportsValue <- majorMonthlyImports %>%
+  filter(Month == currentMonth)
 
 # Calculate value of commodities for current month
 codesCP4 <- c(4000, 4071, 7100)
@@ -847,18 +842,38 @@ columnCategories <- list(
   "Rice"=c("Rice"))
 majorImportsCurrentMonth <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-# Take data-frame and add to historical "majorMonthlyImports"
+# Convert to data frame and add current year and month
+majorImportCommoditiesValues <- cbind(data.frame("Year" = currentYear, "Month" = currentMonth), 
+                                      as.data.frame(majorImportsCurrentMonth))
 
+# Remove the total column
+majorImportCommoditiesValues <- majorImportCommoditiesValues %>% select(-Total)
 
+# Add current month to historical data before visualising - unless already there!
+totalMajorImports <- majorImportsValue
+if(majorImportCommoditiesValues$Year %in% majorImportsValue$Year == FALSE &&
+   majorImportCommoditiesValues$Month %in% majorImportsValue$Month == FALSE ){
+  totalMajorImports <- rbind(majorImportsValue, majorImportCommoditiesValues)
+}
 
-# Build the table
-dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
-                        Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
-                        Value=c(50, 76, 96, 65, 86, 30, 60, 45, 75, 80))
+# Convert the table to long format
+totalMajorImports <- totalMajorImports %>% 
+  pivot_longer(cols = colnames(totalMajorImports)[-c(1, 2)])
+
+# Shorten the commodity names
+totalMajorImports$name_shortened <- sapply(totalMajorImports$name, 
+                                           FUN=split_sentence_across_lines, 
+                                           word_separator = "\\.")
+
 # Create a line graph
-ggplot(data=dummyData, aes(x=Time, y=Value, group=Commodity)) +
-  geom_line(aes(color=Commodity), size=1.5) +
-  theme_minimal()
+ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_shortened))) +
+  geom_line(aes(color = factor(name_shortened)), size = 1.5) +
+  ylab("Total import value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+        axis.title.y = element_text(size = 9),
+        axis.title.x = element_blank(),
+        legend.title=element_blank())
 ```
 
 # Top 5 New Major Imports
