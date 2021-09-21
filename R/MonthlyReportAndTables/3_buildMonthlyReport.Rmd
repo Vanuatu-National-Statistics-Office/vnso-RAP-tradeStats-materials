@@ -812,8 +812,19 @@ exportsOtherandNA <- orderedPrincipleExportType %>%
   filter(principleExportCategory %in% c("Other products", "NA"))
 
 # Select top 5 new exports
-top5OtherExports<- exportsOtherandNA %>% 
+top5OtherExports <- exportsOtherandNA %>% 
   head(5)
+
+exportsOtherandNA %>%
+  head(5) %>%
+  ggplot(aes(x = reorder(Goods.Comm..Dsc., -total), y = total)) +
+  geom_bar(stat = "identity") +
+  ylab("Total export value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+        axis.title.y = element_text(size = 9),
+        axis.title.x = element_blank())
+
 
 # Create some dummy data
 dummyData <- data.frame("Value"=c(rnorm(5, mean=9000, sd=250), rnorm(5, mean=9500, sd=250)), 
