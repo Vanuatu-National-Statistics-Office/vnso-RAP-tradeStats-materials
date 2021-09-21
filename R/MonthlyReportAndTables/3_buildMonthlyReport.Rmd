@@ -7,7 +7,10 @@ output:
 
 ```{r setup, include=FALSE}
 # Set echo=FALSE as default for code cells
-knitr::opts_chunk$set(echo=FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+```{r preparation, include = FALSE}
 # Load the required libraries
 library(knitr) # Creating documents
 library(flextable) # Nicely formatted tables
@@ -35,6 +38,7 @@ secureDataFolder <- file.path(repository, "data", "secure")
 source(file.path(repository, "R", "functions.R"))
 ```
 
+
 ```{r load data}
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
@@ -42,7 +46,10 @@ source(file.path(repository, "R", "functions.R"))
 processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-01-20.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%Y-%m-%d")
 processedTradeStats$Month <- format(processedTradeStats$Reg..Date, "%B")
+
+# Get the current month and year of data
 currentMonth <- unique(processedTradeStats$Month)
+currentYear <- unique(processedTradeStats$Year)
 
 # Load import substitution table
 importSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
@@ -724,9 +731,8 @@ tradeByTradeTable
 
 ```{r principle exports through time, fig.height=1.75}
 # Calculate value of major exports commodities for current month for historical data
-majorExportsValue<- majorMonthlyExports %>%
-  filter(Month == "January") %>%
-  group_by(Year, Month, Copra, Coconut.Oil, Beef, Cocoa, Kava) 
+majorExportsValue <- majorMonthlyExports %>%
+  filter(Month == "January")
 
 # Calculate current month major export commodities 
 # CP4 code for exports
@@ -736,7 +742,7 @@ codesCP4 <- c(1000)
 categoryColumn <- "Principle.Exports"
 columnCategories <- list(
   "Copra"=c("Copra"),
-  "CoconutOil"=c("Coconut Oil"),
+  "Coconut.Oil"=c("Coconut Oil"),
   "Beef"=c("Beef fresh, chilled, frozen and preserved"),
   "Cocoa"=c("Cocoa"),
   "Kava"=c("Kava")
@@ -745,26 +751,33 @@ columnCategories <- list(
 # Build the table
 majorExportCommoditiesValues <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
-# Create dataframe of current month major exports
-copra<- sum(majorExportCommoditiesValues$Copra)
-coconutOil<- sum(majorExportCommoditiesValues$CoconutOil)
-beef<- sum(majorExportCommoditiesValues$Beef)
-cocoa<- sum(majorExportCommoditiesValues$Cocoa)
-kava<- sum(majorExportCommoditiesValues$Kava)
-majorExportCurrentMonth <- data.frame("Year"= "2021", "Month"= "January", "Copra"= copra, "Coconut Oil"=coconutOil, "Beef"=beef, "Cocoa"=cocoa, "Kava"=kava)
+# Convert to data frame and add current year and month
+majorExportCommoditiesValues <- cbind(data.frame("Year" = currentYear, "Month" = currentMonth), 
+                                      as.data.frame(majorExportCommoditiesValues))
 
-# Add current month to historical data before visualising 
-totalMajorExports<- rbind(majorExportsValue, majorExportCurrentMonth)
+# Remove the total column
+majorExportCommoditiesValues <- majorExportCommoditiesValues %>% select(-Total)
 
-# Build the table
-dummyData <- data.frame(Commodity=rep(c("A", "B"), each=5),
-                        Time=rep(c("2016", "2017", "2018", "2019", "November"),2),
-                        Value=c(6.8, 15, 33, 42, 35, 4.2, 10, 29.5, 31, 25))
+# Add current month to historical data before visualising - unless already there!
+totalMajorExports <- majorExportsValue
+if(majorExportCommoditiesValues$Year %in% majorExportsValue$Year == FALSE &&
+   majorExportCommoditiesValues$Month %in% majorExportsValue$Month == FALSE ){
+  totalMajorExports <- rbind(majorExportsValue, majorExportCommoditiesValues)
+}
+
+# Convert the table to long format
+totalMajorExports <- totalMajorExports %>% 
+  pivot_longer(cols = colnames(totalMajorExports)[-c(1, 2)])
 
 # Create a line graph
-ggplot(data=dummyData, aes(x=Time, y=Value, group=Commodity)) +
-  geom_line(aes(color=Commodity), size=1.5) +
-  theme_minimal()
+ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name))) +
+  geom_line(aes(color = factor(name)), size = 1.5) +
+  ylab("Total export value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+        axis.title.y = element_text(size = 9),
+        axis.title.x = element_blank(),
+        legend.title=element_blank())
 
 ```
 
@@ -937,8 +950,6 @@ foodSubCategoryHistoricalMonthlyValue <- foodSubCategoryHistoricalValue %>%
 # Join current month data-frame to historical data
 foodSubCategoryHistoricalMonthlyValue$Month<- as.character(foodSubCategoryHistoricalMonthlyValue$Month)
 historalAndCurrentMonthFood <- rbind(foodSubCategoryHistoricalMonthlyValue, foodSubCategoryValue)
-
-# Add Year
 
 # Create a line graph
 ggplot(historalAndCurrentMonthFood, aes(x = Year, y = total, color = Food.sub.category)) + 
