@@ -40,6 +40,9 @@ checkMergingColumnsForClassificationTables <- function(tradeStats, classificatio
 #' @return A character vector representing the sentence split across multiple lines
 split_sentence_across_lines <- function(sentence, line_length = 25, word_separator = " "){
   
+  # Remove any existing new lines in the sentence
+  sentence <- gsub(pattern = "\n", replacement = word_separator, "test\ntest")
+  
   # skip if sentence has less characters than line limit
   if(nchar(sentence) <= line_length){
     return(sentence)

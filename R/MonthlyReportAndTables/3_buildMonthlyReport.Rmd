@@ -770,9 +770,14 @@ if(majorExportCommoditiesValues$Year %in% majorExportsValue$Year == FALSE &&
 totalMajorExports <- totalMajorExports %>% 
   pivot_longer(cols = colnames(totalMajorExports)[-c(1, 2)])
 
+# Shorten the commodity names
+totalMajorExports$name_shortened <- sapply(totalMajorExports$name, 
+                                           FUN=split_sentence_across_lines, 
+                                           word_separator = "\\.")
+
 # Create a line graph
-ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name))) +
-  geom_line(aes(color = factor(name)), size = 1.5) +
+ggplot(data = totalMajorExports, aes(x = Year, y = value)) +
+  geom_line(aes(color = factor(name_shortened)), size = 1.5) +
   ylab("Total export value") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
@@ -866,7 +871,7 @@ totalMajorImports$name_shortened <- sapply(totalMajorImports$name,
                                            word_separator = "\\.")
 
 # Create a line graph
-ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_shortened))) +
+ggplot(data = totalMajorImports, aes(x = Year, y = value)) +
   geom_line(aes(color = factor(name_shortened)), size = 1.5) +
   ylab("Total import value") +
   theme_minimal() +
