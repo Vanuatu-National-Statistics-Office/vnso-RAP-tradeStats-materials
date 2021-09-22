@@ -777,7 +777,7 @@ totalMajorExports$name_shortened <- sapply(totalMajorExports$name,
 
 # Create a line graph
 ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_shortened))) +
-  geom_line(aes(color = factor(name_shortened)), size = 1.5) +
+  geom_line(aes(color = factor(name_shortened)), size = 1.5, alpha = 0.75) +
   ylab("Total export value") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
@@ -871,7 +871,7 @@ totalMajorImports$name_shortened <- sapply(totalMajorImports$name,
 
 # Create a line graph
 ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_shortened))) +
-  geom_line(aes(color = factor(name_shortened)), size = 1.5) +
+  geom_line(aes(color = factor(name_shortened)), size = 1.5, alpha = 0.75) +
   ylab("Total import value") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
@@ -960,8 +960,15 @@ foodSubCategoryHistoricalMonthlyValue$Month<- as.character(foodSubCategoryHistor
 historalAndCurrentMonthFood <- rbind(foodSubCategoryHistoricalMonthlyValue, foodSubCategoryValue)
 
 # Create a line graph
-ggplot(historalAndCurrentMonthFood, aes(x = Year, y = total, color = Food.sub.category)) + 
-  geom_line()
+ggplot(historalAndCurrentMonthFood, aes(x = Year, y = total, group = factor(Food.sub.category))) + 
+  geom_line(aes(color = factor(Food.sub.category)), size = 1.5, alpha = 0.75) +
+  ylab("Import value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+        axis.title.y = element_text(size = 9),
+        axis.title.x = element_blank(),
+        legend.title=element_blank(),
+        legend.key.size = unit(0.1, "cm"))
 
 # Divide monthly values by actual and estimated population data from the Census
 
