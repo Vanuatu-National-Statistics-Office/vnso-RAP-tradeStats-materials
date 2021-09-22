@@ -830,7 +830,7 @@ exportsOtherandNA %>%
 
 # Principle Imports
 
-```{r principle imports through time, fig.height=1.75}
+```{r principle imports through time, fig.height = 1.8}
 # Calculate value of major imports commodities for current month for historical data
 majorImportsValue <- majorMonthlyImports %>%
   filter(Month == currentMonth)
@@ -882,7 +882,7 @@ ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_sh
 
 # Top 5 New Major Imports
 
-```{r new major imports, fig.height=1.75}
+```{r new major imports, fig.height = 1.8}
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
   mutate(CommodityType = case_when(CP4 %in% c(4000, 4071, 7100) ~ "IMPORT",
@@ -923,7 +923,7 @@ importsOther %>%
 
 # Imports of Products related to Health
 
-```{r health imports through time, fig.height=1.75}
+```{r health imports through time, fig.height = 1.8}
 
 # Merge unhealthy commodity classifications with cleaned data
 productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWithZeros, "HS")
@@ -940,7 +940,7 @@ foodSubCategoryValue <- unhealthyImportCommodities %>%
   arrange(desc(total))
 
 # Create data-frame for all unhealthy imports from historical data 
-historicalImportsTenYears <- historicalImports[historicalImports$Year %in% c("2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020"), ]
+historicalImportsTenYears <- historicalImports[historicalImports$Year %in% 2011:currentYear, ]
 historicalImportsTenYears$HS <- sapply(historicalImportsTenYears$HS, FUN=padWithZeros, "HS")
 historicalHealthMergedWithClassifications <- merge(historicalImportsTenYears, productsRelatedHealth, by.x = "HS", by.y = "HS.Code", all.x=TRUE)
 unhealthlyHistoricalCommodities <- historicalHealthMergedWithClassifications[is.na(historicalHealthMergedWithClassifications$Unhealthy.Focus.Food.Category) == FALSE, ]
@@ -970,28 +970,8 @@ ggplot(historalAndCurrentMonthFood, aes(x = Year, y = total, group = factor(Food
         legend.title=element_blank(),
         legend.key.size = unit(0.1, "cm"))
 
-# Divide monthly values by actual and estimated population data from the Census
+# TODO Divide monthly values by actual and estimated population data from the Census
 
-
-
-
-### Code below not working not sure why
-# Calculate value of unhealthy commodities for current month
-codesCP4 <- c(4000, 4071, 7100)
-categoryColumn <- "Food.sub.category"
-columnCategories <- list(
-  "Processed Meats"=c("Processed Meats"),
-  "Canned Meats"=c("Canned Meats"),
-  "Cordial"=c("Cordial"),
-  "Soft Drinks"=c("Soft Drinks"),
-  "Electrolyte drinks"=c("Electrolyte drinks"),
-  "Sugar"=c("Sugar"),
-  "Crisps and snacks"=c("Crisps and snacks"),
-  "Noodles"=c("Noodles"),
-  "Confectionary"=c("Confectionary"),
-  "Bakery products"=c("Bakery products")
-  )
-importsUnhealthyFoodCurrentMonth <- buildRawSummaryTable(unhealthlyCommodities, codesCP4, categoryColumn, columnCategories)
 
 ```
 
@@ -999,9 +979,7 @@ importsUnhealthyFoodCurrentMonth <- buildRawSummaryTable(unhealthlyCommodities, 
 
 ```{r food and products imports through time, fig.height=1.75}
 
-
-
-
+# TODO Add code to generate data and plot current figure
 
 ```
 
