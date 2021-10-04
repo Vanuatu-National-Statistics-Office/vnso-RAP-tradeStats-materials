@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo=FALSE)
 library(knitr) # Creating documents
 library(flextable) # Nicely formatted tables
 library(rnaturalearth) # World map
+library(rgeos)
 library(sf) # Working with spatial data
 library(ggplot2) # Creating plots
 library(dplyr) # Working with data
@@ -310,8 +311,6 @@ targetENV1.1.3<- data.frame("Percentage change in DARD targetted imports)"= targ
 
 
 ## ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15%
-
-
 
 # Calculate value of Trade Agreements for current month from baseline year 
 baselineExportsTradeAgreementCurrentMonth <- sum(baselineMSGExports[baselineMSGExports$Month == "January", "Total.VT"], na.rm= TRUE)
