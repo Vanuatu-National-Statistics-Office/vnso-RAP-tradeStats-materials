@@ -29,6 +29,61 @@ checkMergingColumnsForClassificationTables <- function(tradeStats, classificatio
               "NotPresentInTradesData" = classificationsTable[rowsNotInTradesData, classificationColumn]))
 }
 
+#' Split sentence across lines
+#'
+#' Given a sentence as a string of characters, current function will split using new lines
+#'where the length of the sentence exceeds a specificed line length
+#' @param sentence character vector containing the sentence
+#' @param line_length the line length lmiit in number of characters. Defaults to 25 (including spaces)
+#' @param word_separator The separator between words. Defaults to " ".
+#'
+#' @return A character vector representing the sentence split across multiple lines
+split_sentence_across_lines <- function(sentence, line_length = 25, word_separator = " "){
+  
+  # Remove any existing new lines in the sentence
+  sentence <- gsub(pattern = "\n", replacement = word_separator, sentence)
+  
+  # skip if sentence has less characters than line limit
+  if(nchar(sentence) <= line_length){
+    return(sentence)
+  }
+  
+  # Remove escaping characters from separator for collapsing
+  word_separator_without_slashes <- gsub(pattern = "\\\\", replacement = "", word_separator)
+  
+  # Split the setence into it's words
+  words <- unlist(strsplit(sentence, split = word_separator))
+  
+  # Count cumulative number of characters
+  number_characters <- nchar(words) + 1
+  cumulative_character_count <- cumsum(number_characters)
+  
+  # Identify the word before the end of the line
+  word_index_before_end_of_line <- which(cumulative_character_count > line_length)[1]
+  word_index_before_end_of_line <- ifelse(word_index_before_end_of_line > 1, 
+                                          word_index_before_end_of_line - 1,
+                                          word_index_before_end_of_line)
+  
+  # Get the front of the sentence
+  sentence_front <- paste(words[seq_len(word_index_before_end_of_line)], collapse = word_separator_without_slashes)
+  
+  # Get the back of the sentence
+  sentence_back <- ""
+  if(word_index_before_end_of_line + 1 <= length(words)){
+    sentence_back <- paste(words[(word_index_before_end_of_line+1):length(words)], collapse = word_separator_without_slashes)
+  }
+  
+  # Check if back needs split further
+  if(nchar(sentence_back) > line_length){
+    sentence_back <- split_sentence_across_lines(sentence_back, line_length, word_separator)
+  }
+  
+  # Build the sentence
+  sentence_split_across_lines <- paste0(sentence_front, "\n", sentence_back) 
+  
+  return(sentence_split_across_lines)
+}
+
 #' Pad the SITC or HS code values with zeros
 #'
 #' Pads SITC or HS values with leading/lagging zeros to conform with classification standards. Add zeros to left of HS code to make them 8 digits. Adds zeros to SITC codes to match 5 digit format 000.00.
