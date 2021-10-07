@@ -923,7 +923,7 @@ importsOther %>%
 
 # Imports of Products related to Health
 
-```{r health imports through time, fig.height = 1.8}
+```{r health imports through time, fig.height = 1.8, eval= FALSE}
 
 # Merge unhealthy commodity classifications with cleaned data
 productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWithZeros, "HS")
