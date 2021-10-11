@@ -253,6 +253,6 @@ processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 # Create csv of last months processed data
 write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-01-20.csv"))
 
-# Note progress
+# Note progress final
 
 cat("Finished processing and cleaning latest month's data.\n")

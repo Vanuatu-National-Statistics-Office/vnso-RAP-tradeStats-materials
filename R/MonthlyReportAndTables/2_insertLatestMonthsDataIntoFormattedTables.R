@@ -913,5 +913,5 @@ becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categ
 updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_WORKING.xlsx")
 openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
-# Print progress
+# Print progress for finish
 cat(paste0("Finished updated formatted excel tables in ", updatedWorkbookFileName, ".\n"))
