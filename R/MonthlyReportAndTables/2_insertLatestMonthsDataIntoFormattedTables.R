@@ -1,5 +1,8 @@
 #### Preparation ####
 
+# Load the required libraries
+library(openxlsx) # Reading and writing excel formatted data
+
 # Check that 1_processLatestMonthsTradeStats.R has already been run
 if(exists("repository") == FALSE || exists("secureDataFolder") == FALSE || 
    exists("openDataFolder") == FALSE || exists("processedTradeStats") == FALSE){
@@ -14,10 +17,8 @@ date <- max(processedTradeStats$Reg..Date, na.rm=TRUE)
 month <- format(date, "%B")
 year <- format(date, "%Y")
 
-# Note the excel workbook containing the final formmatted tables
-#finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-19_WORKING.xlsx")
-finalWorkbookFileName <- choose.files(default="SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-19_WORKING.xlsx", multi=FALSE,
-                                      caption="Select the output excel file containing the formatted tables to be edited (should be in outputs folder)")
+# Note the excel workbook containing the final formatted tables
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-12-19_WORKING.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
@@ -647,12 +648,99 @@ if(is.null(tradeByModeOfTransportSubTables) == FALSE){
 # Print progress
 cat("Finished formatting Table 10: Trade by Mode of Transport.\n")
 
-#### Table 11: Trade by Trade Agreement (INCOMPLETE) ####
+#### Table 11: Trade by Trade Agreement ####
 
 ## Getting latest statistics ##
 
-# Get the trade stats for the 
-tradeStatsForMSG <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
+# Get the trade stats for the imports aligned to the MSG agreement
+tradeStatsForMSGImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
+
+# Get the trade stats for the exports aligned to the MSG agreement
+msgAgreementCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
+msgAgreementCommoditiesExclude <- read.csv(msgAgreementCommoditiesExcludeFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
+msgAgreementCommoditiesExclude$HS.Code_6<- sapply(msgAgreementCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
+msgAgreementCommoditiesExcludeMerged <- merge(processedTradeStats, msgAgreementCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
+tradeStatsForAllMSGCountryExports <- msgAgreementCommoditiesExcludeMerged[msgAgreementCommoditiesExcludeMerged$CP4 == 1000 & msgAgreementCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
+tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+
+# Order data for exports and imports (statistical value) by combined classifications 
+exportMSGOrderedValue<- tradeStatsForMSGExports[order(-tradeStatsForMSGExports$Stat..Value), ]
+importMSGOrderedValue<- tradeStatsForMSGImports[order(-tradeStatsForMSGImports$Stat..Value), ]
+
+# Group statistical values of exports by classifications 
+groupedExportsMSGValue<- exportMSGOrderedValue %>%
+  group_by(Classifications.Combined) %>%
+  summarise(total = sum(Stat..Value))
+groupedExportMSGOrderedValue<- groupedExportsMSGValue[order(-groupedExportsMSGValue$total), ]
+
+# Insert export values into table
+tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Export"=totalExports, "Imports CIF"=imports, "Trade Balance"=balance)
+
+# Group statistical values of imports by classifications 
+groupedImportsMSGValue<- importMSGOrderedValue %>%
+  group_by(Classifications.Combined) %>%
+  summarise(total = sum(Stat..Value))
+groupedImportMSGOrderedValue<- groupedImportsMSGValue[order(-groupedImportsMSGValue$total), ]
+
+# Create Data-frame for top ten exports sent to 
+# Define the CP4 codes need for table
+codesCP4 <- c(1000)
+
+# Define the categories used for each column
+categoryColumn <- "Classifications.Combined"
+columnCategories <- list(
+  "Kava"=c("Kava"),
+  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal"),
+  "Other furniture and parts thereof"=c("Other furniture and parts thereof"),
+  "Articles of iron or steel"=c("Articles of iron or steel"),
+  "Footwear, gaiters and the like; parts of such articles"=c("Footwear, gaiters and the like; parts of such articles"),
+  "Printed books, brochures, leaflets and similar printed matter"=c("Printed books, brochures, leaflets and similar printed matter"),
+  "Articles of apparel and clothing accessories"=c("Articles of apparel and clothing accessories"),
+  "Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"=c("Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"),
+  "Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data"=c("Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data")
+)
+exportCommodities <- unique(tradeStatsForMSGExports[, "Classifications.Combined"])
+columnCategories[["All Others: Exports"]] <- exportCommodities[exportCommodities %in% unlist(columnCategories) == FALSE]
+
+# Build the table
+tradeByTradeAgreementExportsDataFrame <- buildRawSummaryTable(tradeStatsForMSGExports, codesCP4, categoryColumn, columnCategories)
+
+# Create Data-frame for top ten imports sent to 
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "Classifications.Combined"
+columnCategories <- list(
+  "Other prepared or preserved meat, meat offal or blood"=c("Other prepared or preserved meat, meat offal or blood"),
+  "Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"=c("Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"),
+  "Bread, pastry, cakes, biscuits and other bakers' wares"=c("Bread, pastry, cakes, biscuits and other bakers' wares"),
+  "Prepared or preserved fish"=c("Prepared or preserved fish"),
+  "Wheat or meslin flour"=c("Wheat or meslin flour"),
+  "Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"=c("Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"),
+  "Non-alcoholic drinks including mineral water"=c("Non-alcoholic drinks including mineral water"),
+  "Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"=c("Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"),
+  "Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"=c("Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"),
+  "Articles of iron or steel"=c("Articles of iron or steel"),
+  "Toilet paper and similar paper"=c("Toilet paper and similar paper"),
+  "Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"=c("Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"),
+  "Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics"=c("Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics"),
+  "Preparations of a kind used in animal feeding"=c("Preparations of a kind used in animal feeding")
+)
+importCommodities <- unique(tradeStatsForMSGImports[, "Classifications.Combined"])
+columnCategories[["All Others: Imports"]] <- importCommodities[importCommodities %in% unlist(columnCategories) == FALSE]
+
+# Build the table
+tradeByTradeAgreementImportsDataFrame <- buildRawSummaryTable(tradeStatsForMSGImports, codesCP4, categoryColumn, columnCategories)
+
+
+
+
+
+
+
+
+
 
 # Aggregate the statistical value column by country and SITC (note import and export countries always appear to be equal)
 msgLatestStats <- aggregate(tradeStatsForMSG$Stat..Value, by=list(tradeStatsForMSG$SITC_1, 
@@ -780,10 +868,50 @@ if(is.null(totalImportsbySITCTable) == FALSE){
 # Print progress
 cat("Finished formatting Table 13: Imports by SITC.\n")
 
+#### Table 14: Retained Imports by BEC ####
+
+## Getting latest statistics ##
+# Calculate Retained imports by BEC 
+
+# Define the CP4 codes need for table
+codesCP4 <- c(4000, 4071, 7100)
+
+# Define the categories used for each column
+categoryColumn <- "BEC4"
+columnCategories <- list(
+  "Food and Beverage: Primary- Mainly for Industry"=c("111"),
+  "Food and Beverage: Processed- Mainly for Household consumption"=c("112"),
+  "Food and Beverage: Processed- Mainly for Industry"=c("121"),
+  "Food and Beverage: Processed- Mainly for Household consumption"=c("122"),
+  "Industrial Supplies Not Elsewhere Specified: Primary"=c("21"),
+  "Industrial Supplies Not Elsewhere Specified: Processed"=c("22"),
+  "Fuels And Lubricants: Primary"=c("31"),
+  "Fuels And Lubricants: Processed- Other"=c("322"),
+  "Capital Goods (Except Transport Equipment): Capital goods (except transport equipment)"=c("41"),
+  "Capital Goods (Except Transport Equipment): Parts and accessories"=c("42"),
+  "Transport Equipment And Parts And Accessories Thereof: Passenger motor cars"=c("51"),
+  "Transport Equipment And Parts And Accessories Thereof: Other- Industrial"=c("521"),
+  "Transport Equipment And Parts And Accessories Thereof: Other- Non-Industrial"=c("522"),
+  "Transport Equipment And Parts And Accessories Therefof: Parts and accessories"=c("53"),
+  "Consumer Goods Not Elsewhere Specified: Durable"=c("61"),
+  "Consumer Goods Not Elsewhere Specified: Semi-Durable"=c("62"),
+  "Consumer Goods Not Elsewhere Specified: Non-Durable"=c("63"),
+  "Capital Goods"=c("41", "521"),
+  "Intermediate Goods"=c("111", "121", "21", "22", "31", "322", "42", "53"),
+  "Consumption Goods"=c("112", "122", "522", "61", "62", "63")
+)
+
+# Build the table
+becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
+
+## Formatting the table ##
+
+
 #### Finish ####
 
 # Save the changes to the excel file
-openxlsx::saveWorkbook(finalWorkbook, file=finalWorkbookFileName, overwrite=TRUE)
+updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-01-20_WORKING.xlsx")
+openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
-# Print progress
-cat(paste0("Finished updated formatted excel tables in ", finalWorkbookFileName, ".\n"))
+# Print progress for finish
+cat(paste0("Finished updated formatted excel tables in ", updatedWorkbookFileName, ".\n"))

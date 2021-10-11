@@ -1,3 +1,131 @@
+#' Check for missing values in columns used for merging trade statistics data with classification table
+#'
+#' Given the column used for merging the trade statistics data and classification table, the current function will check if any values in either table's column (used to merge) are missing in the other
+#' @param tradeStats A dataframe containing the trade statistics data
+#' @param classificationTable A dataframe of code classifications
+#' @param tradeStatsColumn The column in the tradeStats dataframe used for merge
+#' @param classificationColumn The column in the classification dataframe used for merge. Defaults to same as for trade statistics dataframe
+#' @param classificationTableName The name of the classification table being examine - helps with more meaningful warning messages. Defaults to ""
+#' @return A list reporting the values that were found to be missing in the merging column of each dataframe
+checkMergingColumnsForClassificationTables <- function(tradeStats, classificationsTable, tradeStatsColumn,
+                                                       classificationColumn = tradeStatsColumn, 
+                                                       classificationTableName = ""){
+  
+  # Note the values in the trade statistics column that aren't in classification table column
+  rowsNotInClassificationTable <- which(tradeStats[, tradeStatsColumn] %in% 
+                                          classificationsTable[, classificationColumn] == FALSE)
+  if(length(rowsNotInClassificationTable) > 0){
+    warning(length(rowsNotInClassificationTable), " codes in the \"", tradeStatsColumn ,"\" column of the trades statistics table are not in the \"", classificationColumn, "\" of the ", classificationTableName, " classification table.")
+  }
+  
+  # Note the values in the classification table column that aren't in the trade statistics column
+  rowsNotInTradesData <- which(classificationsTable[, classificationColumn] %in% 
+                                 tradeStats[, tradeStatsColumn] == FALSE)
+  if(length(rowsNotInTradesData) > 0){
+    warning(length(rowsNotInTradesData), " codes in the \"", classificationColumn, "\" column of the ", classificationTableName, " classification table are not in the \"", tradeStatsColumn ,"\" column of the trades statistics table.")
+  }
+  
+  return(list("NotPresentInClassificationTable" = tradeStats[rowsNotInClassificationTable, tradeStatsColumn],
+              "NotPresentInTradesData" = classificationsTable[rowsNotInTradesData, classificationColumn]))
+}
+
+#' Split sentence across lines
+#'
+#' Given a sentence as a string of characters, current function will split using new lines
+#'where the length of the sentence exceeds a specificed line length
+#' @param sentence character vector containing the sentence
+#' @param line_length the line length lmiit in number of characters. Defaults to 25 (including spaces)
+#' @param word_separator The separator between words. Defaults to " ".
+#'
+#' @return A character vector representing the sentence split across multiple lines
+split_sentence_across_lines <- function(sentence, line_length = 25, word_separator = " "){
+  
+  # Remove any existing new lines in the sentence
+  sentence <- gsub(pattern = "\n", replacement = word_separator, sentence)
+  
+  # skip if sentence has less characters than line limit
+  if(nchar(sentence) <= line_length){
+    return(sentence)
+  }
+  
+  # Remove escaping characters from separator for collapsing
+  word_separator_without_slashes <- gsub(pattern = "\\\\", replacement = "", word_separator)
+  
+  # Split the setence into it's words
+  words <- unlist(strsplit(sentence, split = word_separator))
+  
+  # Count cumulative number of characters
+  number_characters <- nchar(words) + 1
+  cumulative_character_count <- cumsum(number_characters)
+  
+  # Identify the word before the end of the line
+  word_index_before_end_of_line <- which(cumulative_character_count > line_length)[1]
+  word_index_before_end_of_line <- ifelse(word_index_before_end_of_line > 1, 
+                                          word_index_before_end_of_line - 1,
+                                          word_index_before_end_of_line)
+  
+  # Get the front of the sentence
+  sentence_front <- paste(words[seq_len(word_index_before_end_of_line)], collapse = word_separator_without_slashes)
+  
+  # Get the back of the sentence
+  sentence_back <- ""
+  if(word_index_before_end_of_line + 1 <= length(words)){
+    sentence_back <- paste(words[(word_index_before_end_of_line+1):length(words)], collapse = word_separator_without_slashes)
+  }
+  
+  # Check if back needs split further
+  if(nchar(sentence_back) > line_length){
+    sentence_back <- split_sentence_across_lines(sentence_back, line_length, word_separator)
+  }
+  
+  # Build the sentence
+  sentence_split_across_lines <- paste0(sentence_front, "\n", sentence_back) 
+  
+  return(sentence_split_across_lines)
+}
+
+#' Pad the SITC or HS code values with zeros
+#'
+#' Pads SITC or HS values with leading/lagging zeros to conform with classification standards. Add zeros to left of HS code to make them 8 digits. Adds zeros to SITC codes to match 5 digit format 000.00.
+#' @param code A value representing an HS or SITC code
+#' @param type The type of codes ("SITC" or "HS") in values. Defaults to "HS"
+#' @param nDigits The number of zeros to use to pad HS codes. Defaults to 8.
+#' @return A character string of the code padded with zeros
+padWithZeros <- function(code, type = "HS", nDigits = 8){
+  
+  # Convert the code to a character string
+  code <- as.character(code)
+
+  # Skip NA values
+  if(is.na(code)){
+    return(code)
+  }
+  
+  # Handle HS codes
+  if(type == "HS"){
+    
+    code <- paste0(paste(rep(0, nDigits - nchar(code)), collapse = ""), code)
+
+  # Handle SITC codes
+  }else if(type == "SITC"){
+
+    partsOfCode <- strsplit(code, split = "\\.")[[1]]
+    partsOfCode[2] <- ifelse(length(partsOfCode) == 1, "", partsOfCode[2])
+
+    if(length(partsOfCode) == 2 && nchar(partsOfCode[1]) <= 3 && nchar(partsOfCode[2]) <= 2){
+      code <- paste0(paste(rep(0, 3 - nchar(partsOfCode[1])), collapse = ""), partsOfCode[1], ".", 
+                            partsOfCode[2], paste0(rep(0, 3 - nchar(partsOfCode[1])), collapse = ""))
+    }else{
+      warning(paste0("Format of current SITC code (", code, ") isn't in the expected form: 000.00. Code will remain unchanged."))
+    }
+    
+  }else{
+    warning(paste0("Code type provided (", type, ") is not recognised. Should be one of c(\"SITC\" or \"HS\"). Code will remain unchanged."))
+  }
+  
+  return(code)
+}
+
 #' Use \code{kableExtra} package to create nice scrollable table in Rmarkdown
 #'
 #' A function to change the alpha value (transparency) of colours that are defined as strings.
@@ -448,6 +576,12 @@ extractCodeSubset <- function(codes, nDigits){
   subsettedCodes <- sapply(codes, 
                            FUN=function(code, nDigits){
                              
+                             # Check for NA values
+                             if(is.na(code)){
+                               warning(paste0("Skipping NA value when extracting subset of code."))
+                               return(NA)
+                             }
+                             
                              # Check if the number of digits we want to select is less than or equal 8
                              if(nDigits > nchar(code)){
                                warning(paste0("The number of digits (", nDigits, ") to extract was more than the length of the code (", code, ") provided"))
@@ -471,7 +605,17 @@ extractCodeSubset <- function(codes, nDigits){
 #' @param categoryColumn A column header used to define the subset of data that needs to be summed  
 #' @param columnCategories A list providing a vector of categories to be used to select data in \code{categoryColumn} for each column 
 #' @return Returns an integer vector representing a subset of the dataframe processedTradeStats
-buildRawSummaryTable <- function(processTradeStats, codesCP4, categoryColumn, columnCategories){
+buildRawSummaryTable <- function(processedTradeStats, codesCP4, categoryColumn, columnCategories){
+  
+  # Check the categoryColumn exists
+  if(categoryColumn %in% colnames(processedTradeStats) == FALSE){
+    stop(paste0("ERROR! The category column (", categoryColumn, ") provided does not exist in table!"))
+  }
+  
+  # Check CP4 column exists
+  if("CP4" %in% colnames(processedTradeStats) == FALSE){
+    stop(paste0("ERROR! The \"CP4\" column does not exist in table!"))
+  }
   
   # Initialise a dataframe to store the calculated statistics
   summaryTable <- data.frame(matrix(NA, nrow=1, ncol=length(columnCategories)), check.names=FALSE, stringsAsFactors=FALSE)
@@ -516,26 +660,39 @@ calculateStatValueSum<- function(processedTradeStats, codes_CP4, categoryCol, ca
 #' A function that searches column added after merging to identify if any values missing
 #' @param merged A data.frame resulting from a merge operation
 #' @param by A vector of columns used as common identifiers in merge operation. Note where multiple values are present, each should have corresponding value in \code{column}.
-#' @param column A vector of columns that were pulled in during merge
+#' @param columns A vector of columns that were pulled in during merge
 #' @param printWarnings Boolean value to indicate whether or not to print warnings
-searchForMissingObservations <- function(merged, by, column, printWarnings=TRUE){
+searchForMissingObservations <- function(merged, by, columns, printWarnings=TRUE){
+  
+  # Check that by and columns are the same length
+  if(length(by) != length(columns)){
+    stop("Number of values in \"by\" and \"columns\" parameters don't match. For each column provided in \"by\" parameter a paired column (that was pulled in during merge) should be provided.")
+  }
   
   # Initialise a data.frame to store information about the missing observations
-  missingInfo <- data.frame("ClassificationValue"=NA, "ClassificationColumn"=NA, "MergedColumn"=NA)
+  missingInfo <- data.frame("ValueInColumnUsedToMerge"=NA, "ColumnUsedToMergeOn"=NA, "ColumnBroughtInOnMerge"=NA)
   row <- 0
   
   # Examine each of the columns of interest
-  for(columnIndex in seq_along(column)){
+  for(columnIndex in seq_along(columns)){
+    
+    # Skip if column names provided for by and matched columns are not present
+    if(columns[columnIndex] %in% colnames(merged) == FALSE){
+      stop(paste0("Column name provided in \"columns\" parameter (", columns[columnIndex], ") not present in table"))
+    }
+    if(by[columnIndex] %in% colnames(merged) == FALSE){
+      stop(paste0("Column name provided in \"by\" parameter (", by[columnIndex], ") not present in table"))
+    }
     
     # Check if any NA values are present in column of interest
-    naIndices <- which(is.na(merged[, column[columnIndex]]))
+    naIndices <- which(is.na(merged[, columns[columnIndex]]))
     
     # If NAs are present report the category they are present for
     for(naIndex in naIndices){
       
       # Store information about the current missing observation
       row <- row + 1
-      missingInfo[row, ] <- c(merged[naIndex, by[columnIndex]], by[columnIndex], column[columnIndex])
+      missingInfo[row, ] <- c(merged[naIndex, by[columnIndex]], by[columnIndex], columns[columnIndex])
       
       # Print warning if requested
       if(printWarnings){
@@ -637,21 +794,35 @@ calculateSummaryStatistics <- function(values){
 #' @param importCP4s CP4 codes that identify IMPORTS
 #' @param exportCP4s CP4 codes that identify EXPORTS
 #' @param useUnitValue Boolean value indicating whether to use range, 95% and 99% bounds of the Unit Value. Defaults to false and uses Value.
+#' @param columsnOfInterest A vector of columns of interest to include in summary statistics table (merge by) to go alongside "Stat..Value" column
 #' @return Returns an numeric labeled vector containing the summary statistics
 checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, historicExportsSummaryStats,
-                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000), useUnitValue=FALSE){
+                                 importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000, 3071), useUnitValue=FALSE,
+                                 columnsOfInterest=c("HS.Code", "Type", "Reg..Date", 
+                                                     "CP4", "Itm..")){
+  
+  # Check essential columns are present in the trade statistics data
+  if("Stat..Value" %in% colnames(tradeStats) == FALSE){
+    stop("The \"Stat..Value\" column is not present in the trade statistics table!")
+  }
+  if("CP4" %in% colnames(tradeStats) == FALSE){
+    stop("The \"CP4\" column is not present in the trade statistics table!")
+  }
   
   # Pad the HS codes with zeros to make up to 8 digits
-  padHSCode <- function(hsCode, length=8){
-    return(paste0(paste(rep(0, length-nchar(hsCode)), collapse=""), hsCode))
-  }
-  historicImportsSummaryStats$HS <- sapply(historicImportsSummaryStats$HS, FUN=padHSCode)
-  historicExportsSummaryStats$HS <- sapply(historicExportsSummaryStats$HS, FUN=padHSCode)
+  historicImportsSummaryStats$HS <- sapply(historicImportsSummaryStats$HS, FUN=padWithZeros, "HS")
+  historicExportsSummaryStats$HS <- sapply(historicExportsSummaryStats$HS, FUN=padWithZeros, "HS")
   
   # Combine the summary stats tables
   historicImportsSummaryStats$HSAndType <- paste0("IMPORT_", historicImportsSummaryStats$HS)
   historicExportsSummaryStats$HSAndType <- paste0("EXPORT_", historicExportsSummaryStats$HS)
   historicSummaryStats <- rbind(historicImportsSummaryStats, historicExportsSummaryStats)
+  
+  # Check the CP4 codes provided are present in trades data
+  cp4CodesNotPresent <- c(importCP4s, exportCP4s)[c(importCP4s, exportCP4s) %in% tradeStats$CP4 == FALSE]
+  if(length(cp4CodesNotPresent) > 0){
+    warning(paste0("Some of the CP4 codes provided (", paste(cp4CodesNotPresent, collapse = ","), ") are not present in the CP4 column of the trade statistics data."))
+  }
   
   # Identify imports and exports and create
   tradeStats$Type <- "UNKNOWN"
@@ -666,9 +837,18 @@ checkCommodityValues <- function(tradeStats, historicImportsSummaryStats, histor
   }
   summaryColumnsOfInterest <- paste0(summaryPrefix, c("Median", "Lower.2.5", "Upper.97.5", "Lower.1", "Upper.99", "Min", "Max"))
   
+  # Check all the columns of interest are present
+  summaryColumnsNotPresent <- summaryColumnsOfInterest[summaryColumnsOfInterest %in% colnames(historicSummaryStats) == FALSE]
+  if(length(summaryColumnsNotPresent) > 0){
+    stop(paste0("Some expected sumamry columns (", paste(summaryColumnsNotPresent, collapse=","), ") aren't present in historic data summary tables!"))
+  }
+  columnsOfInterestNotPresent <- columnsOfInterest[columnsOfInterest %in% colnames(tradeStats) == FALSE]
+  if(length(columnsOfInterestNotPresent) > 0){
+    stop(paste0("Some of the columns of interest (", paste(columnsOfInterestNotPresent, collapse=","), ") aren't present in trade statistics data!"))
+  }
+
   # Get the expected distribution summary statistics for each commodity
-  commoditiesWithExpectations <- merge(tradeStats[c("HSAndType", "HS.Code", "Type", "Reg..Date", 
-                                                   "CP4", "Itm.#", "Stat..Value")],
+  commoditiesWithExpectations <- merge(tradeStats[, c("HSAndType", columnsOfInterest, "Stat..Value")],
                                        historicSummaryStats[, c("HSAndType", summaryColumnsOfInterest)],
                                        by="HSAndType",
                                        all.x=TRUE)
