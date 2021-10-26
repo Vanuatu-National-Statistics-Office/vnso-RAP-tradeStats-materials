@@ -59,8 +59,8 @@ mergeClassificationTablesIntoTradesData <- function(tradeStats, classificationTa
     codesInClassificationNotInTrades <- uniqueCodesInClassifications[uniqueCodesInClassifications %in% uniqueCodesInTrades == FALSE]
     
     # Count and store information about missing codes
-    classificationTables[row, "codes_in_trades_not_in_classification"] <- paste(codesInTradesNotInClassification, collapse = ",")
-    classificationTables[row, "codes_in_classification_not_in_trades"] <- paste(codesInClassificationNotInTrades, collapse = ",")
+    classificationTables[row, "codes_in_trades_not_in_classification"] <- paste(codesInTradesNotInClassification, collapse = ";")
+    classificationTables[row, "codes_in_classification_not_in_trades"] <- paste(codesInClassificationNotInTrades, collapse = ";")
     classificationTables[row, "n_codes_in_trades_not_in_classification"] <- length(codesInTradesNotInClassification)
     classificationTables[row, "n_codes_in_classification_not_in_trades"] <- length(codesInClassificationNotInTrades)
     
