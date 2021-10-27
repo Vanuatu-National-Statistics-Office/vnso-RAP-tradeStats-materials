@@ -35,17 +35,14 @@ mergeClassificationTablesIntoTradesData <- function(tradeStats, classificationTa
     colnames(classificationTable) <- removeSpecialCharactersColumnNameStart(colnames(classificationTable))
     
     # Update formatting of SITC and HS codes in classification table if present
-    if(grepl(pattern = "SITC|HS", linkColumn)){
-      
-      # Check whether HS or SITC
-      type <- ifelse(grepl(pattern = "SITC", linkColumn), "SITC", "HS")
+    if(grepl(pattern = "HS", linkColumn)){
       
       # Extract number of digits from column name - defaults to 8 if none present
       nDigits <- unlist(strsplit(linkColumn, split = "_"))[2]
       nDigits <- ifelse(is.na(nDigits), 8, nDigits)
       
       # Pad SITC or HS code to specified number of digits
-      classificationTable[, linkColumn] <- sapply(classificationTable[, linkColumn], FUN=padWithZeros, type, as.numeric(nDigits))
+      classificationTable[, linkColumn] <- sapply(classificationTable[, linkColumn], FUN=padWithZeros, "HS", as.numeric(nDigits))
     }
     
     # Get unique codes in link column from trades and claissifcation tables and remove NA values
