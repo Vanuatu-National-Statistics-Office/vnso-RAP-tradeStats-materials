@@ -23,7 +23,6 @@ openDataFolder <- file.path(repository, "data", "open")
 # Read in the raw trade data from secure folder of the repository 
 tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-01-20.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
-# tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null"), skip = 1)
 
 #### Clean and process the latest month's data ####
 
@@ -119,111 +118,25 @@ cat("Added separate date elements.\n")
 
 #### Merge in classification tables ####
 
-## MODE OF TRANSPORT ##
+# Define classification tables and link columns
+classification_tables <- data.frame(
+  "file" = c(
+    "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_SITCCodeClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_BECClassifications_31-01-20.csv"
+  ),
+  "link_column" = c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6")
+)
 
-# Merge Mode of Transport classifications with cleaned data
-tradeStatsFileMergeTransport <- file.path(openDataFolder, "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.csv")
-modeOfTransport <- read.csv(tradeStatsFileMergeTransport)
-colnames(modeOfTransport)[1] <- "Office"
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommodities, modeOfTransport, by="Office", all.x=TRUE)
-
-missingValuesOffice <- checkMergingColumnsForClassificationTables(
-  tradeStatsCommoditiesMergedWithClassifications,
-  modeOfTransport,
-  tradeStatsColumn = "Office",
-  classificationTableName = "Mode of transport")
-
-## HARMONISED SYSTEM (HS) CODES ##
-
-# Merge Harmonised System (HS) Code classifications with cleaned data
-tradeStatsFileMergeHSCode <- file.path(openDataFolder, "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.csv") 
-hsDescription <- read.csv(tradeStatsFileMergeHSCode)
-colnames(hsDescription)[1] <- "HS.Code_2"
-hsDescription$HS.Code_2 <- sapply(hsDescription$HS.Code_2, FUN=padWithZeros, "HS", 2)
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, hsDescription, by="HS.Code_2", all.x=TRUE)
-
-missingValuesHSCode_2 <- checkMergingColumnsForClassificationTables(
-  tradeStatsCommoditiesMergedWithClassifications,
-  hsDescription,
-  tradeStatsColumn = "HS.Code_2",
-  classificationTableName = "HS descriptions")
-
-## STANDARD INTERNATIONAL TRADE CLASSIFICATION (SITC) CODES ##
-
-# Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
-tradeStatsFileMergeSITCCode <- file.path(openDataFolder, "OPN_FINAL_ASY_SITCCodeClassifications_31-01-20.csv") 
-sitcDescription <- read.csv(tradeStatsFileMergeSITCCode)
-colnames(sitcDescription) <- c("SITC_1", "SITC.description")
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, sitcDescription, by="SITC_1", all.x=TRUE)
-
-missingValuesSITC_1 <- checkMergingColumnsForClassificationTables(
-  tradeStatsCommoditiesMergedWithClassifications,
-  sitcDescription,
-  tradeStatsColumn = "SITC_1",
-  classificationTableName = "SITC descriptions")
-
-## COUNTRY DESCRIPTIONS OF IMPORTS ##
-
-# Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
-tradeStatsFileMergeCountryDesImports <- file.path(openDataFolder, "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.csv")
-countryDescriptionImports <- read.csv(tradeStatsFileMergeCountryDesImports)
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionImports, by="CO", all.x=TRUE)
-
-missingValuesImportCountry <- checkMergingColumnsForClassificationTables(
-  tradeStatsCommoditiesMergedWithClassifications,
-  countryDescriptionImports,
-  tradeStatsColumn = "CO",
-  classificationTableName = "Import country")
-
-## COUNTRY DESCRIPTIONS OF EXPORTS ##
-
-# Merge Standard International Trade Classification (SITC) Code classifications with cleaned data
-tradeStatsFileMergeCountryDesExports <- file.path(openDataFolder, "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.csv") 
-countryDescriptionExports <- read.csv(tradeStatsFileMergeCountryDesExports)
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, countryDescriptionExports, by="CE.CD", all.x=TRUE)
-
-missingValuesExportCountry <- checkMergingColumnsForClassificationTables(
-  tradeStatsCommoditiesMergedWithClassifications,
-  countryDescriptionExports,
-  tradeStatsColumn = "CE.CD",
-  classificationTableName = "Export country")
-
-## PRINCIPLE COMMODITIES ##
-
-# Merge Principle Commodity Classifications of Exports and Imports with cleaned data
-tradeStatsFileMergePrincipleCommdityClass <- file.path(openDataFolder, "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.csv") 
-principleCommodityClassification <- read.csv(tradeStatsFileMergePrincipleCommdityClass)
-colnames(principleCommodityClassification)[1] <- "HS.Code"
-hsDescription$HS.Code <- sapply(hsDescription$HS.Code, FUN=padWithZeros, "HS")
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, principleCommodityClassification, by="HS.Code", all.x=TRUE)
-
-missingValuesPrincipleCommodities <- checkMergingColumnsForClassificationTables(
-  tradeStatsCommoditiesMergedWithClassifications,
-  principleCommodityClassification,
-  tradeStatsColumn = "HS.Code",
-  classificationTableName = "Principle Commodities")
-
-## BROAD ECONOMIC CATEGORIES (BEC) ##
-
-# Merge Broad Economic Categories (BEC) classifications with cleaned data
-tradeStatsFileMergeBECDescriptions <- file.path(openDataFolder, "OPN_FINAL_ASY_BECClassifications_31-01-20.csv")
-becDescriptions <- read.csv(tradeStatsFileMergeBECDescriptions)
-becDescriptions$HS.Code_6<- sapply(becDescriptions$HS.Code_6, FUN=padWithZeros, "HS", 6)
-tradeStatsCommoditiesMergedWithClassifications <- merge(tradeStatsCommoditiesMergedWithClassifications, becDescriptions, by="HS.Code_6", all.x=TRUE)
-
-missingValuesBEC <- checkMergingColumnsForClassificationTables(
-  tradeStatsCommoditiesMergedWithClassifications,
-  becDescriptions,
-  tradeStatsColumn = "HS.Code_6",
-  classificationTableName = "BEC descriptions")
-
-## Check number of rows with NA values present
-prfColumn <- which(colnames(tradeStatsCommoditiesMergedWithClassifications) == "PRF")
-rowNACounts <- rowSums(is.na(tradeStatsCommoditiesMergedWithClassifications[, -prfColumn]))
-rowsWithNAValues <- tradeStatsCommoditiesMergedWithClassifications[rowNACounts > 0, ]
-if(nrow(rowsWithNAValues) > 0){
-  warning(paste0("View the ", nrow(rowsWithNAValues), " rows of the trade statistics data with missing values with: View(rowsWithNAValues)"))
-}
+# Merge in each of the classification tables
+mergingOutputs <- mergeClassificationTablesIntoTradesData(tradeStats = tradeStatsCommodities,
+                                                          classificationTables = classification_tables)
+tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
+missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
 # Print progress
 cat("Finished merging in classification tables.\n")

@@ -1,32 +1,92 @@
-#' Check for missing values in columns used for merging trade statistics data with classification table
+#' Merge classification tables into the trade statistics data
 #'
-#' Given the column used for merging the trade statistics data and classification table, the current function will check if any values in either table's column (used to merge) are missing in the other
-#' @param tradeStats A dataframe containing the trade statistics data
-#' @param classificationTable A dataframe of code classifications
-#' @param tradeStatsColumn The column in the tradeStats dataframe used for merge
-#' @param classificationColumn The column in the classification dataframe used for merge. Defaults to same as for trade statistics dataframe
-#' @param classificationTableName The name of the classification table being examine - helps with more meaningful warning messages. Defaults to ""
-#' @return A list reporting the values that were found to be missing in the merging column of each dataframe
-checkMergingColumnsForClassificationTables <- function(tradeStats, classificationsTable, tradeStatsColumn,
-                                                       classificationColumn = tradeStatsColumn, 
-                                                       classificationTableName = ""){
+#' Each classification links to the trades statistics data via a shared column,
+#' which is used for merging. THe current function also records which codes in
+#' the shared columns aren't present in either the trade statistics data or the
+#' classification table
+#' @param tradeStats A dataframe containing the customs data
+#' @param classificationTables A dataframe providing file names and link columns
+#'                             for each of the classification tables of interest
+#'
+#' @return customs data with classifications information merged in and dataframe
+#'         detailing which columns are missing
+mergeClassificationTablesIntoTradesData <- function(tradeStats, classificationTables){
   
-  # Note the values in the trade statistics column that aren't in classification table column
-  rowsNotInClassificationTable <- which(tradeStats[, tradeStatsColumn] %in% 
-                                          classificationsTable[, classificationColumn] == FALSE)
-  if(length(rowsNotInClassificationTable) > 0){
-    warning(length(rowsNotInClassificationTable), " codes in the \"", tradeStatsColumn ,"\" column of the trades statistics table are not in the \"", classificationColumn, "\" of the ", classificationTableName, " classification table.")
+  # Add columns to store information about missing codes
+  classificationTables$codes_in_trades_not_in_classification <- NA
+  classificationTables$codes_in_classification_not_in_trades <- NA
+  classificationTables$n_codes_in_trades_not_in_classification <- 0
+  classificationTables$n_codes_in_classification_not_in_trades <- 0
+  
+  # Make copy of the trades stats table in preparation for merging with classification tables
+  tradeStatsWithClassifications <- tradeStats
+  
+  # Merge each classification table into the commodities data
+  for(row in seq_len(nrow(classificationTables))){
+    
+    # Get name of classification table and link column
+    classificationFile <- classificationTables[row, "file"]
+    linkColumn <- classificationTables[row, "link_column"]
+    
+    # Load classification table
+    classificationTable <- read.csv(file.path(openDataFolder, classificationFile))
+    
+    # Remove strange characters from column name
+    colnames(classificationTable) <- removeSpecialCharactersColumnNameStart(colnames(classificationTable))
+    
+    # Update formatting of SITC and HS codes in classification table if present
+    if(grepl(pattern = "SITC|HS", linkColumn)){
+      
+      # Check whether HS or SITC
+      type <- ifelse(grepl(pattern = "SITC", linkColumn), "SITC", "HS")
+      
+      # Extract number of digits from column name - defaults to 8 if none present
+      nDigits <- unlist(strsplit(linkColumn, split = "_"))[2]
+      nDigits <- ifelse(is.na(nDigits), 8, nDigits)
+      
+      # Pad SITC or HS code to specified number of digits
+      classificationTable[, linkColumn] <- sapply(classificationTable[, linkColumn], FUN=padWithZeros, type, as.numeric(nDigits))
+    }
+    
+    # Get unique codes in link column from trades and claissifcation tables and remove NA values
+    uniqueCodesInTrades <- unique(tradeStatsWithClassifications[, linkColumn])
+    uniqueCodesInClassifications <- unique(classificationTable[, linkColumn])
+    uniqueCodesInTrades <- uniqueCodesInTrades[is.na(uniqueCodesInTrades) == FALSE]
+    uniqueCodesInClassifications <- uniqueCodesInClassifications[is.na(uniqueCodesInClassifications) == FALSE]
+    
+    # Note codes present in trades and not in classification and vice versa
+    codesInTradesNotInClassification <- uniqueCodesInTrades[uniqueCodesInTrades %in% uniqueCodesInClassifications == FALSE]
+    codesInClassificationNotInTrades <- uniqueCodesInClassifications[uniqueCodesInClassifications %in% uniqueCodesInTrades == FALSE]
+    
+    # Count and store information about missing codes
+    classificationTables[row, "codes_in_trades_not_in_classification"] <- paste(codesInTradesNotInClassification, collapse = ";")
+    classificationTables[row, "codes_in_classification_not_in_trades"] <- paste(codesInClassificationNotInTrades, collapse = ";")
+    classificationTables[row, "n_codes_in_trades_not_in_classification"] <- length(codesInTradesNotInClassification)
+    classificationTables[row, "n_codes_in_classification_not_in_trades"] <- length(codesInClassificationNotInTrades)
+    
+    # Merge classification table 
+    tradeStatsWithClassifications <- merge(tradeStatsWithClassifications, classificationTable, 
+                                           by = linkColumn, all.x = TRUE)
   }
   
-  # Note the values in the classification table column that aren't in the trade statistics column
-  rowsNotInTradesData <- which(classificationsTable[, classificationColumn] %in% 
-                                 tradeStats[, tradeStatsColumn] == FALSE)
-  if(length(rowsNotInTradesData) > 0){
-    warning(length(rowsNotInTradesData), " codes in the \"", classificationColumn, "\" column of the ", classificationTableName, " classification table are not in the \"", tradeStatsColumn ,"\" column of the trades statistics table.")
-  }
+  return(list("tradeStatistics"=tradeStatsWithClassifications, 
+              "missingCodeInfo"=classificationTables))
+}
+
+#' Removes special characters from start of column name
+#'
+#' @param column_names vector fo column names to remove characters from
+#'
+#' @return updated column_names with any special characters at start removed
+removeSpecialCharactersColumnNameStart <- function(column_names){
   
-  return(list("NotPresentInClassificationTable" = tradeStats[rowsNotInClassificationTable, tradeStatsColumn],
-              "NotPresentInTradesData" = classificationsTable[rowsNotInTradesData, classificationColumn]))
+  # Remove special characters
+  column_names <- gsub(pattern = "[^\u0001-\u007F]+", replacement = "", column_names)
+  
+  # Remove dots from start
+  column_names <- gsub(pattern = "^\\.+", replacement = "", column_names)
+  
+  return(column_names)
 }
 
 #' Split sentence across lines
