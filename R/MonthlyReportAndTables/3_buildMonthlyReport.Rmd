@@ -107,6 +107,9 @@ productsRelatedHealth <- read.csv(productsRelatedHealthFile)
 historicalImportsFile <- file.path(secureDataFolder, "imports_history_summary.csv")
 historicalImports<- read.csv(historicalImportsFile)
 historicalImports$Month <- month.name[historicalImports$Month]
+historicalExportsFile <- file.path(secureDataFolder, "exports_history_summary.csv")
+historicalExports<- read.csv(historicalExportsFile)
+historicalExports$Month <- month.name[historicalExports$Month]
 
 # Read in the imports substitution classification table
 importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
@@ -590,14 +593,15 @@ pacificCountryTotals$Balance <- pacificCountryTotals$Exports - pacificCountryTot
 
 # Remove the total row and pivot to be in format for bar chart
 pacificCountryTotalsLong <- pacificCountryTotals %>%
-  filter(Country != "Total") %>%
+  filter(Country != "Total" & Balance != "0") %>%
   pivot_longer(cols = c("Imports", "Exports", "Balance"), 
                names_to = "Type", values_to = "Value")
 
 # Create a bar chart
-ggplot(pacificCountryTotalsLong, aes(x=Country, y=Value, fill=Type)) +
+ggplot(pacificCountryTotalsLong, aes(x=Country, y= (Value/1000000),  fill=Type)) +
   geom_bar(stat="identity", color="black", position=position_dodge()) +
   theme_minimal() + 
+  labs(title="Trade Balance of South Pacific Islands", y = "International Merchandise Trade (millions)") +
   scale_fill_brewer(palette="Blues") +
   theme(legend.title=element_blank(),
         axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
@@ -645,13 +649,15 @@ tradeBalanceByCountryOther <- tradeBalanceByCountry %>%
 # Create a bar chart to view the top 5 and bottom 5 countries
 nRows <- nrow(tradeBalanceByCountryOther)
 ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ], 
-       aes(x = reorder(country, -balance), y = balance)) +
-  geom_bar(stat = "identity") +
-  ylab("Trade Balance") +
+       aes(x = reorder(country, -balance), y = (balance/1000000))) +
+  geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
+  labs(title="Trade Balance of New Emerging Markets", y = "Trade Balance (millions)") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+  theme(legend.title=element_blank(),
+        axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank())
+
 ```
 
 # Trade by Trade Agreement
@@ -668,7 +674,7 @@ sitcExportMSGValue <- exportTradeAgreement %>%
   summarise(total = sum(Stat..Value), .groups = "drop") %>%
   pivot_wider(names_from = EXPORT.PARTNER.COUNTRIES, values_from = total)
 colnames(sitcExportMSGValue)[-1] <- paste(colnames(sitcExportMSGValue)[-1], "EXPORTS")
-  
+
 # Calculate imports by SITC to MSG countries
 sitcImportMSGValue <- importTradeAgreement %>%
   group_by(SITC.description, IMPORT.PARTNER.COUNTRIES) %>%
@@ -778,7 +784,7 @@ totalMajorExports$name_shortened <- sapply(totalMajorExports$name,
 # Create a line graph
 ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_shortened))) +
   geom_line(aes(color = factor(name_shortened)), size = 1.5, alpha = 0.75) +
-  ylab("Total export value") +
+  labs(title="Principle Exports", y = "Total export value (millions)") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
@@ -819,13 +825,14 @@ exportsOtherandNA <- orderedPrincipleExportType %>%
 # Plot the top five exports
 exportsOtherandNA %>%
   head(5) %>%
-  ggplot(aes(x = reorder(Goods.Comm..Dsc., -total), y = total)) +
-    geom_bar(stat = "identity") +
-    ylab("Total export value") +
+  ggplot(aes(x = reorder(Goods.Comm..Dsc., -total), y = (total/1000000))) +
+    geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
+      labs(title="Top 5 New Major Exports", y = "Total export value (millions)") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
           axis.title.y = element_text(size = 9),
           axis.title.x = element_blank())
+
 ```
 
 # Principle Imports
@@ -872,7 +879,7 @@ totalMajorImports$name_shortened <- sapply(totalMajorImports$name,
 # Create a line graph
 ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_shortened))) +
   geom_line(aes(color = factor(name_shortened)), size = 1.5, alpha = 0.75) +
-  ylab("Total import value") +
+  labs(title="Principle Imports", y = "Total import value (millions)") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
@@ -912,13 +919,14 @@ importsOther <- orderedPrincipleImportType %>%
 # Plot the top five exports
 importsOther %>%
   head(5) %>%
-  ggplot(aes(x = reorder(Goods.Comm..Dsc., -total), y = total)) +
-    geom_bar(stat = "identity") +
-    ylab("Total import value") +
+  ggplot(aes(x = reorder(Goods.Comm..Dsc., -total), y = (total/1000000))) +
+    geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
+  labs(title="Top 5 New Major Imports", y = "Total import value (millions)") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
           axis.title.y = element_text(size = 9),
           axis.title.x = element_blank())
+
 ```
 
 # Imports of Products related to Health
@@ -948,7 +956,7 @@ unhealthlyHistoricalCommodities <- historicalHealthMergedWithClassifications[is.
 # Calculate value of Food Sub-Category for historical data
 foodSubCategoryHistoricalValue <- unhealthlyHistoricalCommodities %>%
   group_by(Year, Month, Food.sub.category) %>%
-  summarise(total = sum(Value_Sum), .groups = "drop")
+  summarise(total = sum(Value), .groups = "drop")
 
 # Calculate value of Food Sub-Category current month value for historical data
 foodSubCategoryHistoricalMonthlyValue <- foodSubCategoryHistoricalValue %>%
@@ -977,9 +985,54 @@ ggplot(historalAndCurrentMonthFood, aes(x = Year, y = total, group = factor(Food
 
 # Imports of food and products targeted as those that can be produced domestically
 
-```{r food and products imports through time, fig.height=1.75}
+```{r food and products imports through time, fig.height=1.75, eval= FALSE}
 
 # TODO Add code to generate data and plot current figure
+
+# Merge unhealthy commodity classifications with cleaned data
+importSubstitution$HS.Code <- sapply(importSubstitution$HS.Code, FUN=padWithZeros, "HS")
+productsRelatedHealthMergedWithClassifications <- merge(processedTradeStats, productsRelatedHealth, by="HS.Code", all.x=TRUE)
+
+# Create data-frame for all unhealthy imports for current month
+unhealthlyCommodities <- productsRelatedHealthMergedWithClassifications[is.na(productsRelatedHealthMergedWithClassifications$Unhealthy.Focus.Food.Category) == FALSE, ]
+unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000, 4071, 7100), ]
+
+# Calculate value of Food Sub-Category for current month
+foodSubCategoryValue <- unhealthyImportCommodities %>%
+  group_by(Year, Month, Food.sub.category) %>%
+  summarise(total = sum(Stat..Value), .groups = "drop") %>%
+  arrange(desc(total))
+
+# Create data-frame for all unhealthy imports from historical data 
+historicalImportsTenYears <- historicalImports[historicalImports$Year %in% 2011:currentYear, ]
+historicalImportsTenYears$HS <- sapply(historicalImportsTenYears$HS, FUN=padWithZeros, "HS")
+historicalHealthMergedWithClassifications <- merge(historicalImportsTenYears, productsRelatedHealth, by.x = "HS", by.y = "HS.Code", all.x=TRUE)
+unhealthlyHistoricalCommodities <- historicalHealthMergedWithClassifications[is.na(historicalHealthMergedWithClassifications$Unhealthy.Focus.Food.Category) == FALSE, ]
+
+# Calculate value of Food Sub-Category for historical data
+foodSubCategoryHistoricalValue <- unhealthlyHistoricalCommodities %>%
+  group_by(Year, Month, Food.sub.category) %>%
+  summarise(total = sum(Value), .groups = "drop")
+
+# Calculate value of Food Sub-Category current month value for historical data
+foodSubCategoryHistoricalMonthlyValue <- foodSubCategoryHistoricalValue %>%
+  group_by(Year, Month, Food.sub.category) %>%
+    filter(Month == currentMonth) 
+
+# Join current month data-frame to historical data
+foodSubCategoryHistoricalMonthlyValue$Month<- as.character(foodSubCategoryHistoricalMonthlyValue$Month)
+historalAndCurrentMonthFood <- rbind(foodSubCategoryHistoricalMonthlyValue, foodSubCategoryValue)
+
+# Create a line graph
+ggplot(historalAndCurrentMonthFood, aes(x = Year, y = total, group = factor(Food.sub.category))) + 
+  geom_line(aes(color = factor(Food.sub.category)), size = 1.5, alpha = 0.75) +
+  ylab("Import value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+        axis.title.y = element_text(size = 9),
+        axis.title.x = element_blank(),
+        legend.title=element_blank(),
+        legend.key.size = unit(0.1, "cm"))
 
 ```
 
