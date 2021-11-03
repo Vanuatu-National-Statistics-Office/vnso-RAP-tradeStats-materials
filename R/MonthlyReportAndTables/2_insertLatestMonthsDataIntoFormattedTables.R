@@ -669,37 +669,25 @@ importMSGOrderedValue<- tradeStatsForMSGImports[order(-tradeStatsForMSGImports$S
 
 # Group statistical values of exports by classifications 
 groupedExportsMSGValue<- exportMSGOrderedValue %>%
-  group_by(SITC.description) %>%
+  group_by(EXPORT.COUNTRY) %>%
   summarise(total = sum(Stat..Value))
-
-# Insert export values into table
-tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Export"=totalExports, "Imports CIF"=imports, "Trade Balance"=balance)
 
 # Group statistical values of imports by classifications 
 groupedImportsMSGValue<- importMSGOrderedValue %>%
-  group_by(SITC.description) %>%
+  group_by(IMPORT.COUNTRY) %>%
   summarise(total = sum(Stat..Value))
 
-
-# Aggregate the statistical value column by country and SITC (note import and export countries always appear to be equal)
-msgLatestStats <- aggregate(tradeStatsForMSG$Stat..Value, by=list(tradeStatsForMSG$SITC_1, 
-                                                                  tradeStatsForMSG$IMPORT.COUNTRY),
-                            FUN=sum, na.rm=TRUE)
-colnames(msgLatestStats) <- c("SITC_1", "COUNTRY", "Stat..Value")
-
-# Create a table to store the data in
-templateMSGTable <- data.frame(matrix(nrow=10, ncol=length(unique(msgLatestStats$COUNTRY))))
-rownames(templateMSGTable) <- 0:9
-colnames(templateMSGTable) <- sort(unique(msgLatestStats$COUNTRY))
-
-# Fill in the values from this month
-for(row in seq_len(nrow(msgLatestStats))){
-  templateMSGTable[msgLatestStats[row, "SITC_1"], msgLatestStats[row, "COUNTRY"]] <- msgLatestStats[row, "Stat..Value"]
-}
-
-# Add total column
-templateMSGTable$Total <- rowSums(templateMSGTable, na.rm=TRUE)
-templateMSGTable[templateMSGTable == 0] <- NA
+# Insert values into table
+tradeAgreementBalance <- data.frame("Fiji Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "FIJI", "total"], na.rm=TRUE)),
+                                    "Fiji Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "FIJI", "total"], na.rm=TRUE)),
+                                    "Fiji Balance"= sum(tradeAgreementExports$Fiji.Exports - tradeAgreementImports$Fiji.Imports),
+                                    "Papa New Guinea Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "PAPUA NEW GUINEA", "total"], na.rm=TRUE)),
+                                    "Papa New Guinea Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "PAPUA NEW GUINEA", "total"], na.rm=TRUE)),
+                                    "Papa New Guinea Balance"= sum(tradeAgreementExports$Papa.New.Guinea.Exports - tradeAgreementImports$Papa.New.Guinea.Imports),
+                                    "Solomon Island Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "SOLOMON ISLANDS", "total"], na.rm=TRUE)),
+                                    "Solomon Island Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "SOLOMON ISLANDS", "total"], na.rm=TRUE)),
+                                    "Solomon Island Balance"= sum(tradeAgreementExports$Solomon.Island.Exports - tradeAgreementImports$Solomon.Island.Imports))
+                                    
 
 ## Formatting the table ##
 
