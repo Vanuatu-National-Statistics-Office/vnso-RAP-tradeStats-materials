@@ -139,9 +139,7 @@ mergingOutputs <- mergeClassificationTablesIntoTradesData(tradeStats = tradeStat
 tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
-# Refer to your correlation tables
-write.csv(missingClassificationCodeInfo, "missingClassifications.csv")
-
+write.csv(missingClassificationCodeInfo, "missingClassification.csv")
 
 # Print progress
 cat("Finished merging in classification tables.\n")
