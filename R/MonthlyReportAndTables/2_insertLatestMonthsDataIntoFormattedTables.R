@@ -653,14 +653,14 @@ cat("Finished formatting Table 10: Trade by Mode of Transport.\n")
 ## Getting latest statistics ##
 
 # Get the trade stats for the imports aligned to the MSG agreement
-tradeStatsForMSGImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF == "MSG", ]
+tradeStatsForMSGImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
 
 # Get the trade stats for the exports aligned to the MSG agreement
 msgAgreementCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
 msgAgreementCommoditiesExclude <- read.csv(msgAgreementCommoditiesExcludeFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
 msgAgreementCommoditiesExclude$HS.Code_6<- sapply(msgAgreementCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
 msgAgreementCommoditiesExcludeMerged <- merge(processedTradeStats, msgAgreementCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
-tradeStatsForAllMSGCountryExports <- msgAgreementCommoditiesExcludeMerged[msgAgreementCommoditiesExcludeMerged$CP4 == 1000 & msgAgreementCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "NEW CALEDONIA", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
+tradeStatsForAllMSGCountryExports <- msgAgreementCommoditiesExcludeMerged[msgAgreementCommoditiesExcludeMerged$CP4 == 1000 & msgAgreementCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
 tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
 
 # Order data for exports and imports (statistical value) by combined classifications 
@@ -669,98 +669,25 @@ importMSGOrderedValue<- tradeStatsForMSGImports[order(-tradeStatsForMSGImports$S
 
 # Group statistical values of exports by classifications 
 groupedExportsMSGValue<- exportMSGOrderedValue %>%
-  group_by(Classifications.Combined) %>%
+  group_by(EXPORT.COUNTRY) %>%
   summarise(total = sum(Stat..Value))
-groupedExportMSGOrderedValue<- groupedExportsMSGValue[order(-groupedExportsMSGValue$total), ]
-
-# Insert export values into table
-tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Export"=totalExports, "Imports CIF"=imports, "Trade Balance"=balance)
 
 # Group statistical values of imports by classifications 
 groupedImportsMSGValue<- importMSGOrderedValue %>%
-  group_by(Classifications.Combined) %>%
+  group_by(IMPORT.COUNTRY) %>%
   summarise(total = sum(Stat..Value))
-groupedImportMSGOrderedValue<- groupedImportsMSGValue[order(-groupedImportsMSGValue$total), ]
 
-# Create Data-frame for top ten exports sent to 
-# Define the CP4 codes need for table
-codesCP4 <- c(1000)
-
-# Define the categories used for each column
-categoryColumn <- "Classifications.Combined"
-columnCategories <- list(
-  "Kava"=c("Kava"),
-  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal"),
-  "Other furniture and parts thereof"=c("Other furniture and parts thereof"),
-  "Articles of iron or steel"=c("Articles of iron or steel"),
-  "Footwear, gaiters and the like; parts of such articles"=c("Footwear, gaiters and the like; parts of such articles"),
-  "Printed books, brochures, leaflets and similar printed matter"=c("Printed books, brochures, leaflets and similar printed matter"),
-  "Articles of apparel and clothing accessories"=c("Articles of apparel and clothing accessories"),
-  "Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"=c("Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"),
-  "Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data"=c("Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data")
-)
-exportCommodities <- unique(tradeStatsForMSGExports[, "Classifications.Combined"])
-columnCategories[["All Others: Exports"]] <- exportCommodities[exportCommodities %in% unlist(columnCategories) == FALSE]
-
-# Build the table
-tradeByTradeAgreementExportsDataFrame <- buildRawSummaryTable(tradeStatsForMSGExports, codesCP4, categoryColumn, columnCategories)
-
-# Create Data-frame for top ten imports sent to 
-# Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
-
-# Define the categories used for each column
-categoryColumn <- "Classifications.Combined"
-columnCategories <- list(
-  "Other prepared or preserved meat, meat offal or blood"=c("Other prepared or preserved meat, meat offal or blood"),
-  "Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"=c("Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"),
-  "Bread, pastry, cakes, biscuits and other bakers' wares"=c("Bread, pastry, cakes, biscuits and other bakers' wares"),
-  "Prepared or preserved fish"=c("Prepared or preserved fish"),
-  "Wheat or meslin flour"=c("Wheat or meslin flour"),
-  "Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"=c("Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"),
-  "Non-alcoholic drinks including mineral water"=c("Non-alcoholic drinks including mineral water"),
-  "Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"=c("Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"),
-  "Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"=c("Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"),
-  "Articles of iron or steel"=c("Articles of iron or steel"),
-  "Toilet paper and similar paper"=c("Toilet paper and similar paper"),
-  "Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"=c("Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"),
-  "Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics"=c("Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics"),
-  "Preparations of a kind used in animal feeding"=c("Preparations of a kind used in animal feeding")
-)
-importCommodities <- unique(tradeStatsForMSGImports[, "Classifications.Combined"])
-columnCategories[["All Others: Imports"]] <- importCommodities[importCommodities %in% unlist(columnCategories) == FALSE]
-
-# Build the table
-tradeByTradeAgreementImportsDataFrame <- buildRawSummaryTable(tradeStatsForMSGImports, codesCP4, categoryColumn, columnCategories)
-
-
-
-
-
-
-
-
-
-
-# Aggregate the statistical value column by country and SITC (note import and export countries always appear to be equal)
-msgLatestStats <- aggregate(tradeStatsForMSG$Stat..Value, by=list(tradeStatsForMSG$SITC_1, 
-                                                                  tradeStatsForMSG$IMPORT.COUNTRY),
-                            FUN=sum, na.rm=TRUE)
-colnames(msgLatestStats) <- c("SITC_1", "COUNTRY", "Stat..Value")
-
-# Create a table to store the data in
-templateMSGTable <- data.frame(matrix(nrow=10, ncol=length(unique(msgLatestStats$COUNTRY))))
-rownames(templateMSGTable) <- 0:9
-colnames(templateMSGTable) <- sort(unique(msgLatestStats$COUNTRY))
-
-# Fill in the values from this month
-for(row in seq_len(nrow(msgLatestStats))){
-  templateMSGTable[msgLatestStats[row, "SITC_1"], msgLatestStats[row, "COUNTRY"]] <- msgLatestStats[row, "Stat..Value"]
-}
-
-# Add total column
-templateMSGTable$Total <- rowSums(templateMSGTable, na.rm=TRUE)
-templateMSGTable[templateMSGTable == 0] <- NA
+# Insert values into table
+tradeAgreementBalance <- data.frame("Fiji Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "FIJI", "total"], na.rm=TRUE)),
+                                    "Fiji Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "FIJI", "total"], na.rm=TRUE)),
+                                    "Fiji Balance"= sum(tradeAgreementExports$Fiji.Exports - tradeAgreementImports$Fiji.Imports),
+                                    "Papa New Guinea Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "PAPUA NEW GUINEA", "total"], na.rm=TRUE)),
+                                    "Papa New Guinea Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "PAPUA NEW GUINEA", "total"], na.rm=TRUE)),
+                                    "Papa New Guinea Balance"= sum(tradeAgreementExports$Papa.New.Guinea.Exports - tradeAgreementImports$Papa.New.Guinea.Imports),
+                                    "Solomon Island Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "SOLOMON ISLANDS", "total"], na.rm=TRUE)),
+                                    "Solomon Island Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "SOLOMON ISLANDS", "total"], na.rm=TRUE)),
+                                    "Solomon Island Balance"= sum(tradeAgreementExports$Solomon.Island.Exports - tradeAgreementImports$Solomon.Island.Imports))
+                                    
 
 ## Formatting the table ##
 
