@@ -416,7 +416,7 @@ indicatorsTable <- flextable(nsdpIndicators)
 
 # Add a header row and set background colour
 indicatorsTable <- add_header_row(indicatorsTable, top=TRUE, 
-                     values=c("NATIONAL SUSTAINABLE DEVELOPMENT PLAN: Key Indicators Aligned to International Merchandise Trade\nNOTE: SMART Indicators calculated for the current month, and Target Percentage is an estimation of change between current month and same month during baseline year (2016)"),
+                     values=c("NATIONAL SUSTAINABLE DEVELOPMENT PLAN: Key Indicators Aligned to International Merchandise Trade\nNOTE: SMART Indicators calculated for the current month, and Target Percentage is an estimation of change between the current month and same month during baseline year (2016)"),
                      colwidths=ncol(nsdpIndicators))
 indicatorsTable <- bg(indicatorsTable, bg="coral1", part="header")
 
@@ -523,7 +523,8 @@ world <- merge(world, balanceOfTradeByMajorPartnerCountries, by.x = "admin", by.
 # Plot with ggplot
 ggplot(data = world) +
   geom_sf(aes(fill = Balance_of_trade / 1000000)) + 
-  guides(fill=guide_legend(title="Balance of trade\n(millions)"))
+  guides(fill=guide_legend(title="Balance of trade\n(millions)")) 
+
 ```
 
 # Trade Balance of Pacific Islands (excluding Melanesian Islands, Australia and New Zealand) 
