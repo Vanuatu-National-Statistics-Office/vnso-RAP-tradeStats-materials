@@ -242,6 +242,11 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   monthlyStart <- which(tolower(historic[, 1]) == "monthly")
   end <- which(historic[, 1] == "Notes:") - 1
   
+  # Check if notes not found - if so choose last empty row in first numeric column
+  if(length(end) == 0){
+    end <- max(which(is.na(historic[, numericColumns[1]])))
+  }
+  
   # Extract the Annual statistics
   annually <- historic[1:(monthlyStart-2), ]
   colnames(annually)[c(1,2)] <- c("Year", "blank")
