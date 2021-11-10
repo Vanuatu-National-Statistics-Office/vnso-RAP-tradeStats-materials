@@ -20,9 +20,17 @@ secureDataFolder <- file.path(repository, "data", "secure")
 # Note the open data path
 openDataFolder <- file.path(repository, "data", "open")
 
+# Note the outputs folder
+outputsFolder <- file.path(repository, "outputs")
+
 # Read in the raw trade data from secure folder of the repository 
 tradeStatsFile <- file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+
+# Load the summary statistics for the historic IMPORTS and EXPORTS data
+historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
+historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
+
 
 #### Clean and process the latest month's data ####
 
@@ -139,16 +147,13 @@ mergingOutputs <- mergeClassificationTablesIntoTradesData(tradeStats = tradeStat
 tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
-write.csv(missingClassificationCodeInfo, "missingClassification.csv")
+# Write missing codes table to file
+write.csv(file.path(outputsFolder, missingClassificationCodeInfo), "missingClassification.csv")
 
 # Print progress
 cat("Finished merging in classification tables.\n")
 
 #### Check if any statistical values fall outside of expected boundaries ####
-
-# Load the summary statistics for the historic IMPORTS and EXPORTS data
-historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
-historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
 
 # Check the commodity values against expected values based on historic data
 commoditiesWithExpectations <- checkCommodityValues(tradeStatsCommoditiesMergedWithClassifications,  
