@@ -148,7 +148,7 @@ tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
 # Write missing codes table to file
-write.csv(file.path(outputsFolder, missingClassificationCodeInfo), "missingClassification.csv")
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "missingClassification.csv"))
 
 # Print progress
 cat("Finished merging in classification tables.\n")
@@ -178,90 +178,3 @@ write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_Process
 
 cat("Finished processing and cleaning latest month's data.\n")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-importsCombinedFile <- file.path("importsCombined.csv")
-importsHistoricalFile <- file.path("imports_history_summary.csv")
-
-importsCombined <- read.csv(importsCombinedFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
-importsHistorical <- read.csv(importsHistoricalFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
-
-importsHistorical$Office<- "NA"
-importsHistorical$Reg.Ref<- "NA"
-
-
-importsHistorical<- importsHistorical %>% 
-  rename(
-    CP4 = Procedure,
-    HS.Code= HS,
-    Goods.Comm..Dsc.1= Description,
-    CO= CTY_Origin,
-    Wgt..Net= Weight,
-    Pkg..type= Pkg_Type,
-    Supp.Qty= Supp_Qty,
-    Stat..Value= Value)
-
-importsHistoricalUpdated <- importsHistorical[ -c(1,13,15) ]
-
-importsHistoricalUpdated$Type<- "NA"
-importsHistoricalUpdated$CP3<- "NA"
-importsHistoricalUpdated$Declarant<- "NA"
-importsHistoricalUpdated$Con_cod<- "NA"
-importsHistoricalUpdated$Con...Exp.name<- "NA"
-importsHistoricalUpdated$Shipper...Buyer.name<- "NA"
-importsHistoricalUpdated$Itm..<- "NA"
-importsHistoricalUpdated$PRF<- "NA"
-importsHistoricalUpdated$Goods.Comm..Dsc.<- "NA"
-importsHistoricalUpdated$CE.CD<- "NA"
-importsHistoricalUpdated$Wgt..Gross<- "NA"
-importsHistoricalUpdated$Pkg..<- "NA"
-importsHistoricalUpdated$Supp<- "NA"
-importsHistoricalUpdated$TOD<- "NA"
-importsHistoricalUpdated$TOD<- "NA"
-importsHistoricalUpdated$IMD<- "NA"
-importsHistoricalUpdated$VAT<- "NA"
-importsHistoricalUpdated$IEX<- "NA"
-importsHistoricalUpdated$DEX<- "NA"
-importsHistoricalUpdated$EXD<- "NA"
-importsHistoricalUpdated$OED<- "NA"
-importsHistoricalUpdated$Day<- "NA"
-
-newImportsHistorical<- importsHistoricalUpdated[,c(13,14,1,15,4,16,17,18,19,20,21,5,6,22,7,23,8,24,25,9,26,10,11,27,28,12,29,30,31,32,33,34,2,3,35)]
-
-importsTotal<- rbind(newImportsHistorical, importsCombined)
-
-importsTotalRecoded<- importsTotal %>% mutate(sex=recode(sex, 
-                         `1`="Male",
-                         `2`="Female"))
-
-
-write.csv(importsTotal, "totalimportsCombined.csv")
-
-
-
-combinedFile <- file.path("combinedExports2021.csv")
-Exports2021 <- read.csv(combinedFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
-
-Exports2021$Reg..Date <- as.Date(Exports2021$Reg..Date, format = "%d/%m/%Y")
-
-Exports2021$Year <- format(Exports2021$Reg..Date, format= "%Y")
-Exports2021$Month <- format(Exports2021$Reg..Date, format= "%B")
-Exports2021$Day <- format(Exports2021$Reg..Date, format= "%d")
-write.csv(Exports2021, "newcombinedExports2021.csv")
