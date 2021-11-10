@@ -61,7 +61,14 @@ mergeClassificationTablesIntoTradesData <- function(tradeStats, classificationTa
     classificationTables[row, "n_codes_in_trades_not_in_classification"] <- length(codesInTradesNotInClassification)
     classificationTables[row, "n_codes_in_classification_not_in_trades"] <- length(codesInClassificationNotInTrades)
     
-    # Merge classification table 
+    # Check if classification columns are already present in trades data
+    classificationColumns <- colnames(classificationTable)
+    classificationColumns <- classificationColumns[classificationColumns != linkColumn]
+    if(sum(classificationColumns %in% colnames(tradeStatsWithClassifications)) > 0){
+      stop("Some or all of the columns from the classification file (", classificationFile, ") are already present in the trade statistics table!")
+    }
+    
+    # Merge classification table
     tradeStatsWithClassifications <- merge(tradeStatsWithClassifications, classificationTable, 
                                            by = linkColumn, all.x = TRUE)
   }

@@ -24,13 +24,12 @@ openDataFolder <- file.path(repository, "data", "open")
 outputsFolder <- file.path(repository, "outputs")
 
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-10-21.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
 # Load the summary statistics for the historic IMPORTS and EXPORTS data
 historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
 historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
-
 
 #### Clean and process the latest month's data ####
 
@@ -128,7 +127,7 @@ cat("Added separate date elements.\n")
 #### Merge in classification tables ####
 
 # Define classification tables and link columns
-classification_tables <- data.frame(
+classificationTables <- data.frame(
   "file" = c(
     "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.csv",
     "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.csv",
@@ -143,7 +142,7 @@ classification_tables <- data.frame(
 
 # Merge in each of the classification tables
 mergingOutputs <- mergeClassificationTablesIntoTradesData(tradeStats = tradeStatsCommodities,
-                                                          classificationTables = classification_tables)
+                                                          classificationTables = classificationTables)
 tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
@@ -169,7 +168,6 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 
 # Make copy of latest month's processed data
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
-
 
 # Create csv of last months processed data
 write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-10-21.csv"))
