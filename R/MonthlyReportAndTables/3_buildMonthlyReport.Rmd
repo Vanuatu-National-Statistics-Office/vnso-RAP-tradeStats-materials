@@ -995,6 +995,7 @@ ggplot(historalAndCurrentMonthFood, aes(x = Year, y = (total/1000000), group = f
 
 # Merge imports domestically produced classifications with cleaned data
 importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
+processedTradeStats$HS.Code <- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
 importSubstitutionChickenFishMergedWithClassifications <- merge(processedTradeStats, importsSubstitutionChickenFish, by="HS.Code", all.x=TRUE)
 
 # Create data-frame for import substitutes for current month
@@ -1010,28 +1011,29 @@ chickenFishCategoryValue <- chickenFishImportCommodities %>%
 # Create data-frame for all import substitutions imports from historical data 
 historicalImportsTenYears <- historicalImports[historicalImports$Year %in% 2011:currentYear, ]
 historicalImportsTenYears$HS <- sapply(historicalImportsTenYears$HS, FUN=padWithZeros, "HS")
+importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
 historicalChickenFishMergedWithClassifications <- merge(historicalImportsTenYears, importsSubstitutionChickenFish, by= "HS.Code", all.x=TRUE)
 chickenFishCommodities <- historicalChickenFishMergedWithClassifications[is.na(historicalChickenFishMergedWithClassifications$Livestock.Substitution) == FALSE, ]
 
-# Calculate value of Food Sub-Category for historical data
+# Calculate value for historical data
 chickenFishCommodities$Stat..Value <- as.numeric(gsub(",", "", chickenFishCommodities$Stat..Value))
 chickenFishHistoricalValue <- chickenFishCommodities %>%
   group_by(Year, Month, Livestock.Substitution) %>%
   summarise(total = sum(Stat..Value), .groups = "drop")
 
-# Calculate value of Food Sub-Category current month value for historical data
-foodSubCategoryHistoricalMonthlyValue <- foodSubCategoryHistoricalValue %>%
-  group_by(Year, Month, Food.sub.category) %>%
+# Calculate value of current month value for historical data
+chickenFishCategoryHistoricalMonthlyValue <- chickenFishHistoricalValue %>%
+  group_by(Year, Month, Livestock.Substitution) %>%
     filter(Month == currentMonth) 
 
 # Join current month data-frame to historical data
-foodSubCategoryHistoricalMonthlyValue$Month<- as.character(foodSubCategoryHistoricalMonthlyValue$Month)
-historalAndCurrentMonthFood <- rbind(foodSubCategoryHistoricalMonthlyValue, foodSubCategoryValue)
+chickenFishCategoryHistoricalMonthlyValue$Month<- as.character(chickenFishCategoryHistoricalMonthlyValue$Month)
+historalAndCurrentMonthChickenFish <- rbind(chickenFishCategoryHistoricalMonthlyValue, chickenFishCategoryValue)
 
 # Create a line graph
-ggplot(historalAndCurrentMonthFood, aes(x = Year, y = total, group = factor(Food.sub.category))) + 
-  geom_line(aes(color = factor(Food.sub.category)), size = 1.5, alpha = 0.75) +
-  ylab("Import value") +
+ggplot(historalAndCurrentMonthChickenFish, aes(x = Year, y = (total/1000000), group = factor(Livestock.Substitution))) + 
+  geom_line(aes(color = factor(Livestock.Substitution)), size = 1.5, alpha = 0.75) +
+  labs(title="Imports of Canned Fish and Chicken Products", y = "Vatu (millions)") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
