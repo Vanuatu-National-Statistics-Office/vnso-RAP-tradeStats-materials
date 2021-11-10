@@ -837,7 +837,7 @@ becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categ
 #### Finish ####
 
 # Save the changes to the excel file
-updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-06-21_WORKING.xlsx")
+updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-07-21_WORKING.xlsx")
 openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
 # Print progress for finish

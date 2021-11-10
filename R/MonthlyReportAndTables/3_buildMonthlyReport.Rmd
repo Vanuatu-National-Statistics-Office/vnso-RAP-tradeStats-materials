@@ -133,10 +133,10 @@ importSubstitutionMerged <- merge(processedTradeStats, importSubstitution, by="H
 # Calculate value of all imports that are targeted by DARD
 importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000, 4071, 7100), ]
 importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Import.Substitution) == FALSE, ]
-importSubstitutionValue<- sum(importSubstitutionDataFrame$Stat..Value)
+indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
 
 # Insert values into table
-ENV1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"= importSubstitutionValue)
+ENV1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"= indicatorENV1.3.1)
 
 
 ## ECO 1.5.2 Trade by trade agreement (value)
@@ -156,10 +156,10 @@ exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Inclu
 exportTradeAgreementValue<- sum(exportTradeAgreement$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
-totalTradeAgreementValue<- importTradeAgreementValue + exportTradeAgreementValue
+indicatorECO1.5.2<- ((importTradeAgreementValue + exportTradeAgreementValue)/1000000)
 
 # Insert values into table
-ECO1.5.2 <- data.frame("Trade by Trade Agreement Value"= totalTradeAgreementValue)
+ECO1.5.2 <- data.frame("Trade by Trade Agreement Value"= indicatorECO1.5.2)
 
 
 ## Calculate ECO 1.5.3 Balance of Trade by major partner countries 
@@ -229,10 +229,10 @@ importMajorPartnerCountry <- buildRawSummaryTable(processedTradeStats, codesCP4,
 totalMajorPartnerCountryImportValue<- importMajorPartnerCountry$Total
 
 # Indicator calculated for NSDP indicator ECO 1.5.3 by subtracting total imports from exports 
-balanceTradeByMajorPartnerCountry <- totalMajorPartnerCountryExportValue - totalMajorPartnerCountryImportValue
+indicatorECO1.5.3 <- ((totalMajorPartnerCountryExportValue - totalMajorPartnerCountryImportValue)/1000000)
 
 # Insert values into table
-ECO1.5.3 <- data.frame("Balance of Trade by Major Partner Countries"= balanceTradeByMajorPartnerCountry)
+ECO1.5.3 <- data.frame("Balance of Trade by Major Partner Countries"= indicatorECO1.5.3)
 
 
 ## ECO 1.6.2 Total estimated value of trade agreement as a proportion of GDP
@@ -247,8 +247,8 @@ mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeries
 tradeAgreementGDPProportion<- (totalTradeAgreementValue/mostRecentGrossDomesticProduct)*100
 
 # Insert values into table as a percentage to 2 decimal places
-tradeAgreementGDPProportionRounded<- round(tradeAgreementGDPProportion, digits = 2)
-ECO1.6.2<- data.frame("Value of Trade Agreement as Proportion of GDP"= tradeAgreementGDPProportionRounded)
+indicatorECO1.6.2<- round(tradeAgreementGDPProportion, digits = 2)
+ECO1.6.2<- data.frame("Value of Trade Agreement as Proportion of GDP"= indicatorECO1.6.2)
 
 
 ## Calculate ECO 1.7.1 Level of production of major commodities to include Cocoa and Copra
@@ -273,8 +273,8 @@ columnCategories <- list(
 majorExportCommodities <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Proxy indicator for NSDP ECO 1.7.1
-majorExportCommoditiesValue<- majorExportCommodities$Total
-ECO1.7.1 <- data.frame("Level of production of major commodities to include Cocoa and Copra"= majorExportCommoditiesValue)
+indicatorECO1.7.1<- ((majorExportCommodities$Total)/1000000)
+ECO1.7.1 <- data.frame("Level of production of major commodities to include Cocoa and Copra"= indicatorECO1.7.1)
 
 
 ## ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports
@@ -298,8 +298,8 @@ raw<- processedToRawDataFrame[2,2]
 processedRawProportion<- (processed/raw)
 
 # Insert values into table as a percentage to 2 decimal places
-processedRawProportionRounded<- round(processedRawProportion$total, digits = 2)
-ECO4.3.2<- data.frame("Ratio of Processed Export Commodities"= processedRawProportionRounded)
+indicatorECO4.3.2<- round(processedRawProportion$total, digits = 2)
+ECO4.3.2<- data.frame("Ratio of Processed Export Commodities"= indicatorECO4.3.2)
 
 ```
 
@@ -308,13 +308,13 @@ ECO4.3.2<- data.frame("Ratio of Processed Export Commodities"= processedRawPropo
 
 ### Calculating Progress Against the NSDP Indicator Targets
 
-## ENV 1.1.3 Total annual volume of imports of food and products targeted by DARD as those that can be produced domestically (including ‘value-added products), Target to be decided after baseline established (baseline taken from 2016) 
+## ENV 1.3.1 Total annual volume of imports of food and products targeted by DARD as those that can be produced domestically (including ‘value-added products), Target to be decided after baseline established (baseline taken from 2016) 
 
 # Calculate value of DARD targeted imports for current month from baseline year
 baselineDARDImportsCurrentMonth <- sum(baselineDARDImports[baselineDARDImports$Month == "January", "Total.VT"], na.rm= TRUE)
 
 # Calculate ENV 1.1.3 Value of imports of food and products targeted by DARD,  
-targetValueENV1.1.3<- ((importSubstitutionValue - baselineDARDImportsCurrentMonth)/baselineDARDImportsCurrentMonth)*100 # needs to be 15% to meet Target
+targetValueENV1.3.1<- ((importSubstitutionValue - baselineDARDImportsCurrentMonth)/baselineDARDImportsCurrentMonth)*100 # needs to be 15% to meet Target
 
 ## ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15%
 
@@ -373,14 +373,21 @@ nsdpIndicators <- data.frame(
                         "ECO 1.5: Increase access to markets for Vanuatu exports",
                         "ECO 1.6: Require all new trade agreements to demonstrate tangible benefits in the national interest",
                         "ECO 1.7: Stimulate economic diversification to spread the benefits of growth and increase economic stability",
-                        "ECO 4.3: Increase production and processing of niche commodities, and value addition to commodities in which Vanuatu enjoys a comparative advantage",
+                        "ECO 4.3: Increase production and processing of niche commodities, and value addition to commodities in which Vanuatu enjoys a comparative advantage"),
   "SMART Indicators"=c("ENV 1.3.1 Total annual volume of imports of food and products targeted by DARD as those that can be produced domestically (including ‘value-added products)",
                        "ECO 1.5.2 Trade by trade agreement (value)",
                        "ECO 1.5.3 Balance of trade by major partner countries",
                        "ECO 1.6.2 Total estimated value of trade agreement as proportion of GDP",
-                       "ECO 1.7.1 Level of production of major commodities to include cocoa and copra"),
+                       "ECO 1.7.1 Level of production of major commodities to include cocoa and copra",
                        "ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports"),
-  "Indicator Value (Increased/Decreased)"=NA,
+  "Indicator Value"= c(
+    indicatorENV1.3.1,
+    indicatorECO1.5.2,
+    indicatorECO1.5.3,
+    indicatorECO1.6.2,
+    indicatorECO1.7.1,
+    indicatorECO4.3.2
+  ),
   "Targets 2030"=c("Target TBD after baseline established",
                    "By 2020, exports increase by 15%",
                    "By 2020, exports increase by 20%",
@@ -396,22 +403,20 @@ nsdpIndicators <- data.frame(
     targetECO4.3.2Value), 
   check.names=FALSE, stringsAsFactors=FALSE)
 
+# Round the indicator values
+nsdpIndicators$`Indicator Value` <- round(nsdpIndicators$`Indicator Value`, digits = 2)
+
 # Round the target percentages
 nsdpIndicators$`Target Percentage (%)` <- round(nsdpIndicators$`Target Percentage (%)`, digits = 2)
 
-# Add indicator direction
-nsdpIndicators$`Indicator Value (Increased/Decreased)` <- ifelse(nsdpIndicators$`Target Percentage (%)` > 0, 
-                                                                 "Increased",
-                                                                 ifelse(nsdpIndicators$`Target Percentage (%)` < 0,
-                                                                        "Decreased",
-                                                                        NA))
+
 
 # Initiailise a flextable object for NSDP table
 indicatorsTable <- flextable(nsdpIndicators)
 
 # Add a header row and set background colour
 indicatorsTable <- add_header_row(indicatorsTable, top=TRUE, 
-                     values=c("NSDP Pillar 3: Economy Pillar\nECONOMY 1: A stable and prosperous economy, encouraging trade, investment and providing economic opportunities for all members of society throughout Vanuatu"), 
+                     values=c("NATIONAL SUSTAINABLE DEVELOPMENT PLAN: Key Indicators Aligned to International Merchandise Trade\nNOTE: SMART Indicators calculated for the current month, and Target Percentage is an estimation of change between current month and same month during baseline year (2016)"),
                      colwidths=ncol(nsdpIndicators))
 indicatorsTable <- bg(indicatorsTable, bg="coral1", part="header")
 

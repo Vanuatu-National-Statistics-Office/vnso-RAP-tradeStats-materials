@@ -175,6 +175,23 @@ cat("Finished processing and cleaning latest month's data.\n")
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 importsCombinedFile <- file.path("importsCombined.csv")
 importsHistoricalFile <- file.path("imports_history_summary.csv")
 
