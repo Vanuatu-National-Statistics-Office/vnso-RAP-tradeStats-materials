@@ -112,9 +112,14 @@ historicalImports<- read.csv(historicalImportsFile)
 historicalExportsFile <- file.path(secureDataFolder, "exports_history_summary.csv")
 historicalExports<- read.csv(historicalExportsFile)
 
-# Read in the imports substitution classification table
-importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
-importsSubstitution <- read.csv(importsSubstitutionFile)
+# Read in the imports substitution (chicken, fish) classification table
+importsSubstitutionChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
+importsSubstitutionChickenFish <- read.csv(importsSubstitutionChickenFishFile)
+
+# Read in the imports substitution (DARD) classification table
+importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
+importsSubstitution<- read.csv(importsSubstitutionFile)
+
 ```
 
 
@@ -945,7 +950,7 @@ importsOther %>%
 
 ```
 
-# Imports of Products related to Noncommunicable Diseases
+# Imports of Dietary Risk Factors for Noncommunicable Diseases
 
 ```{r health imports through time, fig.height = 1.8, eval= FALSE}
 
@@ -974,7 +979,7 @@ historalAndCurrentMonthFood <- rbind(foodSubCategoryHistoricalMonthlyValue, food
 # Create a line graph
 ggplot(historalAndCurrentMonthFood, aes(x = Year, y = (total/1000000), group = factor(Food.sub.category))) + 
   geom_line(aes(color = factor(Food.sub.category)), size = 1.5, alpha = 0.75) +
-  labs(title="Dietary Risk Factors for Noncommunicable Diseases", y = "Vatu (millions)") +
+  labs(title="Imports of Dietary Risk Factors for Noncommunicable Diseases", y = "Vatu (millions)") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
@@ -988,32 +993,31 @@ ggplot(historalAndCurrentMonthFood, aes(x = Year, y = (total/1000000), group = f
 
 ```{r food and products imports through time, fig.height=1.75, eval= FALSE}
 
-# TODO Add code to generate data and plot current figure
+# Merge imports domestically produced classifications with cleaned data
+importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
+importSubstitutionChickenFishMergedWithClassifications <- merge(processedTradeStats, importsSubstitutionChickenFish, by="HS.Code", all.x=TRUE)
 
-# Merge unhealthy commodity classifications with cleaned data
-importSubstitution$HS.Code <- sapply(importSubstitution$HS.Code, FUN=padWithZeros, "HS")
-productsRelatedHealthMergedWithClassifications <- merge(processedTradeStats, productsRelatedHealth, by="HS.Code", all.x=TRUE)
+# Create data-frame for import substitutes for current month
+chickenFishCommodities <- importSubstitutionChickenFishMergedWithClassifications[is.na(importSubstitutionChickenFishMergedWithClassifications$Livestock.Substitution) == FALSE, ]
+chickenFishImportCommodities<- chickenFishCommodities[chickenFishCommodities$CP4 %in% c(4000, 4071, 7100), ]
 
-# Create data-frame for all unhealthy imports for current month
-unhealthlyCommodities <- productsRelatedHealthMergedWithClassifications[is.na(productsRelatedHealthMergedWithClassifications$Unhealthy.Focus.Food.Category) == FALSE, ]
-unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000, 4071, 7100), ]
-
-# Calculate value of Food Sub-Category for current month
-foodSubCategoryValue <- unhealthyImportCommodities %>%
-  group_by(Year, Month, Food.sub.category) %>%
+# Calculate value of import substitutions for current month
+chickenFishCategoryValue <- chickenFishImportCommodities %>%
+  group_by(Year, Month, Livestock.Substitution) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") %>%
   arrange(desc(total))
 
-# Create data-frame for all unhealthy imports from historical data 
+# Create data-frame for all import substitutions imports from historical data 
 historicalImportsTenYears <- historicalImports[historicalImports$Year %in% 2011:currentYear, ]
 historicalImportsTenYears$HS <- sapply(historicalImportsTenYears$HS, FUN=padWithZeros, "HS")
-historicalHealthMergedWithClassifications <- merge(historicalImportsTenYears, productsRelatedHealth, by.x = "HS", by.y = "HS.Code", all.x=TRUE)
-unhealthlyHistoricalCommodities <- historicalHealthMergedWithClassifications[is.na(historicalHealthMergedWithClassifications$Unhealthy.Focus.Food.Category) == FALSE, ]
+historicalChickenFishMergedWithClassifications <- merge(historicalImportsTenYears, importsSubstitutionChickenFish, by= "HS.Code", all.x=TRUE)
+chickenFishCommodities <- historicalChickenFishMergedWithClassifications[is.na(historicalChickenFishMergedWithClassifications$Livestock.Substitution) == FALSE, ]
 
 # Calculate value of Food Sub-Category for historical data
-foodSubCategoryHistoricalValue <- unhealthlyHistoricalCommodities %>%
-  group_by(Year, Month, Food.sub.category) %>%
-  summarise(total = sum(Value), .groups = "drop")
+chickenFishCommodities$Stat..Value <- as.numeric(gsub(",", "", chickenFishCommodities$Stat..Value))
+chickenFishHistoricalValue <- chickenFishCommodities %>%
+  group_by(Year, Month, Livestock.Substitution) %>%
+  summarise(total = sum(Stat..Value), .groups = "drop")
 
 # Calculate value of Food Sub-Category current month value for historical data
 foodSubCategoryHistoricalMonthlyValue <- foodSubCategoryHistoricalValue %>%
