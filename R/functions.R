@@ -245,6 +245,7 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   # Check if notes not found - if so choose last empty row in first numeric column
   if(length(end) == 0){
     end <- max(which(is.na(historic[, numericColumns[1]])))
+    warning("Expected notes section in sheet ", sheet, "of file: ", fileName, " using last empty row to identify table end instead.")
   }
   
   # Extract the Annual statistics
