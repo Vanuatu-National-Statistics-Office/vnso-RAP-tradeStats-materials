@@ -952,7 +952,7 @@ importsOther %>%
 
 # Imports of Dietary Risk Factors for Noncommunicable Diseases
 
-```{r health imports through time, fig.height = 1.8, eval= FALSE}
+```{r health imports through time, fig.height = 1.8}
 
 # Merge unhealthy commodity classifications with cleaned data
 productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWithZeros, "HS")
@@ -991,7 +991,7 @@ ggplot(historalAndCurrentMonthFood, aes(x = Year, y = (total/1000000), group = f
 
 # Imports of food and products targeted as those that can be produced domestically
 
-```{r food and products imports through time, fig.height=1.75, eval= FALSE}
+```{r food and products imports through time, fig.height=1.75}
 
 # Merge imports domestically produced classifications with cleaned data
 importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
