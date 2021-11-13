@@ -135,9 +135,11 @@ classificationTables <- data.frame(
     "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.csv",
     "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.csv",
     "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.csv",
-    "OPN_FINAL_ASY_BECClassifications_31-01-20.csv"
+    "OPN_FINAL_ASY_BECClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv"
   ),
-  "link_column" = c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6")
+  "link_column" = c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6", "HS.Code", "HS.Code")
 )
 
 # Merge in each of the classification tables
@@ -147,7 +149,8 @@ tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
 # Write missing codes table to file
-write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "missingClassification.csv"))
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-10-21.csv"))
+
 
 # Print progress
 cat("Finished merging in classification tables.\n")
