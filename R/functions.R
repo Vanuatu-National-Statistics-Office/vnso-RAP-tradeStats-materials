@@ -61,7 +61,14 @@ mergeClassificationTablesIntoTradesData <- function(tradeStats, classificationTa
     classificationTables[row, "n_codes_in_trades_not_in_classification"] <- length(codesInTradesNotInClassification)
     classificationTables[row, "n_codes_in_classification_not_in_trades"] <- length(codesInClassificationNotInTrades)
     
-    # Merge classification table 
+    # Check if classification columns are already present in trades data
+    classificationColumns <- colnames(classificationTable)
+    classificationColumns <- classificationColumns[classificationColumns != linkColumn]
+    if(sum(classificationColumns %in% colnames(tradeStatsWithClassifications)) > 0){
+      stop("Some or all of the columns from the classification file (", classificationFile, ") are already present in the trade statistics table!")
+    }
+    
+    # Merge classification table
     tradeStatsWithClassifications <- merge(tradeStatsWithClassifications, classificationTable, 
                                            by = linkColumn, all.x = TRUE)
   }
@@ -234,6 +241,12 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   annualStart <- 1
   monthlyStart <- which(tolower(historic[, 1]) == "monthly")
   end <- which(historic[, 1] == "Notes:") - 1
+  
+  # Check if notes not found - if so choose last empty row in first numeric column
+  if(length(end) == 0){
+    end <- max(which(is.na(historic[, numericColumns[1]])))
+    warning("Expected notes section in sheet ", sheet, "of file: ", fileName, " using last empty row to identify table end instead.")
+  }
   
   # Extract the Annual statistics
   annually <- historic[1:(monthlyStart-2), ]

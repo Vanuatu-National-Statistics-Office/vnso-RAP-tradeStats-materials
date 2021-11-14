@@ -20,9 +20,16 @@ secureDataFolder <- file.path(repository, "data", "secure")
 # Note the open data path
 openDataFolder <- file.path(repository, "data", "open")
 
+# Note the outputs folder
+outputsFolder <- file.path(repository, "outputs")
+
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_30-09-21.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-10-21.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+
+# Load the summary statistics for the historic IMPORTS and EXPORTS data
+historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
+historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
 
 #### Clean and process the latest month's data ####
 
@@ -47,9 +54,9 @@ tradeStatsNoDup <- tradeStatsNoBlankCols[duplicatedRows == FALSE, ]
 # Convert the statistical value to numeric - note numbers formatted with commas in them and these need removed
 tradeStatsNoDup$Stat..Value <- as.numeric(gsub(",", "", tradeStatsNoDup$Stat..Value))
 
-# Convert excel figures to dates
-#tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, format = "%d/%m/%Y")
-tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, tryFormats = c("%Y-%m-%d", "%Y/%m/%d"), optional = FALSE)
+# Convert excel figures to dates (choose)
+tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, format = "%d/%m/%Y")
+#tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, tryFormats = c("%Y-%m-%d", "%Y/%m/%d"), optional = FALSE)
 
 # Convert SITC to character
 tradeStatsNoDup$SITC <- sapply(tradeStatsNoDup$SITC, FUN=padWithZeros, "SITC")
@@ -120,7 +127,7 @@ cat("Added separate date elements.\n")
 #### Merge in classification tables ####
 
 # Define classification tables and link columns
-classification_tables <- data.frame(
+classificationTables <- data.frame(
   "file" = c(
     "OPN_FINAL_ASY_ModeOfTransportClassifications_31-01-20.csv",
     "OPN_FINAL_ASY_HSCodeClassifications_31-01-20.csv",
@@ -128,27 +135,27 @@ classification_tables <- data.frame(
     "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.csv",
     "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.csv",
     "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.csv",
-    "OPN_FINAL_ASY_BECClassifications_31-01-20.csv"
+    "OPN_FINAL_ASY_BECClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv",
+    "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv"
   ),
-  "link_column" = c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6")
+  "link_column" = c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6", "HS.Code", "HS.Code")
 )
 
 # Merge in each of the classification tables
 mergingOutputs <- mergeClassificationTablesIntoTradesData(tradeStats = tradeStatsCommodities,
-                                                          classificationTables = classification_tables)
+                                                          classificationTables = classificationTables)
 tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
-write.csv(missingClassificationCodeInfo, "missingClassification.csv")
+# Write missing codes table to file
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-10-21.csv"))
+
 
 # Print progress
 cat("Finished merging in classification tables.\n")
 
 #### Check if any statistical values fall outside of expected boundaries ####
-
-# Load the summary statistics for the historic IMPORTS and EXPORTS data
-historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
-historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
 
 # Check the commodity values against expected values based on historic data
 commoditiesWithExpectations <- checkCommodityValues(tradeStatsCommoditiesMergedWithClassifications,  
@@ -165,81 +172,10 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 # Make copy of latest month's processed data
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
-
 # Create csv of last months processed data
-write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-09-21.csv"))
+write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-10-21.csv"))
 
 # Note progress final
 
 cat("Finished processing and cleaning latest month's data.\n")
 
-
-
-importsCombinedFile <- file.path("importsCombined.csv")
-importsHistoricalFile <- file.path("imports_history_summary.csv")
-
-importsCombined <- read.csv(importsCombinedFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
-importsHistorical <- read.csv(importsHistoricalFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
-
-importsHistorical$Office<- "NA"
-importsHistorical$Reg.Ref<- "NA"
-
-
-importsHistorical<- importsHistorical %>% 
-  rename(
-    CP4 = Procedure,
-    HS.Code= HS,
-    Goods.Comm..Dsc.1= Description,
-    CO= CTY_Origin,
-    Wgt..Net= Weight,
-    Pkg..type= Pkg_Type,
-    Supp.Qty= Supp_Qty,
-    Stat..Value= Value)
-
-importsHistoricalUpdated <- importsHistorical[ -c(1,13,15) ]
-
-importsHistoricalUpdated$Type<- "NA"
-importsHistoricalUpdated$CP3<- "NA"
-importsHistoricalUpdated$Declarant<- "NA"
-importsHistoricalUpdated$Con_cod<- "NA"
-importsHistoricalUpdated$Con...Exp.name<- "NA"
-importsHistoricalUpdated$Shipper...Buyer.name<- "NA"
-importsHistoricalUpdated$Itm..<- "NA"
-importsHistoricalUpdated$PRF<- "NA"
-importsHistoricalUpdated$Goods.Comm..Dsc.<- "NA"
-importsHistoricalUpdated$CE.CD<- "NA"
-importsHistoricalUpdated$Wgt..Gross<- "NA"
-importsHistoricalUpdated$Pkg..<- "NA"
-importsHistoricalUpdated$Supp<- "NA"
-importsHistoricalUpdated$TOD<- "NA"
-importsHistoricalUpdated$TOD<- "NA"
-importsHistoricalUpdated$IMD<- "NA"
-importsHistoricalUpdated$VAT<- "NA"
-importsHistoricalUpdated$IEX<- "NA"
-importsHistoricalUpdated$DEX<- "NA"
-importsHistoricalUpdated$EXD<- "NA"
-importsHistoricalUpdated$OED<- "NA"
-importsHistoricalUpdated$Day<- "NA"
-
-newImportsHistorical<- importsHistoricalUpdated[,c(13,14,1,15,4,16,17,18,19,20,21,5,6,22,7,23,8,24,25,9,26,10,11,27,28,12,29,30,31,32,33,34,2,3,35)]
-
-importsTotal<- rbind(newImportsHistorical, importsCombined)
-
-importsTotalRecoded<- importsTotal %>% mutate(sex=recode(sex, 
-                         `1`="Male",
-                         `2`="Female"))
-
-
-write.csv(importsTotal, "totalimportsCombined.csv")
-
-
-
-combinedFile <- file.path("combinedExports2021.csv")
-Exports2021 <- read.csv(combinedFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
-
-Exports2021$Reg..Date <- as.Date(Exports2021$Reg..Date, format = "%d/%m/%Y")
-
-Exports2021$Year <- format(Exports2021$Reg..Date, format= "%Y")
-Exports2021$Month <- format(Exports2021$Reg..Date, format= "%B")
-Exports2021$Day <- format(Exports2021$Reg..Date, format= "%d")
-write.csv(Exports2021, "newcombinedExports2021.csv")
