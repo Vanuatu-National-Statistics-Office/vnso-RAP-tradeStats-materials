@@ -18,7 +18,7 @@ month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formatted tables
-finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-09-21_WORKING.xlsx")
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-06-21_WORKING.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
@@ -648,7 +648,7 @@ if(is.null(tradeByModeOfTransportSubTables) == FALSE){
 # Print progress
 cat("Finished formatting Table 10: Trade by Mode of Transport.\n")
 
-#### Table 11: Trade by Trade Agreement ####
+#### !!WORK IN PROGRESS!! Table 11: Trade by Trade Agreement ####
 
 ## Getting latest statistics ##
 
@@ -795,7 +795,7 @@ if(is.null(totalImportsbySITCTable) == FALSE){
 # Print progress
 cat("Finished formatting Table 13: Imports by SITC.\n")
 
-#### Table 14: Retained Imports by BEC ####
+#### !! WORK IN PROGRESS!! Table 14: Retained Imports by BEC ####
 
 ## Getting latest statistics ##
 # Calculate Retained imports by BEC 
@@ -837,7 +837,7 @@ becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categ
 #### Finish ####
 
 # Save the changes to the excel file
-updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-10-21_WORKING.xlsx")
+updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-07-21_WORKING.xlsx")
 openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
 # Print progress for finish
