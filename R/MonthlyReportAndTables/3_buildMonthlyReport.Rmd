@@ -1033,7 +1033,7 @@ ggplot(historalAndCurrentMonthChickenFish, aes(x = Year, y = (total/1000000), gr
 
 # Concluding remarks
 
-This section not automated, instead analysis of the information in partnership with the Ministry of Trades.
+This section not automated, instead analysis of the information in partnership with the Ministry of Trades
 
 ######### Page break
 
