@@ -244,7 +244,8 @@ extractSubTablesFromFormattedTableByTime <- function(fileName, sheet, startRow, 
   
   # Check if notes not found - if so choose last empty row in first numeric column
   if(length(end) == 0){
-    end <- max(which(is.na(historic[, numericColumns[1]])))
+    naCountsByRow <- rowSums(is.na(historic[, numericColumns]))
+    end <- max(which(naCountsByRow < length(numericColumns))) + 1
     warning("Expected notes section in sheet ", sheet, "of file: ", fileName, " using last empty row to identify table end instead.")
   }
   
@@ -432,6 +433,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   annualStartRow <- nRowsInHeader + 1
   monthlyStartRow <- nRowsInHeader + nRowsInAnnual + 3
   notesStartRow <- monthlyStartRow + nRowsInMonthly + 1
+  lastRow <- notesStartRow + nrow(subTables$Notes)
 
   # Load the final tables workbook for editing
   if(loadAndSave){
@@ -439,7 +441,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   }
 
   # Clear the current contents of the workbook
-  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=annualStartRow, x=matrix(NA, nrow=nRows+1+nrow(subTables$Notes), ncol=nColumns), colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=annualStartRow, x=matrix(NA, nrow=lastRow, ncol=nColumns), colNames=FALSE)
   openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=seq_len(nColumns), rows=annualStartRow:notesStartRow)
   openxlsx::setRowHeights(finalWorkbook, sheet=sheet, rows=annualStartRow:notesStartRow, heights=14.5)
 
@@ -457,7 +459,7 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   default <- openxlsx::createStyle(borderStyle="thin", borderColour="black", border=c("top", "bottom", "left", "right"),
                                    fontName="Times New Roman")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=default, gridExpand=TRUE, cols=seq_len(nColumns), 
-                     rows=annualStartRow:(notesStartRow+3), stack=FALSE)
+                     rows=annualStartRow:lastRow, stack=FALSE)
 
   # Format the Monthly and Annually sub table names as bold
   bold <- openxlsx::createStyle(textDecoration="bold", halign="left")
@@ -479,14 +481,14 @@ insertUpdatedSubTablesAsFormattedTable <- function(fileName, sheet, subTables, n
   # Format the notes as italics
   italics <- openxlsx::createStyle(textDecoration="italic", halign="left", valign="bottom")
   openxlsx::addStyle(finalWorkbook, sheet=sheet, style=italics, cols=1:nColumns, stack=TRUE, gridExpand=TRUE,
-                     rows=notesStartRow:(notesStartRow+4))
+                     rows=notesStartRow:lastRow)
   
   # Remove formatting outside the table region
   blank <- openxlsx::createStyle(borderStyle="none", border=c("top", "bottom", "left", "right"))
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=(nColumns+1):100, 
-                     rows=1:100, stack=FALSE)
-  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=1:100, 
-                     rows=(notesStartRow+nrow(subTables$Notes)):100, stack=FALSE)
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=(nColumns+1):(nColumns + 100), 
+                     rows=(lastRow+1):(lastRow+100), stack=FALSE) # <- clear columns to right of table
+  openxlsx::addStyle(finalWorkbook, sheet=sheet, style=blank, gridExpand=TRUE, cols=1:(nColumns + 100), 
+                     rows=(lastRow+1):(lastRow+100), stack=FALSE) # clear rows below table
 
   # Save the edited workbook as a new file
   if(loadAndSave){
