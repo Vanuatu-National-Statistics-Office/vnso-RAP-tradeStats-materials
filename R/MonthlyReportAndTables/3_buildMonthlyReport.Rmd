@@ -447,11 +447,13 @@ indicatorsTable <- theme_booktabs(indicatorsTable)
 indicatorsTable
 ```
 
-<br>
+&nbsp;  
+&nbsp;  
+&nbsp;  
 
 # Trade Balance by Major Partner Countries
 
-```{r major partner country trade, warning=FALSE, fig.width=5.5, fig.height=2.4}
+```{r major partner country trade, warning=FALSE, fig.width=5.5, fig.height=2.5}
 
 ## Getting latest statistics ##
 # Define the CP4 codes need for table
@@ -537,6 +539,16 @@ ggplot(data = world) +
   guides(fill=guide_legend(title="Balance of trade\n(millions)"))
 
 ```
+
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
 
 # Trade Balance of Pacific Islands (excluding Melanesian Islands, Australia and New Zealand) 
 
@@ -723,6 +735,9 @@ tradeByTradeAgreement <- tradeByTradeAgreement %>%
   adorn_totals("col") %>%
   adorn_totals("row", name = "Grand Total")
 
+# Divide by 1,000,000
+tradeByTradeAgreement[, -1] <- tradeByTradeAgreement[, -1] / 1000000
+
 # Initiailise a flextable object for NSDP table
 tradeByTradeTable <- flextable(tradeByTradeAgreement)
 
@@ -802,12 +817,11 @@ totalMajorExports$name_shortened <- sapply(totalMajorExports$name,
 ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_shortened))) +
   geom_line(aes(color = factor(name_shortened)), size = 1.5, alpha = 0.75) +
   labs(y = "Vatu (millions)") +
-  guides(color=guide_legend(title="Monthly Trend Analysis")) +
+  guides(color=guide_legend(title="Monthly Trend\nAnalysis")) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank(),
-        legend.title=element_blank())
+        axis.title.x = element_blank())
 
 ```
 
@@ -835,7 +849,7 @@ otherPrincipleExports <- totalCommodityValueByPrincipleExportType %>%
 # Order table by the statistical value
 orderedPrincipleExportType <- otherPrincipleExports %>%
   group_by(Goods.Comm..Dsc., principleExportCategory) %>%
-  summarise(Value= sum(total)) %>%
+  summarise(Value= sum(total), .groups = "drop") %>%
   arrange(desc(Value))
 
 # Select only exports falling into the OTHER or NA category
@@ -895,6 +909,7 @@ totalMajorImports <- totalMajorImports %>%
 totalMajorImports$name_shortened <- sapply(totalMajorImports$name, 
                                            FUN=split_sentence_across_lines, 
                                            word_separator = "\\.")
+totalMajorImports$name_shortened <- gsub("\\.", " ", totalMajorImports$name_shortened)
 
 # Create a line graph
 ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_shortened))) +
@@ -904,8 +919,7 @@ ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_sh
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank(),
-        legend.title=element_blank())
+        axis.title.x = element_blank())
 ```
 
 # Top 5 New Major Imports
@@ -981,7 +995,6 @@ ggplot(subsetHistoralAndCurrentMonthFood, aes(x = Year, y = (total/1000000), gro
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank(),
-        legend.title=element_blank(),
         legend.key.size = unit(0.1, "cm"))
 
 ```
@@ -1014,7 +1027,6 @@ ggplot(historalAndCurrentMonthChickenFish, aes(x = Year, y = (total/1000000), gr
   theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank(),
-        legend.title=element_blank(),
         legend.key.size = unit(0.1, "cm"))
 
 ```
