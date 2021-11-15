@@ -617,12 +617,11 @@ pacificCountryTotalsLong <- pacificCountryTotals %>%
 # Create a bar chart
 ggplot(pacificCountryTotalsLong, aes(x=Country, y= (Value/1000000),  fill=Type)) +
   geom_bar(stat="identity", color="black", position=position_dodge()) +
-  guides(color=guide_legend(title="International Merchandise Trade")) +
+  guides(fill=guide_legend(title="International\nMerchandise\nTrade")) +
   theme_minimal() + 
   labs(y = "Vatu (millions)") +
   scale_fill_brewer(palette="Blues") +
-  theme(legend.title=element_blank(),
-        axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank())
 
