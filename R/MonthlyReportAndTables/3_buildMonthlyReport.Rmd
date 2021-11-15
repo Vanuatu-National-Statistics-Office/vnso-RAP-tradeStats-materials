@@ -401,27 +401,29 @@ nsdpIndicators <- data.frame(
     indicatorECO1.6.2,
     indicatorECO1.7.1,
     indicatorECO4.3.2
-  ),
-  "Targets 2030"=c("Target TBD after baseline established",
-                   "By 2020, exports increase by 15%",
-                   "By 2020, exports increase by 20%",
-                   "By 2030 increase by 15%",
-                   "By 2030 increase 10-15% of the proportion",
-                   "By 2020 increase 15%"),
-  "Target (% Change)"=c(
-    targetValueENV1.3.1,
-    targetValueECO1.5.2,
-    targetValueECO1.5.3,
-    targetECO1.6.2Value,
-    targetECO1.7.1Value,
-    targetECO4.3.2Value), 
-  check.names=FALSE, stringsAsFactors=FALSE)
+  ),check.names=FALSE, stringsAsFactors=FALSE)
+
+
+#"Targets 2030"=c("Target TBD after baseline established",
+                  # "By 2020, exports increase by 15%",
+                  # "By 2020, exports increase by 20%",
+                  # "By 2030 increase by 15%",
+                  # "By 2030 increase 10-15% of the proportion",
+                  # "By 2020 increase 15%"),
+ # "Target (% Change)"=c(
+ #   targetValueENV1.3.1,
+ #   targetValueECO1.5.2,
+ #  targetValueECO1.5.3,
+ #   targetECO1.6.2Value,
+ #   targetECO1.7.1Value,
+ #   targetECO4.3.2Value), 
+ # check.names=FALSE, stringsAsFactors=FALSE)
 
 # Round the indicator values
 nsdpIndicators$`Indicator Value` <- round(nsdpIndicators$`Indicator Value`, digits = 2)
 
 # Round the target percentages
-nsdpIndicators$`Target (% Change)` <- round(nsdpIndicators$`Target (% Change)`, digits = 2)
+#nsdpIndicators$`Target (% Change)` <- round(nsdpIndicators$`Target (% Change)`, digits = 2)
 
 # Initiailise a flextable object for NSDP table
 indicatorsTable <- flextable(nsdpIndicators)
