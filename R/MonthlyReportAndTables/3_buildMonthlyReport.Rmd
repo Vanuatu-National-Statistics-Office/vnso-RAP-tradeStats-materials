@@ -149,7 +149,6 @@ indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
 # Insert values into table
 ENV1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"= indicatorENV1.3.1)
 
-
 ## ECO 1.5.2 Trade by trade agreement (value)
 ## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports aligned to MSG agreement included)
 
@@ -736,7 +735,7 @@ tradeByTradeAgreement <- tradeByTradeAgreement %>%
   adorn_totals("row", name = "Grand Total")
 
 # Divide by 1,000,000
-tradeByTradeAgreement[, -1] <- tradeByTradeAgreement[, -1] / 1000000
+tradeByTradeAgreement[, -1] <- round(tradeByTradeAgreement[, -1] / 1000000, digits = 2)
 
 # Initiailise a flextable object for NSDP table
 tradeByTradeTable <- flextable(tradeByTradeAgreement)
