@@ -24,7 +24,7 @@ openDataFolder <- file.path(repository, "data", "open")
 outputsFolder <- file.path(repository, "outputs")
 
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-10-21.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-07-21.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
 # Load the summary statistics for the historic IMPORTS and EXPORTS data
@@ -149,7 +149,7 @@ tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
 # Write missing codes table to file
-write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-10-21.csv"))
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-07-21.csv"))
 
 
 # Print progress
@@ -173,7 +173,7 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
 # Create csv of last months processed data
-write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-10-21.csv"))
+write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv"))
 
 # Note progress final
 

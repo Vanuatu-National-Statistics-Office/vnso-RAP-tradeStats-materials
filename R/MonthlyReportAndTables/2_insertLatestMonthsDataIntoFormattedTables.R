@@ -18,7 +18,7 @@ month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formatted tables
-finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-09-21_WORKING.xlsx")
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-06-21_WORKING.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
@@ -837,7 +837,7 @@ becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categ
 #### Finish ####
 
 # Save the changes to the excel file
-updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-10-21_WORKING.xlsx")
+updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-07-21_WORKING.xlsx")
 openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
 # Print progress for finish
