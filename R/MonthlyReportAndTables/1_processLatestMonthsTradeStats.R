@@ -173,7 +173,7 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
 # Create csv of last months processed data
-write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv"))
+write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-08-21.csv"))
 
 # Note progress final
 
