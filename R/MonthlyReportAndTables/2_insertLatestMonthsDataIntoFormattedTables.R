@@ -255,9 +255,9 @@ columnCategories <- list(
   "Fish: Tuna"=c("Fish: Tuna"),
   "Kava"=c("Kava"),
   "Ornamental fish"=c("Ornamental fish"),
+  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal"),
   "Shell buttons"=c("Shell buttons"),
   "Vanilla"=c("Vanilla"),
-  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal"),
   "Other products"=c("Other products")
 )
 
@@ -292,6 +292,20 @@ principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=
 # Remove empty columns at end
 principleExportsTable <- removeEmptyColumnsAtEnd(principleExportsTable)
 
+# Check expect row order
+expectedRows <- c("A. Exports",
+                  colnames(totalPrincipleExports),
+                  "", "B. Re-exports",
+                  colnames(totalPrincipleReExports),
+                  "", "Total exports and re-exports")
+expectedRows[1 + ncol(totalPrincipleExports)] <- "Total exports"
+expectedRows[1 + ncol(totalPrincipleExports) + 2 + ncol(totalPrincipleReExports)] <- "Total re-exports"
+nCorrectRowNames <- sum(expectedRows == principleExportsTable$X1, na.rm = TRUE)
+nNAs <- sum(is.na(principleExportsTable$X1))
+if(nCorrectRowNames < (length(latestPrincipleExports) - nNAs)){
+  warning("The expected row order for Table 6 doesn't match. Statistics may not be inserted into formatted table correctly!!")
+}
+
 # Add the latest month's statistics
 principleExportsTable <- updateTableByCommodity(principleExportsTable, month, year, newStatistics=latestPrincipleExports / 1000000,
                                                 numericColumns=2:ncol(principleExportsTable))
@@ -317,54 +331,54 @@ codesCP4 <- c(4000, 4071, 7100)
 
 # Define the categories used for each column
 categoryColumn <- "Principle.Imports"
-columnCategories <- list(
-  "Meat and edible offal of poultry"=c("Meat and edible offal of poultry"),
-  "Fish and crustaceans, molluscs and other aquatic invertebrates"=c("Fish and crustaceans, molluscs and other aquatic invertebrates"),
-  "Milk and Cream"=c("Milk and Cream"),
-  "Rice"=c("Rice"),
-  "Wheat or meslin flour"=c("Wheat or meslin flour"),
-  "Other prepared or preserved meat, meat offal or blood"=c("Other prepared or preserved meat, meat offal or blood"),
-  "Prepared or preserved fish"=c("Prepared or preserved fish"),
-  "Sugar"=c("Sugar"),
-  "Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"=c("Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous"),
-  "Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"=c("Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes"),
-  "Bread, pastry, cakes, biscuits and other bakers' wares"=c("Bread, pastry, cakes, biscuits and other bakers' wares"),
-  "Non-alcoholic drinks including mineral water"=c("Non-alcoholic drinks including mineral water"),
-  "Alcoholic drinks"=c("Alcoholic drinks"),
-  "Preparations of a kind used in animal feeding"=c("Preparations of a kind used in animal feeding"),
-  "Cigars, cheroots, cigarillos and cigarettes, of tobacco or of tobacco substitutes"=c("Cigars, cheroots, cigarillos and cigarettes, of tobacco or of tobacco substitutes"),
-  "Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"=c("Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements"),
-  "Petroleum oils and oils obtained from bituminous minerals"=c("Petroleum oils and oils obtained from bituminous minerals"),
-  "Petroleum gases and other gaseous hydrocarbons"=c("Petroleum gases and other gaseous hydrocarbons"),
-  "Medicaments"=c("Medicaments"),
-  "Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"=c("Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair"),
-  "Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics"=c("Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics"),
-  "Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"=c("Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics"),
-  "New pneumatic tires, of rubber"=c("New pneumatic tires, of rubber"),
-  "Wood sawn or chipped lengthwise, sliced or peeled, whether or not planed, sanded or end-jointed"=c("Wood sawn or chipped lengthwise, sliced or peeled, whether or not planed, sanded or end-jointed"),
-  "Toilet paper and similar paper"=c("Toilet paper and similar paper"),
-  "Printed books, brochures, leaflets and similar printed matter"=c("Printed books, brochures, leaflets and similar printed matter"),
-  "Articles of apparel and clothing accessories"=c("Articles of apparel and clothing accessories"),
-  "Other made up textile articles; sets; worn clothing and worn textile articles; rags"=c("Other made up textile articles; sets; worn clothing and worn textile articles; rags"),
-  "Footwear, gaiters and the like; parts of such articles"=c("Footwear, gaiters and the like; parts of such articles"),
-  "Iron and steel"=c("Iron and steel"),
-  "Articles of iron or steel"=c("Articles of iron or steel"),
-  "Aluminium and articles thereof"=c("Aluminium and articles thereof"),
-  "Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)"=c("Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)"),
-  "Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines"=c("Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines"),
-  "Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"=c("Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases"),
-  "Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers"=c("Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers"),
-  "Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data"=c("Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data"),
-  "Electric generating sets and rotary converters"=c("Electric generating sets and rotary converters"),
-  "Telephone sets, including telephones for cellular networks or for other wireless networks"=c("Telephone sets, including telephones for cellular networks or for other wireless networks"),
-  "Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"=c("Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors"),
-  "Motor vehicles for the transport of passengers"=c("Motor vehicles for the transport of passengers"),
-  "Motor vehicles for the transport of goods"=c("Motor vehicles for the transport of goods"),
-  "Parts of aircraft"=c("Parts of aircraft"),
-  "Yachts and other vessels for pleasure or sports; rowing boats and canoes"=c("Yachts and other vessels for pleasure or sports; rowing boats and canoes"),
-  "Other furniture and parts thereof"=c("Other furniture and parts thereof"),
-  "Personal and household effects"=c("Personal and household effects"),
-  "Other Imports"=c("Other Imports")
+columnCategories <- c(
+  "Alcoholic drinks", 
+  "Aluminium and articles thereof", 
+  "Articles for the conveyance or packing of goods; stoppers, lids, caps and other closures, of plastics", 
+  "Articles of apparel and clothing accessories", 
+  "Articles of iron or steel", 
+  "Automatic data processing machines; magnetic or optical readers, machines for transcribing data onto data media in coded form and machines for processing such data.", 
+  "Bread, pastry, cakes, biscuits and other bakers' wares", 
+  "Centrifuges, including centrifugal dryers; filtering or purifying machinery and apparatus, for liquids or gases", 
+  "Cigars, cheroots, cigarillos and cigarettes, of tobacco or of tobacco substitutes", 
+  "Electric generating sets and rotary converters", 
+  "Fish and crustaceans, molluscs and other aquatic invertebrates", 
+  "Footwear, gaiters and the like; parts of such articles ", 
+  "Insulated wire, cable and other insulated electric conductors, whether or not fitted with connectors; optical fibre cables, made up of individually sheathed fibres, whether or not assembled with electric conductors or fitted with connectors", 
+  "Iron and steel", 
+  "Meat and edible offal of poultry", 
+  "Medicaments", 
+  "Milk and Cream", 
+  "Motor vehicles for the transport of goods", 
+  "Motor vehicles for the transport of passengers", 
+  "New pneumatic tires, of rubber", 
+  "Non-alcoholic drinks including mineral water", 
+  "Other furniture and parts thereof", 
+  "Other Imports", 
+  "Other made up textile articles; sets; worn clothing and worn textile articles; rags", 
+  "Other prepared or preserved meat, meat offal or blood", 
+  "Parts of aircraft", 
+  "Pasta, whether cooked or stuffed or otherwise prepared, such as spaghetti, macaroni, noodles, lasagne, gnocchi, ravioli, cannelloni; couscous", 
+  "Perfumes, make-up preparations and preparations for the care of the skin (excl medicaments) and products for hair", 
+  "Personal and household effects", 
+  "Petroleum gases and other gaseous hydrocarbons", 
+  "Petroleum oils and oils obtained from bituminous minerals", 
+  "Portland cement, aluminous cement, slag cement, supersulphate cement and similar hydraulic cements", 
+  "Preparations of a kind used in animal feeding", 
+  "Prepared foods obtained by the swelling or roasting of cereals or cereal products eg corn flakes; cereals (excl maize) in grain or flakes", 
+  "Prepared or preserved fish", 
+  "Printed books, brochures, leaflets and similar printed matter", 
+  "Refrigerators, freezers and other refrigerating or freezing equipment, electric or other; heat pumps other than air conditioning machines ", 
+  "Rice", 
+  "Self-propelled bulldozers, angledozers, graders, levellers, scrapers, mechanical shovels, excavators, shovel loaders, tamping machines and road rollers", 
+  "Spark-ignition reciprocating or rotary internal combustion piston engines and compression-ignition internal combustion piston engines (diesel or semi-diesel engines)", 
+  "Sugar", 
+  "Telephone sets, including telephones for cellular networks or for other wireless networks", 
+  "Toilet paper and similar paper", 
+  "Tubes, pipes and hoses, and fittings therefor (for example, joints, elbows, flanges), of plastics.", 
+  "Wheat or meslin flour", 
+  "Wood sawn or chipped lengthwise, sliced or peeled, whether or not planed, sanded or end-jointed", 
+  "Yachts and other vessels for pleasure or sports; rowing boats and canoes"
 )
 
 # Build the table
@@ -377,12 +391,19 @@ principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=
 # Remove empty columns at end
 principleImportsTable <- removeEmptyColumnsAtEnd(principleImportsTable)
 
+# Check expect row order
+names(totalPrincipleImports)[length(totalPrincipleImports)] <- "TOTAL IMPORTS"
+nCorrectRowNames <- sum(names(totalPrincipleImports) == principleImportsTable$X1)
+if(nCorrectRowNames < length(totalPrincipleImports)){
+  warning("The expected row order for Table 7 doesn't match. Statistics may not be inserted into formatted table correctly!!")
+}
+
 # Add the latest month's statistics
 principleImportsTable <- updateTableByCommodity(principleImportsTable, month, year, newStatistics=totalPrincipleImports / 1000000, 
                                                 numericColumns=2:ncol(principleImportsTable))
 
 # Insert the updated table back into the formatted excel sheet
-if(is.null(principleExportsTable) == FALSE){
+if(is.null(principleImportsTable) == FALSE){
   finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, year=year,
                                                 tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
                                                 numericColumns=2:ncol(principleImportsTable),
