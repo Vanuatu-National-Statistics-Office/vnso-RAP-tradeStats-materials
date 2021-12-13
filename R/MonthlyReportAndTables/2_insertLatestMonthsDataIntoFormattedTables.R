@@ -292,6 +292,20 @@ principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=
 # Remove empty columns at end
 principleExportsTable <- removeEmptyColumnsAtEnd(principleExportsTable)
 
+# Check expect row order
+expectedRows <- c("A. Exports",
+                  colnames(totalPrincipleExports),
+                  "", "B. Re-exports",
+                  colnames(totalPrincipleReExports),
+                  "", "Total exports and re-exports")
+expectedRows[1 + ncol(totalPrincipleExports)] <- "Total exports"
+expectedRows[1 + ncol(totalPrincipleExports) + 2 + ncol(totalPrincipleReExports)] <- "Total re-exports"
+nCorrectRowNames <- sum(expectedRows == principleExportsTable$X1, na.rm = TRUE)
+nNAs <- sum(is.na(principleExportsTable$X1))
+if(nCorrectRowNames < (length(latestPrincipleExports) - nNAs)){
+  warning("The expected row order for Table 6 doesn't match. Statistics may not be inserted into formatted table correctly!!")
+}
+
 # Add the latest month's statistics
 principleExportsTable <- updateTableByCommodity(principleExportsTable, month, year, newStatistics=latestPrincipleExports / 1000000,
                                                 numericColumns=2:ncol(principleExportsTable))
@@ -376,6 +390,13 @@ principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=
 
 # Remove empty columns at end
 principleImportsTable <- removeEmptyColumnsAtEnd(principleImportsTable)
+
+# Check expect row order
+names(totalPrincipleImports)[length(totalPrincipleImports)] <- "TOTAL IMPORTS"
+nCorrectRowNames <- sum(names(totalPrincipleImports) == principleImportsTable$X1)
+if(nCorrectRowNames < length(totalPrincipleImports)){
+  warning("The expected row order for Table 7 doesn't match. Statistics may not be inserted into formatted table correctly!!")
+}
 
 # Add the latest month's statistics
 principleImportsTable <- updateTableByCommodity(principleImportsTable, month, year, newStatistics=totalPrincipleImports / 1000000, 
