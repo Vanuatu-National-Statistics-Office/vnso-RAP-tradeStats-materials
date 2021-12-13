@@ -255,9 +255,9 @@ columnCategories <- list(
   "Fish: Tuna"=c("Fish: Tuna"),
   "Kava"=c("Kava"),
   "Ornamental fish"=c("Ornamental fish"),
+  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal"),
   "Shell buttons"=c("Shell buttons"),
   "Vanilla"=c("Vanilla"),
-  "Wood and articles of wood; wood charcoal"=c("Wood and articles of wood; wood charcoal"),
   "Other products"=c("Other products")
 )
 
@@ -382,7 +382,7 @@ principleImportsTable <- updateTableByCommodity(principleImportsTable, month, ye
                                                 numericColumns=2:ncol(principleImportsTable))
 
 # Insert the updated table back into the formatted excel sheet
-if(is.null(principleExportsTable) == FALSE){
+if(is.null(principleImportsTable) == FALSE){
   finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, year=year,
                                                 tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
                                                 numericColumns=2:ncol(principleImportsTable),
