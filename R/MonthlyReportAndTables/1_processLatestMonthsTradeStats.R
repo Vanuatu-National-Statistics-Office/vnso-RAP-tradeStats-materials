@@ -27,6 +27,10 @@ outputsFolder <- file.path(repository, "outputs")
 tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-07-21.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
+# Get date from input file
+fileNameParts <- unlist(strsplit(tradeStatsFile, "_"))
+fileDate <- unlist(strsplit(fileNameParts[length(fileNameParts)], "\\."))[1]
+
 # Load the summary statistics for the historic IMPORTS and EXPORTS data
 historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
 historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
@@ -173,9 +177,13 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
 # Create csv of last months processed data
-write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-08-21.csv"))
+outputDataFile <- file.path(
+  secureDataFolder, 
+  paste("OUT_PROC_ASY_ProcessedRawData_", fileDate, ".csv")
+)
+write.csv(processedTradeStats, outputDataFile)
 
 # Note progress final
 
-cat("Finished processing and cleaning latest month's data.\n")
+cat(paste0("Finished processing and cleaning latest month's data into:\n\t", outputDataFile, "\n"))
 
