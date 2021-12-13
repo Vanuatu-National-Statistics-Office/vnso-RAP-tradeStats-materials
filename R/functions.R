@@ -695,6 +695,7 @@ buildRawSummaryTable <- function(processedTradeStats, codesCP4, categoryColumn, 
                            FUN=function(category){
                              return(category)
                            })
+    names(columnCategories) <- unlist(columnCategories)
   }
   
   # Initialise a dataframe to store the calculated statistics
