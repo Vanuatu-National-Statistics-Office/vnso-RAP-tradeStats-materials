@@ -3,8 +3,6 @@ title: "International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %
 output: 
   word_document:
     reference_docx: styles_reference.docx
-params:
-  use_cache: TRUE
 ---
 
 ```{r setup, include=FALSE}
@@ -44,96 +42,88 @@ source(file.path(repository, "R", "functions.R"))
 ```{r load data}
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
-# Check if using cache
-cacheFile <- file.path(repository, "data", "secure", "report_environment_cache.RData")
-if(params$useCache == FALSE || file.exists(cacheFile) == FALSE){
-  
-  # Load the processed trade statistics for month of interest
-  processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv"))
-  processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
+# Load the processed trade statistics for month of interest
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv"))
+processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 
-  # Get the current month and year of data
-  currentMonth <- unique(processedTradeStats$Month)
-  currentYear <- unique(processedTradeStats$Year)
-  
-  # Load import substitution table
-  importSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
-  importSubstitution <- read.csv(importSubstitutionFile)
-  
-  # Load the Melanesian Spearhead Group (MSG) classifications table
-  msgCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
-  msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile)
-  
-  # Read in the Gross Domestic Product data
-  grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
-  timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
-  
-  # Read in the classification table for processed & raw Commodities (coconut, kava, cocoa and coffee)
-  processedRawCommoditiesFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawCommodityClassifications_31-01-20.csv")
-  processedRawCommodities <- read.csv(processedRawCommoditiesFile)
-  
-  # Read in the data from the baseline data (2016) for Department of Agricltiure and Rual Development (DARD)
-  baselineDARDImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDTargettedImportsMonthlyValue_31-12-16.csv")
-  baselineDARDImports <- read.csv(baselineDARDImportsFile)
-  
-  # Read in the data from the baseline data (2016) for Melanesian Spearhead Group (MSG)
-  baselineMSGExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_TradeAgreementExportMonthlyValue_31-12-16.csv")
-  baselineMSGExports <- read.csv(baselineMSGExportsFile)
-  
-  # Read in baseline trades data (2016)
-  baselineBalanceTradeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorPartnerCountryExportsMonthlyValue_31-12-16.csv")
-  baselineBalanceTrade <- read.csv(baselineBalanceTradeFile)
-  
-  # Read in the data from the baseline data (2016) for processed data??
-  baselineProcessedRawFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawExportMonthlyValue_31-12-16.csv")
-  baselineProcessedRaw <- read.csv(baselineProcessedRawFile)
-  
-  # Read in the data from the baseline data (2016) for production exports
-  baselineProductionExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorExportsMonthlyValue_31-12-16.csv")
-  baselineProductionExports <- read.csv(baselineProductionExportsFile)
-  
-  # Read in the data for monthly major exports
-  majorMonthlyExportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyExportCalculations_31-12-20.csv")
-  majorMonthlyExports <- read.csv(majorMonthlyExportsFile, 
-                                  colClasses = c("factor", "character", "numeric", "numeric",
-                                                 "numeric", "numeric", "numeric"))
-  colnames(majorMonthlyExports)[1] <- "Year"
-  
-  # Read in the data for monthly major imports
-  majorMonthlyImportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyImportCalculations_31-12-20.csv")
-  majorMonthlyImports <- read.csv(majorMonthlyImportsFile)
-  colnames(majorMonthlyImports)[1] <- "Year"
-  
-  # Read in the data from the open folder of the repository 
-  productsRelatedHealthFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
-  productsRelatedHealth <- read.csv(productsRelatedHealthFile)
-  
-  # Read in the data for monthly unhealthy imports 
-  monthlyUnhealthyImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesMonthlyValue_01-01-20.csv")
-  monthlyUnhealthyImports<- read.csv(monthlyUnhealthyImportsFile)
-  
-  # Read in historic trades data summary
-  historicalImportsFile <- file.path(secureDataFolder, "imports_history_summary.csv")
-  historicalImports<- read.csv(historicalImportsFile)
-  historicalExportsFile <- file.path(secureDataFolder, "exports_history_summary.csv")
-  historicalExports<- read.csv(historicalExportsFile)
-  
-  # Read in the imports substitution (chicken, fish) classification table
-  importsSubstitutionChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
-  importsSubstitutionChickenFish <- read.csv(importsSubstitutionChickenFishFile)
-  
-  # Read in the imports substitution (chicken, fish) monthly value table
-  monthlyValuenChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ChickenFishMonthlyValue_01-01-20.csv")
-  monthlyValuenChickenFish <- read.csv(monthlyValuenChickenFishFile)
-  
-  # Read in the imports substitution (DARD) classification table
-  importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
-  importsSubstitution<- read.csv(importsSubstitutionFile)
-}else{
-  
-  # Load from existing cache
-  load(cacheFile)
-}
+# Get the current month and year of data
+currentMonth <- unique(processedTradeStats$Month)
+currentYear <- unique(processedTradeStats$Year)
+
+# Load import substitution table
+importSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
+importSubstitution <- read.csv(importSubstitutionFile)
+
+# Load the Melanesian Spearhead Group (MSG) classifications table
+msgCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
+msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile)
+
+# Read in the Gross Domestic Product data
+grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
+timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
+
+# Read in the classification table for processed & raw Commodities (coconut, kava, cocoa and coffee)
+processedRawCommoditiesFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawCommodityClassifications_31-01-20.csv")
+processedRawCommodities <- read.csv(processedRawCommoditiesFile)
+
+# Read in the data from the baseline data (2016) for Department of Agricltiure and Rual Development (DARD)
+baselineDARDImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDTargettedImportsMonthlyValue_31-12-16.csv")
+baselineDARDImports <- read.csv(baselineDARDImportsFile)
+
+# Read in the data from the baseline data (2016) for Melanesian Spearhead Group (MSG)
+baselineMSGExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_TradeAgreementExportMonthlyValue_31-12-16.csv")
+baselineMSGExports <- read.csv(baselineMSGExportsFile)
+
+# Read in baseline trades data (2016)
+baselineBalanceTradeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorPartnerCountryExportsMonthlyValue_31-12-16.csv")
+baselineBalanceTrade <- read.csv(baselineBalanceTradeFile)
+
+# Read in the data from the baseline data (2016) for processed data??
+baselineProcessedRawFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawExportMonthlyValue_31-12-16.csv")
+baselineProcessedRaw <- read.csv(baselineProcessedRawFile)
+
+# Read in the data from the baseline data (2016) for production exports
+baselineProductionExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorExportsMonthlyValue_31-12-16.csv")
+baselineProductionExports <- read.csv(baselineProductionExportsFile)
+
+# Read in the data for monthly major exports
+majorMonthlyExportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyExportCalculations_31-12-20.csv")
+majorMonthlyExports <- read.csv(majorMonthlyExportsFile, 
+                                colClasses = c("factor", "character", "numeric", "numeric",
+                                               "numeric", "numeric", "numeric"))
+colnames(majorMonthlyExports)[1] <- "Year"
+
+# Read in the data for monthly major imports
+majorMonthlyImportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyImportCalculations_31-12-20.csv")
+majorMonthlyImports <- read.csv(majorMonthlyImportsFile)
+colnames(majorMonthlyImports)[1] <- "Year"
+
+# Read in the data from the open folder of the repository 
+productsRelatedHealthFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
+productsRelatedHealth <- read.csv(productsRelatedHealthFile)
+
+# Read in the data for monthly unhealthy imports 
+monthlyUnhealthyImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesMonthlyValue_01-01-20.csv")
+monthlyUnhealthyImports<- read.csv(monthlyUnhealthyImportsFile)
+
+# Read in historic trades data summary
+historicalImportsFile <- file.path(secureDataFolder, "imports_history_summary.csv")
+historicalImports<- read.csv(historicalImportsFile)
+historicalExportsFile <- file.path(secureDataFolder, "exports_history_summary.csv")
+historicalExports<- read.csv(historicalExportsFile)
+
+# Read in the imports substitution (chicken, fish) classification table
+importsSubstitutionChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
+importsSubstitutionChickenFish <- read.csv(importsSubstitutionChickenFishFile)
+
+# Read in the imports substitution (chicken, fish) monthly value table
+monthlyValuenChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ChickenFishMonthlyValue_01-01-20.csv")
+monthlyValuenChickenFish <- read.csv(monthlyValuenChickenFishFile)
+
+# Read in the imports substitution (DARD) classification table
+importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
+importsSubstitution<- read.csv(importsSubstitutionFile)
+
 ```
 
 
@@ -464,7 +454,11 @@ The total value of the Melanesian Spearhead Group (MSG) agreement is VT 176.79 m
 
 Level of production of major commodities is VT 360.01 million (ECO 1.7.1). The major commodities included Beef (VT 29.64 million), Cocoa (VT 49.34 million), Coconut Oil (VT 6.33 million), Coffee (VT 0.89 million), Copra (VT 35.56 million), Kava (VT 146.54 million) and Wood (VT 91.72 million). The ratio of processed export commodities including coconut, kava, cocoa, and coffee to raw exports is 1.17 (ECO 4.3.2). Total value of processed exports is VT 128.14 million and total value of raw exports is VT 109.63 million. 
 
-
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
 &nbsp;  
 &nbsp;  
 &nbsp;  
@@ -563,15 +557,7 @@ Balance of trade by major partner countries is VT -2,477.60 million. The main co
 
 Major imports from Australia were Machinery & Electrical Appliances (VT 141.88 million); and Prepared Foodstuffs, Beverages, Alcohol, and Tobacco (VT 97.24 million). Major imports from China were Machinery and Electrical Appliances (VT 156.75 million), and Base Metals (VT 91.76 million). Major imports from Japan were Vehicles and Transport Equipment (VT 78.83 million), and Machinery and Electrical Appliances (VT 27.86 million). Major imports from Singapore were Mineral Products (VT 785.69 million); and Prepared Foodstuffs, Beverages, Alcohol, and Tobacco (VT 15.73 million). Major imports from Thailand were Vehicles and Transport Equipment (VT 117.06 million), and Plastics and Rubbers (VT 10.27 million). 
 
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
+######### Page break
 
 # Trade Balance of Pacific Islands (excluding Melanesian Islands, Australia and New Zealand) 
 
@@ -718,6 +704,13 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
 
 ```
 
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+
 # Trade by Trade Agreement- Melanesian Spearhead Group
 
 ```{r trade by trade agreement, ft.align="left"}
@@ -791,8 +784,6 @@ The major imports from Fiji are Wheat or Meslin Flour (VT 19.48 million), and Br
 
 The major export to Fiji is Kava (VT 71.54 million), to Papua New Guinea is Beef (VT 7.84 million), and to Solomon Islands is also Beef (VT 13.99 million). 
 
-######### Page break
-
 ## International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights
 
 # Principal Exports
@@ -859,6 +850,8 @@ ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_sh
 The level of production of the top five Major Principal Exports is VT 267.41 million. The Principal Exports identified included Beef (VT 29.64 million), Cocoa (VT 49.34 million), Coconut Oil (VT 6.33 million), Coffee (VT 0.89 million), Copra (VT 35.56 million), and Kava (VT 146.54 million). 
 
 The main country of destination for Beef was the Solomon Islands (VT 13.99 million). The major country of destination for Cocoa is Malaysia (VT 43.19 million), for Coconut Oil is Fiji (VT 6.24 million), and Copra is United Arab Emirates (VT 35.56 million). Kava is exported mainly to Fiji (VT 71.54 million), New Caledonia (VT 43.00 million), and New Zealand (VT 14.24 million). 
+
+######### Page break
 
 # Top 5 New Major Exports
 
@@ -967,6 +960,9 @@ Total value of top five Principal imports is VT 1061 million. The Principal Impo
 
 The main country of origin for Alcoholic Drinks is Australia (VT 27.04 million). The main country of origin for Articles of Iron and Steel is China (VT 56.34 million), and Medicaments is Australia (VT 13.47 million). The main country of origin for Petroleum Oils is Singapore (VT 784.55 million), and Rice is Taiwan (VT 32.27 million). 
 
+&nbsp;  
+&nbsp;  
+
 # Top 5 New Major Imports
 
 ```{r new major imports, fig.height = 1.8}
@@ -1054,6 +1050,8 @@ ggplot(subsetHistoralAndCurrentMonthFood, aes(x = Year, y = (total/1000000), gro
 ```
 
 Total value of Bakery Products is VT 35.28 million and are mainly imported from Fiji (VT 11.86 million). Total value of Canned Meats is VT 11.50 million and are mainly imported from Australia (VT 11.05 million). Total value of Confectionary is VT 23.99 million and are mainly imported from Australia (VT 15.46 million). Total value of Cordial is VT 13.61 million and are mainly imported from Malaysia (VT 4.50 million). Total value of Noodles is VT 17.13 million and are mainly imported from Indonesia (VT 5.87 million). 
+
+######### Page break
 
 # Imports of food and products targeted as those that can be produced domestically
 
