@@ -595,19 +595,19 @@ codesCP4 <- c(4000, 4071, 7100)
 # Define the categories used for each column
 categoryColumn <- "IMPORT.COUNTRY"
 columnCategories <- list(
-  "American Samoa: Exports"=c("AMERICAN SAMOA"),
+  "American Samoa: Imports"=c("AMERICAN SAMOA"),
   "Tonga: Imports"= c("TONGA"),
-  "Cook Islands: Exports"=c("COOK ISLANDS"),
-  "Kiribati: Exports"=c("KIRIBATI"),
-  "Federated States of Micronesia: Exports"=c("FED. STATES OF MICRONESIA"),
-  "Marshall Islands: Exports"=c("MARSHALL ISLANDS"),
-  "Nauru: Exports"=c("NAURU"),
-  "Niue: Exports"=c("NIUE"),
-  "Palau: Exports"=c("PALAU"),
-  "Samoa: Exports"=c("SAMOA"),
-  "French Polynesia: Exports"=c("FRENCH POLYNESIA"),
-  "Tuvalu: Exports"=c("TUVALU"),
-  "Wallis and Futuna Islands: Exports"=c("WALLIS AND FUTUNA ISLANDS")
+  "Cook Islands: Imports"=c("COOK ISLANDS"),
+  "Kiribati: Imports"=c("KIRIBATI"),
+  "Federated States of Micronesia: Imports"=c("FED. STATES OF MICRONESIA"),
+  "Marshall Islands: Imports"=c("MARSHALL ISLANDS"),
+  "Nauru: Imports"=c("NAURU"),
+  "Niue: Imports"=c("NIUE"),
+  "Palau: Imports"=c("PALAU"),
+  "Samoa: Imports"=c("SAMOA"),
+  "French Polynesia: Imports"=c("FRENCH POLYNESIA"),
+  "Tuvalu: Imports"=c("TUVALU"),
+  "Wallis and Futuna Islands: Imports"=c("WALLIS AND FUTUNA ISLANDS")
 )
 
 # Build the table
@@ -722,7 +722,8 @@ sitcImportMSGValue <- importTradeAgreement %>%
 colnames(sitcImportMSGValue)[-1] <- paste(colnames(sitcImportMSGValue)[-1], "IMPORTS")
 
 # Transpose the tables for exports and imports
-tradeByTradeAgreement <- merge(sitcExportMSGValue, sitcImportMSGValue, by = "SITC.description")
+tradeByTradeAgreement <- merge(sitcExportMSGValue, sitcImportMSGValue, 
+                               by = "SITC.description", all = TRUE)
 
 # Add and reorder columns
 countryColumnNames <- c("FIJI EXPORTS", "FIJI IMPORTS",
