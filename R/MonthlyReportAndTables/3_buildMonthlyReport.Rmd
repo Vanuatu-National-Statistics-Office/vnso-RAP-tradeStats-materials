@@ -3,6 +3,8 @@ title: "International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %
 output: 
   word_document:
     reference_docx: styles_reference.docx
+params:
+  use_cache: TRUE
 ---
 
 ```{r setup, include=FALSE}
@@ -42,88 +44,96 @@ source(file.path(repository, "R", "functions.R"))
 ```{r load data}
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
-# Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv"))
-processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
+# Check if using cache
+cacheFile <- file.path(repository, "data", "secure", "report_environment_cache.RData")
+if(params$useCache == FALSE || file.exists(cacheFile) == FALSE){
+  
+  # Load the processed trade statistics for month of interest
+  processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv"))
+  processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 
-# Get the current month and year of data
-currentMonth <- unique(processedTradeStats$Month)
-currentYear <- unique(processedTradeStats$Year)
-
-# Load import substitution table
-importSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
-importSubstitution <- read.csv(importSubstitutionFile)
-
-# Load the Melanesian Spearhead Group (MSG) classifications table
-msgCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
-msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile)
-
-# Read in the Gross Domestic Product data
-grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
-timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
-
-# Read in the classification table for processed & raw Commodities (coconut, kava, cocoa and coffee)
-processedRawCommoditiesFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawCommodityClassifications_31-01-20.csv")
-processedRawCommodities <- read.csv(processedRawCommoditiesFile)
-
-# Read in the data from the baseline data (2016) for Department of Agricltiure and Rual Development (DARD)
-baselineDARDImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDTargettedImportsMonthlyValue_31-12-16.csv")
-baselineDARDImports <- read.csv(baselineDARDImportsFile)
-
-# Read in the data from the baseline data (2016) for Melanesian Spearhead Group (MSG)
-baselineMSGExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_TradeAgreementExportMonthlyValue_31-12-16.csv")
-baselineMSGExports <- read.csv(baselineMSGExportsFile)
-
-# Read in baseline trades data (2016)
-baselineBalanceTradeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorPartnerCountryExportsMonthlyValue_31-12-16.csv")
-baselineBalanceTrade <- read.csv(baselineBalanceTradeFile)
-
-# Read in the data from the baseline data (2016) for processed data??
-baselineProcessedRawFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawExportMonthlyValue_31-12-16.csv")
-baselineProcessedRaw <- read.csv(baselineProcessedRawFile)
-
-# Read in the data from the baseline data (2016) for production exports
-baselineProductionExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorExportsMonthlyValue_31-12-16.csv")
-baselineProductionExports <- read.csv(baselineProductionExportsFile)
-
-# Read in the data for monthly major exports
-majorMonthlyExportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyExportCalculations_31-12-20.csv")
-majorMonthlyExports <- read.csv(majorMonthlyExportsFile, 
-                                colClasses = c("factor", "character", "numeric", "numeric",
-                                               "numeric", "numeric", "numeric"))
-colnames(majorMonthlyExports)[1] <- "Year"
-
-# Read in the data for monthly major imports
-majorMonthlyImportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyImportCalculations_31-12-20.csv")
-majorMonthlyImports <- read.csv(majorMonthlyImportsFile)
-colnames(majorMonthlyImports)[1] <- "Year"
-
-# Read in the data from the open folder of the repository 
-productsRelatedHealthFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
-productsRelatedHealth <- read.csv(productsRelatedHealthFile)
-
-# Read in the data for monthly unhealthy imports 
-monthlyUnhealthyImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesMonthlyValue_01-01-20.csv")
-monthlyUnhealthyImports<- read.csv(monthlyUnhealthyImportsFile)
-
-# Read in historic trades data summary
-historicalImportsFile <- file.path(secureDataFolder, "imports_history_summary.csv")
-historicalImports<- read.csv(historicalImportsFile)
-historicalExportsFile <- file.path(secureDataFolder, "exports_history_summary.csv")
-historicalExports<- read.csv(historicalExportsFile)
-
-# Read in the imports substitution (chicken, fish) classification table
-importsSubstitutionChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
-importsSubstitutionChickenFish <- read.csv(importsSubstitutionChickenFishFile)
-
-# Read in the imports substitution (chicken, fish) monthly value table
-monthlyValuenChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ChickenFishMonthlyValue_01-01-20.csv")
-monthlyValuenChickenFish <- read.csv(monthlyValuenChickenFishFile)
-
-# Read in the imports substitution (DARD) classification table
-importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
-importsSubstitution<- read.csv(importsSubstitutionFile)
-
+  # Get the current month and year of data
+  currentMonth <- unique(processedTradeStats$Month)
+  currentYear <- unique(processedTradeStats$Year)
+  
+  # Load import substitution table
+  importSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
+  importSubstitution <- read.csv(importSubstitutionFile)
+  
+  # Load the Melanesian Spearhead Group (MSG) classifications table
+  msgCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
+  msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile)
+  
+  # Read in the Gross Domestic Product data
+  grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
+  timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
+  
+  # Read in the classification table for processed & raw Commodities (coconut, kava, cocoa and coffee)
+  processedRawCommoditiesFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawCommodityClassifications_31-01-20.csv")
+  processedRawCommodities <- read.csv(processedRawCommoditiesFile)
+  
+  # Read in the data from the baseline data (2016) for Department of Agricltiure and Rual Development (DARD)
+  baselineDARDImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDTargettedImportsMonthlyValue_31-12-16.csv")
+  baselineDARDImports <- read.csv(baselineDARDImportsFile)
+  
+  # Read in the data from the baseline data (2016) for Melanesian Spearhead Group (MSG)
+  baselineMSGExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_TradeAgreementExportMonthlyValue_31-12-16.csv")
+  baselineMSGExports <- read.csv(baselineMSGExportsFile)
+  
+  # Read in baseline trades data (2016)
+  baselineBalanceTradeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorPartnerCountryExportsMonthlyValue_31-12-16.csv")
+  baselineBalanceTrade <- read.csv(baselineBalanceTradeFile)
+  
+  # Read in the data from the baseline data (2016) for processed data??
+  baselineProcessedRawFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawExportMonthlyValue_31-12-16.csv")
+  baselineProcessedRaw <- read.csv(baselineProcessedRawFile)
+  
+  # Read in the data from the baseline data (2016) for production exports
+  baselineProductionExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorExportsMonthlyValue_31-12-16.csv")
+  baselineProductionExports <- read.csv(baselineProductionExportsFile)
+  
+  # Read in the data for monthly major exports
+  majorMonthlyExportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyExportCalculations_31-12-20.csv")
+  majorMonthlyExports <- read.csv(majorMonthlyExportsFile, 
+                                  colClasses = c("factor", "character", "numeric", "numeric",
+                                                 "numeric", "numeric", "numeric"))
+  colnames(majorMonthlyExports)[1] <- "Year"
+  
+  # Read in the data for monthly major imports
+  majorMonthlyImportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyImportCalculations_31-12-20.csv")
+  majorMonthlyImports <- read.csv(majorMonthlyImportsFile)
+  colnames(majorMonthlyImports)[1] <- "Year"
+  
+  # Read in the data from the open folder of the repository 
+  productsRelatedHealthFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
+  productsRelatedHealth <- read.csv(productsRelatedHealthFile)
+  
+  # Read in the data for monthly unhealthy imports 
+  monthlyUnhealthyImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesMonthlyValue_01-01-20.csv")
+  monthlyUnhealthyImports<- read.csv(monthlyUnhealthyImportsFile)
+  
+  # Read in historic trades data summary
+  historicalImportsFile <- file.path(secureDataFolder, "imports_history_summary.csv")
+  historicalImports<- read.csv(historicalImportsFile)
+  historicalExportsFile <- file.path(secureDataFolder, "exports_history_summary.csv")
+  historicalExports<- read.csv(historicalExportsFile)
+  
+  # Read in the imports substitution (chicken, fish) classification table
+  importsSubstitutionChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
+  importsSubstitutionChickenFish <- read.csv(importsSubstitutionChickenFishFile)
+  
+  # Read in the imports substitution (chicken, fish) monthly value table
+  monthlyValuenChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ChickenFishMonthlyValue_01-01-20.csv")
+  monthlyValuenChickenFish <- read.csv(monthlyValuenChickenFishFile)
+  
+  # Read in the imports substitution (DARD) classification table
+  importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
+  importsSubstitution<- read.csv(importsSubstitutionFile)
+}else{
+  
+  # Load from existing cache
+  load(cacheFile)
+}
 ```
 
 
