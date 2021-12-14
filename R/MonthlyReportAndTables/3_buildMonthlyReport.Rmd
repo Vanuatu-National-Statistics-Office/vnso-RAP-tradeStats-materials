@@ -156,7 +156,7 @@ ENV1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"=
 ## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports aligned to MSG agreement included)
 
 # Calculate value of imports from countries that have signed the MSG and PICTA trade agreements
-importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
+importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
 importTradeAgreementValue<- sum(importTradeAgreement$Stat..Value)
 
 # Merge commodities to be excluded from MSG Trade Agreement
@@ -166,7 +166,6 @@ msgCommoditiesExcludeMerged <- merge(processedTradeStats, msgCommoditiesExclude,
 # Calculate value of all exports that are destined to countries that have signed the MSG trade agreement
 allMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
-write.csv()
 exportTradeAgreementValue<- sum(exportTradeAgreement$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
@@ -705,6 +704,7 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
 # Commodities (imports and exports) included in Trade Agreements 
 importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+write.csv(exportTradeAgreement, "tradeagreement.csv")
 
 # Calculate exports by SITC to MSG countries
 sitcExportMSGValue <- exportTradeAgreement %>%
