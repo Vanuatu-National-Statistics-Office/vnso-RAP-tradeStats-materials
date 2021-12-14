@@ -43,7 +43,7 @@ source(file.path(repository, "R", "functions.R"))
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-10-21.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 
 # Get the current month and year of data
@@ -143,6 +143,9 @@ importSubstitutionMerged <- merge(processedTradeStats, importSubstitution, by="H
 # Calculate value of all imports that are targeted by DARD
 importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000, 4071, 7100), ]
 importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Import.Substitution) == FALSE, ]
+
+write.csv(importSubstitutionDataFrame, "DARD.csv")
+
 estimateENV1.3.1<- sum(importSubstitutionDataFrame$Stat..Value)
 indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
 
@@ -163,6 +166,7 @@ msgCommoditiesExcludeMerged <- merge(processedTradeStats, msgCommoditiesExclude,
 # Calculate value of all exports that are destined to countries that have signed the MSG trade agreement
 allMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+write.csv()
 exportTradeAgreementValue<- sum(exportTradeAgreement$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
@@ -255,7 +259,7 @@ colnames(timeSeriesGrossDomesticProduct) <- c("Year", "Value")
 timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSeriesGrossDomesticProduct$Year), ]
 
 # Proxy indicator calculated for NSDP ECO 1.6.2 by dividing latest GDP figure by Trade Agreement value
-mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
+mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2019 GDP
 tradeAgreementGDPProportion<- (estimateECO1.5.2/mostRecentGrossDomesticProduct)*100
 
 # Insert values into table as a percentage to 2 decimal places
@@ -768,7 +772,7 @@ tradeByTradeTable
 
 ## International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights
 
-# Principle Exports
+# Principal Exports
 
 ```{r principle exports through time, fig.height=1.75}
 # Calculate value of major exports commodities for current month for historical data
@@ -793,6 +797,8 @@ columnCategories <- list(
 majorExportCommoditiesValues <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 majorExportCommoditiesValues<- (majorExportCommoditiesValues/1000000)
 majorExportCommoditiesValues<- round(majorExportCommoditiesValues)
+names(majorExportCommoditiesValues)[3] <- "Beef"
+names(majorExportCommoditiesValues)[2] <- "Coconut.Oil"
 
 # Convert to data frame and add current year and month
 majorExportCommoditiesValues <- cbind(data.frame("Year" = currentYear, "Month" = currentMonth), 
@@ -891,6 +897,9 @@ columnCategories <- list(
 majorImportsCurrentMonth <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 majorImportsCurrentMonth<- (majorImportsCurrentMonth/1000000)
 majorImportsCurrentMonth<- round(majorImportsCurrentMonth)
+names(majorImportsCurrentMonth)[1] <- "Alcoholic.Drinks"
+names(majorImportsCurrentMonth)[2] <- "Articles.Iron.and.Steel"
+names(majorImportsCurrentMonth)[4] <- "Petroleum.Oils.and.oils.obtained.from.bituminous.minerals"
 
 # Convert to data frame and add current year and month
 majorImportCommoditiesValues <- cbind(data.frame("Year" = currentYear, "Month" = currentMonth), 
