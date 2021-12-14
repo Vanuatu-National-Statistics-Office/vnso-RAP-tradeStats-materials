@@ -689,8 +689,8 @@ buildRawSummaryTable <- function(processedTradeStats, codesCP4, categoryColumn, 
     stop(paste0("ERROR! The \"CP4\" column does not exist in table!"))
   }
   
-  # Check column categories provided as vector - convert to list
-  if(is.vector(columnCategories)){
+  # Check column categories provided isn't a list - convert to list
+  if(is.list(columnCategories) == FALSE && is.vector(columnCategories) == TRUE){
     columnCategories <- lapply(columnCategories, 
                            FUN=function(category){
                              return(category)
