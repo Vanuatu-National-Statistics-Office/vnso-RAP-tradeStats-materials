@@ -144,7 +144,7 @@ importSubstitutionMerged <- merge(processedTradeStats, importSubstitution, by="H
 importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000, 4071, 7100), ]
 importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Import.Substitution) == FALSE, ]
 
-write.csv(importSubstitutionDataFrame, "DARD.csv")
+#write.csv(importSubstitutionDataFrame, file.path("..", "..", "data", "open", "DARD.csv"))
 
 estimateENV1.3.1<- sum(importSubstitutionDataFrame$Stat..Value)
 indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
@@ -166,7 +166,7 @@ msgCommoditiesExcludeMerged <- merge(processedTradeStats, msgCommoditiesExclude,
 # Calculate value of all exports that are destined to countries that have signed the MSG trade agreement
 allMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
-write.csv()
+#write.csv()
 exportTradeAgreementValue<- sum(exportTradeAgreement$Stat..Value)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
@@ -527,11 +527,12 @@ colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTrad
                                                           FUN=function(colName){
                                                             return(strsplit(colName, split=":")[[1]][1])
                                                           })
-balanceOfTradeByMajorPartnerCountries <- data.frame("Country" = colnames(balanceOfTradeByMajorPartnerCountries),
+balanceOfTradeByMajorPartnerCountries <- data.frame("Country" = tolower(colnames(balanceOfTradeByMajorPartnerCountries)),
                                                     "Balance_of_trade" = as.numeric(balanceOfTradeByMajorPartnerCountries[1, ]))
 
 # Get the polygons for the world
 world <- rnaturalearth::ne_countries(type = "countries", scale = "medium", returnclass = "sf")
+world$admin <- tolower(world$admin)
 
 # Merge in my example data
 world <- merge(world, balanceOfTradeByMajorPartnerCountries, by.x = "admin", by.y = "Country", all.x = TRUE)
