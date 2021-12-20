@@ -719,13 +719,6 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
 
 ```
 
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-
 # Trade by Trade Agreement- Melanesian Spearhead Group
 
 ```{r trade by trade agreement, ft.align="left"}
@@ -870,9 +863,6 @@ The level of production of the top five Major Principal Exports is VT 462.99 mil
 
 The main country of destination for Beef was Papua New Guinea (VT 7.52 million). The major country of destination for Cocoa is Malaysia (VT 15.98 million), for Coconut Oil is Singapore (VT 11.91 million), and Copra is Bangladesh (VT 21.52 million). Kava is exported mainly to Fiji (VT 44.02 million), New Caledonia (VT 51.25 million), and New Zealand (VT 245.28 million). 
 
-
-######### Page break
-
 # Top 5 New Major Exports
 
 ```{r new major exports, fig.height=1.75}
@@ -921,6 +911,8 @@ exportsOtherandNA %>%
 ```
 
 Total value of Scrap Metal VT 11.72 million, Pharmaceuticals VT 7.58 million, Frozen Albacore VT 6.82 million, Other Meds VT 3.70 million, and Lead Batteries VT 2.26 million.
+
+######### Page break
 
 # Principle Imports
 
@@ -985,10 +977,6 @@ ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_sh
 Total value of top five Principal imports is VT 561.37 million. The Principal Imports included Alcoholic Drinks (VT 51.61 million), Articles of Iron and Steel (VT 124.56 million), Medicaments (VT 56.32 million), Petroleum Oils (VT 275.05 million), and Rice (VT 53.82 million).
 
 The main country of origin for Alcoholic Drinks is France (VT 26.24 million). The main country of origin for Articles of Iron and Steel is Australia (VT 81.11 million), and Medicaments is Australia (VT 17.45 million). The main country of origin for Petroleum Oils is Singapore (VT 256.45 million), and Rice is China (VT 31.77 million). 
-
-
-&nbsp;  
-&nbsp;  
 
 # Top 5 New Major Imports
 
@@ -1089,8 +1077,6 @@ ggplot(subsetHistoralAndCurrentMonthFood, aes(x = Year, y = (total/1000000), gro
 ```
 
 Total value of Bakery Products is VT 63.79 million and are mainly imported from Fiji (VT 53.99 million). Total value of Canned Meats is VT 43.72 million and are mainly imported from Fiji (VT 36.55 million). Total value of Confectionary is VT 31.21 million and are mainly imported from Fiji (VT 15.61 million). Total value of Cordial is VT 11.22 million and are mainly imported from Australia (VT 2.49 million). Total value of Noodles is VT 31.66 million and are mainly imported from Fiji (VT 27.55 million). 
-
-######### Page break
 
 # Imports of food and products targeted as those that can be produced domestically
 
