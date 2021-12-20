@@ -732,7 +732,7 @@ sitcImportMSGValue <- importTradeAgreement %>%
 colnames(sitcImportMSGValue)[-1] <- paste(colnames(sitcImportMSGValue)[-1], "IMPORTS")
 
 # Transpose the tables for exports and imports
-tradeByTradeAgreement <- merge(sitcExportMSGValue, sitcImportMSGValue, by = "SITC.description")
+tradeByTradeAgreement <- merge(sitcExportMSGValue, sitcImportMSGValue, by = "SITC.description", all = TRUE)
 
 # Add and reorder columns
 countryColumnNames <- c("FIJI EXPORTS", "FIJI IMPORTS",
@@ -748,11 +748,11 @@ colnames(tradeByTradeAgreement)[1] <- "SITC Description"
 
 # Add totol column and row
 tradeByTradeAgreement <- tradeByTradeAgreement %>%
-  adorn_totals("col") %>%
-  adorn_totals("row", name = "Grand Total")
+  adorn_totals("col", fill = NA) %>%
+  adorn_totals("row", name = "Grand Total", fill = NA)
 
 # Divide by 1,000,000
-#tradeByTradeAgreement[, -1] <- round(tradeByTradeAgreement[, -1] / 1000000, digits = 2)
+tradeByTradeAgreement[, -1] <- round(tradeByTradeAgreement[, -1] / 1000000, digits = 2)
 
 # Initiailise a flextable object for NSDP table
 tradeByTradeTable <- flextable(tradeByTradeAgreement)
