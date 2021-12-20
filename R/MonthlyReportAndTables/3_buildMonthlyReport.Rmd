@@ -792,9 +792,6 @@ The major imports from Fiji are Prepared or Preserved Meat (VT 46.20 million), a
 
 The major export to Fiji is Kava (VT 44.02 million), to Papua New Guinea is Beef (VT 7.52 million), and to Solomon Islands is Medicaments (VT 3.56 million). 
 
-
-## International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights
-
 # Principle Exports
 
 ```{r principle exports through time, fig.height=2}
