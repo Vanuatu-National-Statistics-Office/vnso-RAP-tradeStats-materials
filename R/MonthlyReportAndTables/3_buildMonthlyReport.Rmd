@@ -43,7 +43,7 @@ source(file.path(repository, "R", "functions.R"))
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-09-21.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-11-21.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 
 # Get the current month and year of data
