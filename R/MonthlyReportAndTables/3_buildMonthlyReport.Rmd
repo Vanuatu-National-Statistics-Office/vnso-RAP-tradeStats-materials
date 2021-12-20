@@ -7,7 +7,9 @@ output:
 
 ```{r setup, include=FALSE}
 # Set echo=FALSE as default for code cells
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE,
+                      dpi = 600)
 ```
 
 ```{r preparation, include = FALSE}
@@ -642,7 +644,7 @@ ggplot(pacificCountryTotalsLong, aes(x=Country, y= (Value/1000000),  fill=Type))
   theme_minimal() + 
   labs(y = "Vatu (millions)") +
   scale_fill_brewer(palette="Blues") +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank(),
         legend.title = element_text(size = 9))
@@ -696,7 +698,7 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
   labs(y = "Vatu (millions)") +
   theme_minimal() +
   theme(legend.title=element_blank(),
-        axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+        axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank())
 
@@ -839,7 +841,7 @@ ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_sh
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend\nAnalysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank(),
         legend.title = element_text(size = 9))
@@ -891,7 +893,7 @@ exportsOtherandNA %>%
     geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
       labs(y = "Vatu (millions)") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+    theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 7.5),
           axis.title.y = element_text(size = 9),
           axis.title.x = element_blank())
 
@@ -950,7 +952,7 @@ ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_sh
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank(),
         legend.title = element_text(size = 9))
@@ -1000,7 +1002,7 @@ importsOther %>%
     geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
   labs(y = "Vatu (millions)") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+    theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 7.5),
           axis.title.y = element_text(size = 9),
           axis.title.x = element_blank())
 
@@ -1017,7 +1019,7 @@ productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWi
 mergedProductsRelatedNCDs<- merge(processedTradeStats, productsRelatedHealth, by="HS.Code", all.x = TRUE) # this isn't working properly jumping from 9877 obs to 10059
 
 # Create data-frame for all unhealthy imports for current month
-unhealthlyCommodities <- processedTradeStats[is.na(processedTradeStats$Unhealthy.Focus.Food.Category) == FALSE, ]
+unhealthlyCommodities <- mergedProductsRelatedNCDs[is.na(mergedProductsRelatedNCDs$Unhealthy.Focus.Food.Category) == FALSE, ]
 unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000, 4071, 7100), ]
 
 # Calculate value of Food Sub-Category for current month
@@ -1047,7 +1049,7 @@ ggplot(subsetHistoralAndCurrentMonthFood, aes(x = Year, y = (total/1000000), gro
   scale_x_continuous(breaks = x_ticks) +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank(),
         legend.key.size = unit(0.1, "cm"),
@@ -1068,7 +1070,7 @@ importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$
 mergedImportSubstitutions<- merge(processedTradeStats, importsSubstitutionChickenFish, by="HS.Code", all.x=TRUE) # this isn't working properly jumping from 9877 obs to 9878
 
 # Calculate value of import substitutions for current month
-chickenFishCategoryValue <- processedTradeStats %>%
+chickenFishCategoryValue <- mergedImportSubstitutions %>%
   filter(Livestock.Substitution != "NA") %>%
   group_by(Year, Month, Livestock.Substitution) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") %>%
@@ -1094,7 +1096,7 @@ ggplot(historalAndCurrentMonthChickenFish, aes(x = Year, y = (total/1000000), gr
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
+  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
         axis.title.y = element_text(size = 9),
         axis.title.x = element_blank(),
         legend.key.size = unit(0.1, "cm"),
