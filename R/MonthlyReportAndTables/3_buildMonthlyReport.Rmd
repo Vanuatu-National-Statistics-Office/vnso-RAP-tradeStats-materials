@@ -38,6 +38,15 @@ secureDataFolder <- file.path(repository, "data", "secure")
 
 # Load the general R functions
 source(file.path(repository, "R", "functions.R"))
+
+# Some general ggplot settings
+plotTextSize <- 9
+xAxisText <- list(
+  "angle" = 35,
+  "size" = plotTextSize,
+  "vjust" = 1.1,
+  "hjust" = 1
+)
 ```
 
 
@@ -644,10 +653,13 @@ ggplot(pacificCountryTotalsLong, aes(x=Country, y= (Value/1000000),  fill=Type))
   theme_minimal() + 
   labs(y = "Vatu (millions)") +
   scale_fill_brewer(palette="Blues") +
-  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
-        axis.title.y = element_text(size = 9),
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
         axis.title.x = element_blank(),
-        legend.title = element_text(size = 9))
+        legend.title = element_text(size = plotTextSize))
 
 ```
 Total Trade Balance of Pacific Islands excluding Melanesia, Australia and New Zealand is VT 245.30 million. This was driven by exports of Kava to Kiribati (VT 245.30 million), and imports of Wood from Samoa (VT 0.01 million), and Used Clothing from Tonga (VT 0.00 million).  
@@ -697,10 +709,13 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
   geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
   labs(y = "Vatu (millions)") +
   theme_minimal() +
-  theme(legend.title=element_blank(),
-        axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
-        axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank())
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size = xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank(),
+        legend.title = element_blank())
 
 ```
 
@@ -787,9 +802,9 @@ The major export to Fiji is Kava (VT 44.02 million), to Papua New Guinea is Beef
 
 ## International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights
 
-# Principal Exports
+# Principle Exports
 
-```{r principle exports through time, fig.height=1.75}
+```{r principle exports through time, fig.height=2}
 # Calculate value of major exports commodities for current month for historical data
 majorExportsValue <- majorMonthlyExports %>%
   filter(Month == currentMonth)
@@ -841,10 +856,13 @@ ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_sh
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend\nAnalysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
-        axis.title.y = element_text(size = 9),
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
         axis.title.x = element_blank(),
-        legend.title = element_text(size = 9))
+        legend.title = element_text(size = plotTextSize))
 
 ```
 
@@ -893,9 +911,12 @@ exportsOtherandNA %>%
     geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
       labs(y = "Vatu (millions)") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 7.5),
-          axis.title.y = element_text(size = 9),
-          axis.title.x = element_blank())
+    theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size = 7.5),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank())
 
 ```
 
@@ -903,7 +924,7 @@ Total value of Scrap Metal VT 11.72 million, Pharmaceuticals VT 7.58 million, Fr
 
 # Principle Imports
 
-```{r principle imports through time, fig.height = 1.8}
+```{r principle imports through time, fig.height = 2}
 # Calculate value of major imports commodities for current month for historical data
 majorImportsValue <- majorMonthlyImports %>%
   filter(Month == currentMonth)
@@ -952,10 +973,13 @@ ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_sh
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
-        axis.title.y = element_text(size = 9),
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
         axis.title.x = element_blank(),
-        legend.title = element_text(size = 9))
+        legend.title = element_text(size = plotTextSize))
 ```
 
 Total value of top five Principal imports is VT 561.37 million. The Principal Imports included Alcoholic Drinks (VT 51.61 million), Articles of Iron and Steel (VT 124.56 million), Medicaments (VT 56.32 million), Petroleum Oils (VT 275.05 million), and Rice (VT 53.82 million).
@@ -1002,9 +1026,13 @@ importsOther %>%
     geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
   labs(y = "Vatu (millions)") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 7.5),
-          axis.title.y = element_text(size = 9),
-          axis.title.x = element_blank())
+    theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size = 7.5),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank(),
+        legend.title = element_text(size = plotTextSize))
 
 ```
 
@@ -1049,11 +1077,14 @@ ggplot(subsetHistoralAndCurrentMonthFood, aes(x = Year, y = (total/1000000), gro
   scale_x_continuous(breaks = x_ticks) +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
-        axis.title.y = element_text(size = 9),
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
         axis.title.x = element_blank(),
         legend.key.size = unit(0.1, "cm"),
-        legend.title = element_text(size = 9))
+        legend.title = element_text(size = plotTextSize))
 
 ```
 
@@ -1096,11 +1127,14 @@ ggplot(historalAndCurrentMonthChickenFish, aes(x = Year, y = (total/1000000), gr
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 55, vjust = 1.05, hjust=1, size = 9),
-        axis.title.y = element_text(size = 9),
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
         axis.title.x = element_blank(),
-        legend.key.size = unit(0.1, "cm"),
-        legend.title = element_text(size = 9))
+        legend.title = element_text(size = plotTextSize),
+        legend.key.size = unit(0.1, "cm"))
 
 ```
 
