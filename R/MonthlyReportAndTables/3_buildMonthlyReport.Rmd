@@ -1026,6 +1026,10 @@ importsOther %>%
 
 Total value of Zoomline Crane VT 49.20 million, Bitumen VT 37.86 million, Paint VT 13.37 million, Vaccine- Aztra Zeneca VT 12.64 million, and Deform Bar VT 9.93 million.  
 
+&nbsp; 
+&nbsp; 
+&nbsp; 
+
 # Imports of Dietary Risk Factors for Noncommunicable Diseases
 
 ```{r health imports through time, fig.height = 1.8}
