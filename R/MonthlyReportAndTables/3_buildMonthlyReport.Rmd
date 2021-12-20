@@ -1014,7 +1014,7 @@ Total value of Zoomline Crane VT 49.20 million, Bitumen VT 37.86 million, Paint 
 
 # Merge unhealthy imports with the processed data-set
 productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWithZeros, "HS")
-mergedProductsRelatedNCDs<- merge(processedTradeStats, productsRelatedHealth, by="HS.Code", all.x=TRUE) # this isn't working properly jumping from 9877 obs to 10059
+mergedProductsRelatedNCDs<- merge(processedTradeStats, productsRelatedHealth, by="HS.Code", all.x = TRUE) # this isn't working properly jumping from 9877 obs to 10059
 
 # Create data-frame for all unhealthy imports for current month
 unhealthlyCommodities <- processedTradeStats[is.na(processedTradeStats$Unhealthy.Focus.Food.Category) == FALSE, ]
