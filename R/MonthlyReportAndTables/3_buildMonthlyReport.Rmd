@@ -43,7 +43,7 @@ source(file.path(repository, "R", "functions.R"))
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-07-21.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-09-21.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 
 # Get the current month and year of data
@@ -143,8 +143,6 @@ importSubstitutionMerged <- merge(processedTradeStats, importSubstitution, by="H
 # Calculate value of all imports that are targeted by DARD
 importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000, 4071, 7100), ]
 importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Import.Substitution) == FALSE, ]
-
-write.csv(importSubstitutionDataFrame, "DARD.csv")
 
 estimateENV1.3.1<- sum(importSubstitutionDataFrame$Stat..Value)
 indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
@@ -448,11 +446,12 @@ indicatorsTable <- theme_booktabs(indicatorsTable)
 # Print table
 indicatorsTable
 ```
-Total value of imports targeted by Department of Agriculture and Rural Development (DARD) as those that can be produced domestically is VT 3.66 million (ENV 1.3.1). The products imported included Potatoes (VT 0.12 million), Tomatoes (VT 0.33 million), Onions and Shallots (VT 0.04 million), Cauliflower and Broccoli (VT 0.30 million), Carrots and Turnips (VT 1.18 million), Capsicum (VT 0.23 million), and Oranges (VT 1.47 million). 
+Total value of imports targeted by Department of Agriculture and Rural Development (DARD) as those that can be produced domestically is VT 11.59 million (ENV 1.3.1). The products imported included Potatoes (VT 6.95 million), Onions and Shallots (VT 1.99 million), Cauliflower and Broccoli (VT 0.15 million), Carrots and Turnips (VT 1.42 million), and Oranges (VT 1.09 million). 
 
-The total value of the Melanesian Spearhead Group (MSG) agreement is VT 176.79 million (ECO 1.5.2). This Trade-by-Trade agreement included total exports of VT 72.34 million and total imports of VT 104.45 million. The Balance of Trade by Major Partner Countries is VT -2,477.60 million (ECO 1.5.3). Based on the 2019 Gross Domestic Product (GDP) VT 107,450 million, the total estimated value of trade agreement as proportion of GDP is 0.16% (ECO 1.6.2). 
+The total value of the Melanesian Spearhead Group (MSG) agreement is VT 380.01 million (ECO 1.5.2). This Trade-by-Trade agreement included total exports of VT 56.30 million and total imports of VT 323.71 million. The Balance of Trade by Major Partner Countries is VT -2,327.69 million (ECO 1.5.3). Based on the 2019 Gross Domestic Product (GDP) VT 107,450 million, the total estimated value of trade agreement as proportion of GDP is 0.35% (ECO 1.6.2). 
 
-Level of production of major commodities is VT 360.01 million (ECO 1.7.1). The major commodities included Beef (VT 29.64 million), Cocoa (VT 49.34 million), Coconut Oil (VT 6.33 million), Coffee (VT 0.89 million), Copra (VT 35.56 million), Kava (VT 146.54 million) and Wood (VT 91.72 million). The ratio of processed export commodities including coconut, kava, cocoa, and coffee to raw exports is 1.17 (ECO 4.3.2). Total value of processed exports is VT 128.14 million and total value of raw exports is VT 109.63 million. 
+Level of production of major commodities is VT 623.15 million (ECO 1.7.1). The major commodities included Beef (VT 7.52 million), Cocoa (VT 27.94 million), Coconut Oil (VT 11.91 million), Coffee (VT 2.54 million), Copra (VT 21.52 million), Kava (VT 394.10 million) and Wood (VT 157.62 million). The ratio of processed export commodities including coconut, kava, cocoa, and coffee to raw exports is 4.06 (ECO 4.3.2). Total value of processed exports is VT 366.32 million and total value of raw exports is VT 90.25 million. 
+
 
 &nbsp;  
 &nbsp;  
@@ -553,9 +552,10 @@ ggplot(data = world) +
 
 ```
 
-Balance of trade by major partner countries is VT -2,477.60 million. The main countries that account for this Balance are Australia (VT -613.51 million), China (VT -353.95 million), Japan (VT -113.82 million), Singapore (VT -806.02 million) and Thailand (VT -159.65 million). These countries represent 82.61% of the total Balance by Major Partner Countries (VT -2046.95 million).
+Balance of trade by major partner countries is VT -2,327.69 million. The main countries that account for this Balance are Australia (VT -623.08 million), Fiji (VT -330.27 million), New Zealand (VT -364.40 million), Singapore (VT -332.85 million) and Thailand (VT -143.44 million). These countries represent 77.07% of the total Balance by Major Partner Countries (VT -1794.04 million).
 
-Major imports from Australia were Machinery & Electrical Appliances (VT 141.88 million); and Prepared Foodstuffs, Beverages, Alcohol, and Tobacco (VT 97.24 million). Major imports from China were Machinery and Electrical Appliances (VT 156.75 million), and Base Metals (VT 91.76 million). Major imports from Japan were Vehicles and Transport Equipment (VT 78.83 million), and Machinery and Electrical Appliances (VT 27.86 million). Major imports from Singapore were Mineral Products (VT 785.69 million); and Prepared Foodstuffs, Beverages, Alcohol, and Tobacco (VT 15.73 million). Major imports from Thailand were Vehicles and Transport Equipment (VT 117.06 million), and Plastics and Rubbers (VT 10.27 million). 
+Major imports from Australia were Machinery & Electrical Appliances (VT 136.71 million); and Prepared Foodstuffs, Beverages, Alcohol, and Tobacco (VT 109.02 million). Major imports from Fiji were Prepared Foodstuffs, Beverages, Alcohol, and Tobacco (VT 207.70 million), and Vegetable Products (VT 43.23 million). Major imports from New Zealand were Wood, Cork and Plaiting Materials (VT 89.04 million), and Machinery and Electrical Appliances (VT 52.19 million). Major imports from Singapore were Mineral Products (VT 257.73 million); and Machinery & Electrical Appliances (VT 61.21 million). Major imports from Thailand were Vehicles and Transport Equipment (VT 103.34 million), and Mineral Products (VT 15.42 million). 
+
 
 ######### Page break
 
@@ -648,11 +648,9 @@ ggplot(pacificCountryTotalsLong, aes(x=Country, y= (Value/1000000),  fill=Type))
         legend.title = element_text(size = 9))
 
 ```
-Total Trade Balance of Pacific Islands excluding Melanesia, Australia and New Zealand is VT 4.23 million. This was driven by Medicaments to Kiribati (VT 2.75 million), Kava to Samoa (VT 1.01 million), and Steel Bars to Tonga (VT 0.39 million, Total Exports VT 0.47 million). 
+Total Trade Balance of Pacific Islands excluding Melanesia, Australia and New Zealand is VT 245.30 million. This was driven by exports of Kava to Kiribati (VT 245.30 million), and imports of Wood from Samoa (VT 0.01 million), and Used Clothing from Tonga (VT 0.00 million).  
 
-# Trade Balance of Emerging Markets
-
-```{r trade balance of new emerging markets, fig.height=2}
+```{r trade balance of new emerging markets, fig.height=2, eval= FALSE}
 
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
@@ -754,7 +752,7 @@ tradeByTradeAgreement <- tradeByTradeAgreement %>%
   adorn_totals("row", name = "Grand Total")
 
 # Divide by 1,000,000
-tradeByTradeAgreement[, -1] <- round(tradeByTradeAgreement[, -1] / 1000000, digits = 2)
+#tradeByTradeAgreement[, -1] <- round(tradeByTradeAgreement[, -1] / 1000000, digits = 2)
 
 # Initiailise a flextable object for NSDP table
 tradeByTradeTable <- flextable(tradeByTradeAgreement)
@@ -780,9 +778,10 @@ tradeByTradeTable <- bold(tradeByTradeTable, i=nrow(tradeByTradeAgreement))
 # Print table
 tradeByTradeTable
 ```
-The major imports from Fiji are Wheat or Meslin Flour (VT 19.48 million), and Bread, Cakes, Pastry and Biscuits (VT 11.86 million). The major imports from Papua New Guinea is Prepared or Preserved Fish (VT 7.11 million), and from the Solomon Islands is also Prepared or Preserved Fish (VT 14.25 million). 
+The major imports from Fiji are Prepared or Preserved Meat (VT 46.20 million), and Bread, Cakes, Pastry and Biscuits (VT 52.94 million). The major imports from Papua New Guinea is Prepared or Preserved Fish (VT 3.99 million), and from the Solomon Islands is also Prepared or Preserved Fish (VT 28.70 million). 
 
-The major export to Fiji is Kava (VT 71.54 million), to Papua New Guinea is Beef (VT 7.84 million), and to Solomon Islands is also Beef (VT 13.99 million). 
+The major export to Fiji is Kava (VT 44.02 million), to Papua New Guinea is Beef (VT 7.52 million), and to Solomon Islands is Medicaments (VT 3.56 million). 
+
 
 ## International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights
 
@@ -847,9 +846,10 @@ ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_sh
 
 ```
 
-The level of production of the top five Major Principal Exports is VT 267.41 million. The Principal Exports identified included Beef (VT 29.64 million), Cocoa (VT 49.34 million), Coconut Oil (VT 6.33 million), Coffee (VT 0.89 million), Copra (VT 35.56 million), and Kava (VT 146.54 million). 
+The level of production of the top five Major Principal Exports is VT 462.99 million. The Principal Exports identified included Beef (VT 7.52 million), Cocoa (VT 27.94 million), Coconut Oil (VT 11.91 million), Copra (VT 21.52 million), and Kava (VT 394.10 million). 
 
-The main country of destination for Beef was the Solomon Islands (VT 13.99 million). The major country of destination for Cocoa is Malaysia (VT 43.19 million), for Coconut Oil is Fiji (VT 6.24 million), and Copra is United Arab Emirates (VT 35.56 million). Kava is exported mainly to Fiji (VT 71.54 million), New Caledonia (VT 43.00 million), and New Zealand (VT 14.24 million). 
+The main country of destination for Beef was Papua New Guinea (VT 7.52 million). The major country of destination for Cocoa is Malaysia (VT 15.98 million), for Coconut Oil is Singapore (VT 11.91 million), and Copra is Bangladesh (VT 21.52 million). Kava is exported mainly to Fiji (VT 44.02 million), New Caledonia (VT 51.25 million), and New Zealand (VT 245.28 million). 
+
 
 ######### Page break
 
@@ -897,7 +897,7 @@ exportsOtherandNA %>%
 
 ```
 
-Total value of Roadmaking Machine VT 8.56 million, Scrap Metal VT 5.81 million, Pharmaceuticals VT 4.01 million, Automatic Data Processing Machine VT 3.55 million, and Recycled Metal VT 3.23 million. 
+Total value of Scrap Metal VT 11.72 million, Pharmaceuticals VT 7.58 million, Frozen Albacore VT 6.82 million, Other Meds VT 3.70 million, and Lead Batteries VT 2.26 million.
 
 # Principle Imports
 
@@ -956,9 +956,10 @@ ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_sh
         legend.title = element_text(size = 9))
 ```
 
-Total value of top five Principal imports is VT 1061 million. The Principal Imports included Alcoholic Drinks (VT 44 million), Articles of Iron and Steel (VT 122 million), Medicaments (VT 48 million), Petroleum Oils (VT 787 million), and Rice (VT 60 million).
+Total value of top five Principal imports is VT 561.37 million. The Principal Imports included Alcoholic Drinks (VT 51.61 million), Articles of Iron and Steel (VT 124.56 million), Medicaments (VT 56.32 million), Petroleum Oils (VT 275.05 million), and Rice (VT 53.82 million).
 
-The main country of origin for Alcoholic Drinks is Australia (VT 27.04 million). The main country of origin for Articles of Iron and Steel is China (VT 56.34 million), and Medicaments is Australia (VT 13.47 million). The main country of origin for Petroleum Oils is Singapore (VT 784.55 million), and Rice is Taiwan (VT 32.27 million). 
+The main country of origin for Alcoholic Drinks is France (VT 26.24 million). The main country of origin for Articles of Iron and Steel is Australia (VT 81.11 million), and Medicaments is Australia (VT 17.45 million). The main country of origin for Petroleum Oils is Singapore (VT 256.45 million), and Rice is China (VT 31.77 million). 
+
 
 &nbsp;  
 &nbsp;  
@@ -1005,11 +1006,16 @@ importsOther %>%
 
 ```
 
-Total value of Timber Short Landed VT 23.54 million, Interior Construction Materials VT 17.90 million, Insulation VT 14.65 million, Tractor with Front Loader VT 14.43 million, and Prefab Building VT 10.36 million. 
+Total value of Zoomline Crane VT 49.20 million, Bitumen VT 37.86 million, Paint VT 13.37 million, Vaccine- Aztra Zeneca VT 12.64 million, and Deform Bar VT 9.93 million.  
 
 # Imports of Dietary Risk Factors for Noncommunicable Diseases
 
 ```{r health imports through time, fig.height = 1.8}
+
+# Merge unhealthy imports with the processed data-set
+productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWithZeros, "HS")
+mergedProductsRelatedNCDs<- merge(processedTradeStats, productsRelatedHealth, by="HS.Code", all.x=TRUE) # this isn't working properly jumping from 9877 obs to 10059
+
 # Create data-frame for all unhealthy imports for current month
 unhealthlyCommodities <- processedTradeStats[is.na(processedTradeStats$Unhealthy.Focus.Food.Category) == FALSE, ]
 unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000, 4071, 7100), ]
@@ -1049,13 +1055,17 @@ ggplot(subsetHistoralAndCurrentMonthFood, aes(x = Year, y = (total/1000000), gro
 
 ```
 
-Total value of Bakery Products is VT 35.28 million and are mainly imported from Fiji (VT 11.86 million). Total value of Canned Meats is VT 11.50 million and are mainly imported from Australia (VT 11.05 million). Total value of Confectionary is VT 23.99 million and are mainly imported from Australia (VT 15.46 million). Total value of Cordial is VT 13.61 million and are mainly imported from Malaysia (VT 4.50 million). Total value of Noodles is VT 17.13 million and are mainly imported from Indonesia (VT 5.87 million). 
+Total value of Bakery Products is VT 63.79 million and are mainly imported from Fiji (VT 53.99 million). Total value of Canned Meats is VT 43.72 million and are mainly imported from Fiji (VT 36.55 million). Total value of Confectionary is VT 31.21 million and are mainly imported from Fiji (VT 15.61 million). Total value of Cordial is VT 11.22 million and are mainly imported from Australia (VT 2.49 million). Total value of Noodles is VT 31.66 million and are mainly imported from Fiji (VT 27.55 million). 
 
 ######### Page break
 
 # Imports of food and products targeted as those that can be produced domestically
 
 ```{r food and products imports through time, fig.height=1.75}
+
+# Merge imports that can be domestically produced with the processed data-set
+importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
+mergedImportSubstitutions<- merge(processedTradeStats, importsSubstitutionChickenFish, by="HS.Code", all.x=TRUE) # this isn't working properly jumping from 9877 obs to 9878
 
 # Calculate value of import substitutions for current month
 chickenFishCategoryValue <- processedTradeStats %>%
@@ -1092,7 +1102,7 @@ ggplot(historalAndCurrentMonthChickenFish, aes(x = Year, y = (total/1000000), gr
 
 ```
 
-Total value of Chicken is VT 40.68 million and are mainly imported from Australia (VT 37.71 million). Total value of Canned Tunas is VT 24.04 million and are mainly imported from Solomon Islands (VT 14.25 million). Total value of Canned Mackerel is VT 4.30 million and are mainly imported from China (VT 3.80 million). Total value of Chicken Eggs VT 0.92 million and are mainly imported from New Zealand (VT 0.92 million).  
+Total value of Chicken is VT 67.72 million and are mainly imported from Australia (VT 52.30 million). Total value of Canned Tunas is VT 63.43 million and are mainly imported from Solomon Islands (VT 26.70 million). Total value of Canned Mackerel is VT 5.22 million and are mainly imported from Fiji (VT 3.40 million). Total value of Chicken Eggs VT 8.93 million and are mainly imported from Australia (VT 5.05 million).   
 
 # Concluding remarks
 
