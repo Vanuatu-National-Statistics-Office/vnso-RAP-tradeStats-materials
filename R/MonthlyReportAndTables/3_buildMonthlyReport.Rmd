@@ -54,7 +54,7 @@ xAxisText <- list(
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-11-21.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-09-21.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 
 # Get the current month and year of data
@@ -154,6 +154,7 @@ importSubstitutionMerged <- merge(processedTradeStats, importSubstitution, by="H
 # Calculate value of all imports that are targeted by DARD
 importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000, 4071, 7100), ]
 importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Import.Substitution) == FALSE, ]
+write.csv(importSubstitutionDataFrame, "DARD.csv")
 
 estimateENV1.3.1<- sum(importSubstitutionDataFrame$Stat..Value)
 indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
@@ -726,6 +727,8 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
 # Commodities (imports and exports) included in Trade Agreements 
 importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+write.csv(exportTradeAgreement, "exportTrade.csv")
+
 
 # Calculate exports by SITC to MSG countries
 sitcExportMSGValue <- exportTradeAgreement %>%
@@ -1039,6 +1042,8 @@ mergedProductsRelatedNCDs<- merge(processedTradeStats, productsRelatedHealth, by
 unhealthlyCommodities <- mergedProductsRelatedNCDs[is.na(mergedProductsRelatedNCDs$Unhealthy.Focus.Food.Category) == FALSE, ]
 unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000, 4071, 7100), ]
 
+write.csv(unhealthyImportCommodities, "unhealthy.csv")
+
 # Calculate value of Food Sub-Category for current month
 foodSubCategoryValue <- unhealthyImportCommodities %>%
   group_by(Year, Month, Food.sub.category) %>%
@@ -1087,6 +1092,8 @@ Total value of Bakery Products is VT 63.79 million and are mainly imported from 
 importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
 mergedImportSubstitutions<- merge(processedTradeStats, importsSubstitutionChickenFish, by="HS.Code", all.x=TRUE) # this isn't working properly jumping from 9877 obs to 9878
 
+write.csv(mergedImportSubstitutions, "chicken.csv")
+
 # Calculate value of import substitutions for current month
 chickenFishCategoryValue <- mergedImportSubstitutions %>%
   filter(Livestock.Substitution != "NA") %>%
@@ -1131,6 +1138,3 @@ Total value of Chicken is VT 67.72 million and are mainly imported from Australi
 
 This section not automated, instead analysis of the information in partnership with the Ministry of Trades
 
-######### Page break
-
-## Methodology and meta-data
