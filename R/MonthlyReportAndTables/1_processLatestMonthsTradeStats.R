@@ -24,8 +24,12 @@ openDataFolder <- file.path(repository, "data", "open")
 outputsFolder <- file.path(repository, "outputs")
 
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-10-21.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_30-11-21.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+
+# Get date from input file
+fileNameParts <- unlist(strsplit(tradeStatsFile, "_"))
+fileDate <- unlist(strsplit(fileNameParts[length(fileNameParts)], "\\."))[1]
 
 # Load the summary statistics for the historic IMPORTS and EXPORTS data
 historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
@@ -135,11 +139,9 @@ classificationTables <- data.frame(
     "OPN_FINAL_ASY_CountryDescriptionImportClassifications_31-01-20.csv",
     "OPN_FINAL_ASY_CountryDescriptionExportClassifications_31-01-20.csv",
     "OPN_FINAL_ASY_PrincipleCommoditiesClassifications_31-01-20.csv",
-    "OPN_FINAL_ASY_BECClassifications_31-01-20.csv",
-    "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv",
-    "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv"
+    "OPN_FINAL_ASY_BECClassifications_31-01-20.csv"
   ),
-  "link_column" = c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6", "HS.Code", "HS.Code")
+  "link_column" = c("Office", "HS.Code_2", "SITC_1", "CO", "CE.CD", "HS.Code", "HS.Code_6")
 )
 
 # Merge in each of the classification tables
@@ -148,8 +150,9 @@ mergingOutputs <- mergeClassificationTablesIntoTradesData(tradeStats = tradeStat
 tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
+
 # Write missing codes table to file
-write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-10-21.csv"))
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-09-21.csv"))
 
 
 # Print progress
@@ -173,9 +176,12 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
 # Create csv of last months processed data
-write.csv(processedTradeStats, file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-10-21.csv"))
+outputDataFile <- file.path(
+  secureDataFolder, 
+  paste("OUT_PROC_ASY_ProcessedRawData_", fileDate, ".csv")
+)
+write.csv(processedTradeStats, outputDataFile)
 
 # Note progress final
 
-cat("Finished processing and cleaning latest month's data.\n")
-
+cat(paste0("Finished processing and cleaning latest month's data into:\n\t", outputDataFile, "\n"))

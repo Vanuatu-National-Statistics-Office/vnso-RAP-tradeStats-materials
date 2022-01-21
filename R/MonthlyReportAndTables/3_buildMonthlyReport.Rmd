@@ -7,7 +7,9 @@ output:
 
 ```{r setup, include=FALSE}
 # Set echo=FALSE as default for code cells
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE,
+                      dpi = 600)
 ```
 
 ```{r preparation, include = FALSE}
@@ -36,6 +38,15 @@ secureDataFolder <- file.path(repository, "data", "secure")
 
 # Load the general R functions
 source(file.path(repository, "R", "functions.R"))
+
+# Some general ggplot settings
+plotTextSize <- 9
+xAxisText <- list(
+  "angle" = 35,
+  "size" = plotTextSize,
+  "vjust" = 1.1,
+  "hjust" = 1
+)
 ```
 
 
@@ -43,7 +54,7 @@ source(file.path(repository, "R", "functions.R"))
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-10-21.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-09-21.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 
 # Get the current month and year of data
@@ -143,6 +154,8 @@ importSubstitutionMerged <- merge(processedTradeStats, importSubstitution, by="H
 # Calculate value of all imports that are targeted by DARD
 importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000, 4071, 7100), ]
 importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Import.Substitution) == FALSE, ]
+write.csv(importSubstitutionDataFrame, "DARD.csv")
+
 estimateENV1.3.1<- sum(importSubstitutionDataFrame$Stat..Value)
 indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
 
@@ -153,7 +166,7 @@ ENV1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"=
 ## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports aligned to MSG agreement included)
 
 # Calculate value of imports from countries that have signed the MSG and PICTA trade agreements
-importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG", "PICTA"), ]
+importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
 importTradeAgreementValue<- sum(importTradeAgreement$Stat..Value)
 
 # Merge commodities to be excluded from MSG Trade Agreement
@@ -255,7 +268,7 @@ colnames(timeSeriesGrossDomesticProduct) <- c("Year", "Value")
 timeSeriesGrossDomesticProduct <- timeSeriesGrossDomesticProduct[order(timeSeriesGrossDomesticProduct$Year), ]
 
 # Proxy indicator calculated for NSDP ECO 1.6.2 by dividing latest GDP figure by Trade Agreement value
-mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2018 GDP
+mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeriesGrossDomesticProduct), "Value"] #identify 2019 GDP
 tradeAgreementGDPProportion<- (estimateECO1.5.2/mostRecentGrossDomesticProduct)*100
 
 # Insert values into table as a percentage to 2 decimal places
@@ -445,7 +458,18 @@ indicatorsTable <- theme_booktabs(indicatorsTable)
 # Print table
 indicatorsTable
 ```
+Total value of imports targeted by Department of Agriculture and Rural Development (DARD) as those that can be produced domestically is VT 11.59 million (ENV 1.3.1). The products imported included Potatoes (VT 6.95 million), Onions and Shallots (VT 1.99 million), Cauliflower and Broccoli (VT 0.15 million), Carrots and Turnips (VT 1.42 million), and Oranges (VT 1.09 million). 
 
+The total value of the Melanesian Spearhead Group (MSG) agreement is VT 380.01 million (ECO 1.5.2). This Trade-by-Trade agreement included total exports of VT 56.30 million and total imports of VT 323.71 million. The Balance of Trade by Major Partner Countries is VT -2,327.69 million (ECO 1.5.3). Based on the 2019 Gross Domestic Product (GDP) VT 107,450 million, the total estimated value of trade agreement as proportion of GDP is 0.35% (ECO 1.6.2). 
+
+Level of production of major commodities is VT 623.15 million (ECO 1.7.1). The major commodities included Beef (VT 7.52 million), Cocoa (VT 27.94 million), Coconut Oil (VT 11.91 million), Coffee (VT 2.54 million), Copra (VT 21.52 million), Kava (VT 394.10 million) and Wood (VT 157.62 million). The ratio of processed export commodities including coconut, kava, cocoa, and coffee to raw exports is 4.06 (ECO 4.3.2). Total value of processed exports is VT 366.32 million and total value of raw exports is VT 90.25 million. 
+
+
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
 &nbsp;  
 &nbsp;  
 &nbsp;  
@@ -535,19 +559,17 @@ world <- merge(world, balanceOfTradeByMajorPartnerCountries, by.x = "admin", by.
 # Plot with ggplot
 ggplot(data = world) +
   geom_sf(aes(fill = Balance_of_trade / 1000000)) + 
-  guides(fill=guide_legend(title="Balance of trade\n(millions)"))
+  guides(fill=guide_legend(title="Balance of trade\n(millions)")) +
+  theme(legend.title = element_text(size = 9))
 
 ```
 
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
+Balance of trade by major partner countries is VT -2,327.69 million. The main countries that account for this Balance are Australia (VT -623.08 million), Fiji (VT -330.27 million), New Zealand (VT -364.40 million), Singapore (VT -332.85 million) and Thailand (VT -143.44 million). These countries represent 77.07% of the total Balance by Major Partner Countries (VT -1794.04 million).
+
+Major imports from Australia were Machinery & Electrical Appliances (VT 136.71 million); and Prepared Foodstuffs, Beverages, Alcohol, and Tobacco (VT 109.02 million). Major imports from Fiji were Prepared Foodstuffs, Beverages, Alcohol, and Tobacco (VT 207.70 million), and Vegetable Products (VT 43.23 million). Major imports from New Zealand were Wood, Cork and Plaiting Materials (VT 89.04 million), and Machinery and Electrical Appliances (VT 52.19 million). Major imports from Singapore were Mineral Products (VT 257.73 million); and Machinery & Electrical Appliances (VT 61.21 million). Major imports from Thailand were Vehicles and Transport Equipment (VT 103.34 million), and Mineral Products (VT 15.42 million). 
+
+
+######### Page break
 
 # Trade Balance of Pacific Islands (excluding Melanesian Islands, Australia and New Zealand) 
 
@@ -632,15 +654,18 @@ ggplot(pacificCountryTotalsLong, aes(x=Country, y= (Value/1000000),  fill=Type))
   theme_minimal() + 
   labs(y = "Vatu (millions)") +
   scale_fill_brewer(palette="Blues") +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-        axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank())
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank(),
+        legend.title = element_text(size = plotTextSize))
 
 ```
+Total Trade Balance of Pacific Islands excluding Melanesia, Australia and New Zealand is VT 245.30 million. This was driven by exports of Kava to Kiribati (VT 245.30 million), and imports of Wood from Samoa (VT 0.01 million), and Used Clothing from Tonga (VT 0.00 million).  
 
-# Trade Balance of Emerging Markets
-
-```{r trade balance of new emerging markets, fig.height=2}
+```{r trade balance of new emerging markets, fig.height=2, eval= FALSE}
 
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
@@ -685,10 +710,13 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
   geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
   labs(y = "Vatu (millions)") +
   theme_minimal() +
-  theme(legend.title=element_blank(),
-        axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-        axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank())
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size = xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank(),
+        legend.title = element_blank())
 
 ```
 
@@ -699,6 +727,8 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
 # Commodities (imports and exports) included in Trade Agreements 
 importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+write.csv(exportTradeAgreement, "exportTrade.csv")
+
 
 # Calculate exports by SITC to MSG countries
 sitcExportMSGValue <- exportTradeAgreement %>%
@@ -715,7 +745,7 @@ sitcImportMSGValue <- importTradeAgreement %>%
 colnames(sitcImportMSGValue)[-1] <- paste(colnames(sitcImportMSGValue)[-1], "IMPORTS")
 
 # Transpose the tables for exports and imports
-tradeByTradeAgreement <- merge(sitcExportMSGValue, sitcImportMSGValue, by = "SITC.description")
+tradeByTradeAgreement <- merge(sitcExportMSGValue, sitcImportMSGValue, by = "SITC.description", all = TRUE)
 
 # Add and reorder columns
 countryColumnNames <- c("FIJI EXPORTS", "FIJI IMPORTS",
@@ -731,8 +761,8 @@ colnames(tradeByTradeAgreement)[1] <- "SITC Description"
 
 # Add totol column and row
 tradeByTradeAgreement <- tradeByTradeAgreement %>%
-  adorn_totals("col") %>%
-  adorn_totals("row", name = "Grand Total")
+  adorn_totals("col", fill = NA) %>%
+  adorn_totals("row", name = "Grand Total", fill = NA)
 
 # Divide by 1,000,000
 tradeByTradeAgreement[, -1] <- round(tradeByTradeAgreement[, -1] / 1000000, digits = 2)
@@ -761,14 +791,13 @@ tradeByTradeTable <- bold(tradeByTradeTable, i=nrow(tradeByTradeAgreement))
 # Print table
 tradeByTradeTable
 ```
+The major imports from Fiji are Prepared or Preserved Meat (VT 46.20 million), and Bread, Cakes, Pastry and Biscuits (VT 52.94 million). The major imports from Papua New Guinea is Prepared or Preserved Fish (VT 3.99 million), and from the Solomon Islands is also Prepared or Preserved Fish (VT 28.70 million). 
 
-######### Page break
-
-## International Merchandise Trade Statistics - `r format(Sys.Date(), '%B %Y')` Highlights
+The major export to Fiji is Kava (VT 44.02 million), to Papua New Guinea is Beef (VT 7.52 million), and to Solomon Islands is Medicaments (VT 3.56 million). 
 
 # Principle Exports
 
-```{r principle exports through time, fig.height=1.75}
+```{r principle exports through time, fig.height=2}
 # Calculate value of major exports commodities for current month for historical data
 majorExportsValue <- majorMonthlyExports %>%
   filter(Month == currentMonth)
@@ -791,6 +820,8 @@ columnCategories <- list(
 majorExportCommoditiesValues <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 majorExportCommoditiesValues<- (majorExportCommoditiesValues/1000000)
 majorExportCommoditiesValues<- round(majorExportCommoditiesValues)
+names(majorExportCommoditiesValues)[3] <- "Beef"
+names(majorExportCommoditiesValues)[2] <- "Coconut.Oil"
 
 # Convert to data frame and add current year and month
 majorExportCommoditiesValues <- cbind(data.frame("Year" = currentYear, "Month" = currentMonth), 
@@ -818,11 +849,19 @@ ggplot(data = totalMajorExports, aes(x = Year, y = value, group = factor(name_sh
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend\nAnalysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-        axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank())
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank(),
+        legend.title = element_text(size = plotTextSize))
 
 ```
+
+The level of production of the top five Major Principal Exports is VT 462.99 million. The Principal Exports identified included Beef (VT 7.52 million), Cocoa (VT 27.94 million), Coconut Oil (VT 11.91 million), Copra (VT 21.52 million), and Kava (VT 394.10 million). 
+
+The main country of destination for Beef was Papua New Guinea (VT 7.52 million). The major country of destination for Cocoa is Malaysia (VT 15.98 million), for Coconut Oil is Singapore (VT 11.91 million), and Copra is Bangladesh (VT 21.52 million). Kava is exported mainly to Fiji (VT 44.02 million), New Caledonia (VT 51.25 million), and New Zealand (VT 245.28 million). 
 
 # Top 5 New Major Exports
 
@@ -862,15 +901,22 @@ exportsOtherandNA %>%
     geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
       labs(y = "Vatu (millions)") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-          axis.title.y = element_text(size = 9),
-          axis.title.x = element_blank())
+    theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size = 7.5),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank())
 
 ```
 
+Total value of Scrap Metal VT 11.72 million, Pharmaceuticals VT 7.58 million, Frozen Albacore VT 6.82 million, Other Meds VT 3.70 million, and Lead Batteries VT 2.26 million.
+
+######### Page break
+
 # Principle Imports
 
-```{r principle imports through time, fig.height = 1.8}
+```{r principle imports through time, fig.height = 2}
 # Calculate value of major imports commodities for current month for historical data
 majorImportsValue <- majorMonthlyImports %>%
   filter(Month == currentMonth)
@@ -888,6 +934,9 @@ columnCategories <- list(
 majorImportsCurrentMonth <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 majorImportsCurrentMonth<- (majorImportsCurrentMonth/1000000)
 majorImportsCurrentMonth<- round(majorImportsCurrentMonth)
+names(majorImportsCurrentMonth)[1] <- "Alcoholic.Drinks"
+names(majorImportsCurrentMonth)[2] <- "Articles.Iron.and.Steel"
+names(majorImportsCurrentMonth)[4] <- "Petroleum.Oils.and.oils.obtained.from.bituminous.minerals"
 
 # Convert to data frame and add current year and month
 majorImportCommoditiesValues <- cbind(data.frame("Year" = currentYear, "Month" = currentMonth), 
@@ -916,10 +965,18 @@ ggplot(data = totalMajorImports, aes(x = Year, y = value, group = factor(name_sh
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-        axis.title.y = element_text(size = 9),
-        axis.title.x = element_blank())
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank(),
+        legend.title = element_text(size = plotTextSize))
 ```
+
+Total value of top five Principal imports is VT 561.37 million. The Principal Imports included Alcoholic Drinks (VT 51.61 million), Articles of Iron and Steel (VT 124.56 million), Medicaments (VT 56.32 million), Petroleum Oils (VT 275.05 million), and Rice (VT 53.82 million).
+
+The main country of origin for Alcoholic Drinks is France (VT 26.24 million). The main country of origin for Articles of Iron and Steel is Australia (VT 81.11 million), and Medicaments is Australia (VT 17.45 million). The main country of origin for Petroleum Oils is Singapore (VT 256.45 million), and Rice is China (VT 31.77 million). 
 
 # Top 5 New Major Imports
 
@@ -957,18 +1014,35 @@ importsOther %>%
     geom_bar(stat = "identity", color="black", fill= "lightsteelblue1", position=position_dodge()) +
   labs(y = "Vatu (millions)") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-          axis.title.y = element_text(size = 9),
-          axis.title.x = element_blank())
+    theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size = 7.5),
+        axis.title.y = element_text(size = plotTextSize),
+        axis.title.x = element_blank(),
+        legend.title = element_text(size = plotTextSize))
 
 ```
+
+Total value of Zoomline Crane VT 49.20 million, Bitumen VT 37.86 million, Paint VT 13.37 million, Vaccine- Aztra Zeneca VT 12.64 million, and Deform Bar VT 9.93 million.  
+
+&nbsp; 
+&nbsp; 
+&nbsp; 
 
 # Imports of Dietary Risk Factors for Noncommunicable Diseases
 
 ```{r health imports through time, fig.height = 1.8}
+
+# Merge unhealthy imports with the processed data-set
+productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWithZeros, "HS")
+mergedProductsRelatedNCDs<- merge(processedTradeStats, productsRelatedHealth, by="HS.Code", all.x = TRUE) # this isn't working properly jumping from 9877 obs to 10059
+
 # Create data-frame for all unhealthy imports for current month
-unhealthlyCommodities <- processedTradeStats[is.na(processedTradeStats$Unhealthy.Focus.Food.Category) == FALSE, ]
+unhealthlyCommodities <- mergedProductsRelatedNCDs[is.na(mergedProductsRelatedNCDs$Unhealthy.Focus.Food.Category) == FALSE, ]
 unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000, 4071, 7100), ]
+
+write.csv(unhealthyImportCommodities, "unhealthy.csv")
 
 # Calculate value of Food Sub-Category for current month
 foodSubCategoryValue <- unhealthyImportCommodities %>%
@@ -985,25 +1059,43 @@ foodSubCategoryHistoricalMonthlyValue$Month<- as.character(foodSubCategoryHistor
 historalAndCurrentMonthFood <- rbind(foodSubCategoryHistoricalMonthlyValue, foodSubCategoryValue)
 subsetHistoralAndCurrentMonthFood<- historalAndCurrentMonthFood[historalAndCurrentMonthFood$Food.sub.category %in% c("Bakery products", "Confectionary", "Cordial", "Noodles", "Canned Meats"), ]
 
+# Note X axis tick breaks
+x_ticks <- seq(from = min(subsetHistoralAndCurrentMonthFood$Year, na.rm = TRUE),
+               to = max(subsetHistoralAndCurrentMonthFood$Year, na.rm = TRUE),
+               by = 1)
+
 # Create a line graph
 ggplot(subsetHistoralAndCurrentMonthFood, aes(x = Year, y = (total/1000000), group = factor(Food.sub.category))) + 
   geom_line(aes(color = factor(Food.sub.category)), size = 1.5, alpha = 0.75) +
   labs(y = "Vatu (millions)") +
+  scale_x_continuous(breaks = x_ticks) +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-        axis.title.y = element_text(size = 9),
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
         axis.title.x = element_blank(),
-        legend.key.size = unit(0.1, "cm"))
+        legend.key.size = unit(0.1, "cm"),
+        legend.title = element_text(size = plotTextSize))
 
 ```
+
+Total value of Bakery Products is VT 63.79 million and are mainly imported from Fiji (VT 53.99 million). Total value of Canned Meats is VT 43.72 million and are mainly imported from Fiji (VT 36.55 million). Total value of Confectionary is VT 31.21 million and are mainly imported from Fiji (VT 15.61 million). Total value of Cordial is VT 11.22 million and are mainly imported from Australia (VT 2.49 million). Total value of Noodles is VT 31.66 million and are mainly imported from Fiji (VT 27.55 million). 
 
 # Imports of food and products targeted as those that can be produced domestically
 
 ```{r food and products imports through time, fig.height=1.75}
 
+# Merge imports that can be domestically produced with the processed data-set
+importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
+mergedImportSubstitutions<- merge(processedTradeStats, importsSubstitutionChickenFish, by="HS.Code", all.x=TRUE) # this isn't working properly jumping from 9877 obs to 9878
+
+write.csv(mergedImportSubstitutions, "chicken.csv")
+
 # Calculate value of import substitutions for current month
-chickenFishCategoryValue <- processedTradeStats %>%
+chickenFishCategoryValue <- mergedImportSubstitutions %>%
   filter(Livestock.Substitution != "NA") %>%
   group_by(Year, Month, Livestock.Substitution) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") %>%
@@ -1017,23 +1109,32 @@ chickenFishCategoryHistoricalMonthlyValue <- monthlyValuenChickenFish %>%
 chickenFishCategoryHistoricalMonthlyValue$Month<- as.character(chickenFishCategoryHistoricalMonthlyValue$Month)
 historalAndCurrentMonthChickenFish <- rbind(chickenFishCategoryHistoricalMonthlyValue, chickenFishCategoryValue)
 
+# Note X axis tick breaks
+x_ticks <- seq(from = min(historalAndCurrentMonthChickenFish$Year, na.rm = TRUE),
+               to = max(historalAndCurrentMonthChickenFish$Year, na.rm = TRUE),
+               by = 1)
+
 # Create a line graph
 ggplot(historalAndCurrentMonthChickenFish, aes(x = Year, y = (total/1000000), group = factor(Livestock.Substitution))) + 
   geom_line(aes(color = factor(Livestock.Substitution)), size = 1.5, alpha = 0.75) +
+  scale_x_continuous(breaks = x_ticks) +
   labs(y = "Vatu (millions)") +
   guides(color=guide_legend(title="Monthly Trend Analysis")) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 35, vjust = 1.1, hjust=1, size = 5),
-        axis.title.y = element_text(size = 9),
+  theme(axis.text.x = element_text(angle = xAxisText$angle,
+                                   vjust = xAxisText$vjust, 
+                                   hjust = xAxisText$hjust, 
+                                   size =xAxisText$size),
+        axis.title.y = element_text(size = plotTextSize),
         axis.title.x = element_blank(),
+        legend.title = element_text(size = plotTextSize),
         legend.key.size = unit(0.1, "cm"))
 
 ```
+
+Total value of Chicken is VT 67.72 million and are mainly imported from Australia (VT 52.30 million). Total value of Canned Tunas is VT 63.43 million and are mainly imported from Solomon Islands (VT 26.70 million). Total value of Canned Mackerel is VT 5.22 million and are mainly imported from Fiji (VT 3.40 million). Total value of Chicken Eggs VT 8.93 million and are mainly imported from Australia (VT 5.05 million).   
 
 # Concluding remarks
 
 This section not automated, instead analysis of the information in partnership with the Ministry of Trades
 
-######### Page break
-
-## Methodology and meta-data

@@ -689,6 +689,15 @@ buildRawSummaryTable <- function(processedTradeStats, codesCP4, categoryColumn, 
     stop(paste0("ERROR! The \"CP4\" column does not exist in table!"))
   }
   
+  # Check column categories provided isn't a list - convert to list
+  if(is.list(columnCategories) == FALSE && is.vector(columnCategories) == TRUE){
+    columnCategories <- lapply(columnCategories, 
+                           FUN=function(category){
+                             return(category)
+                           })
+    names(columnCategories) <- unlist(columnCategories)
+  }
+  
   # Initialise a dataframe to store the calculated statistics
   summaryTable <- data.frame(matrix(NA, nrow=1, ncol=length(columnCategories)), check.names=FALSE, stringsAsFactors=FALSE)
   colnames(summaryTable) <- names(columnCategories)
