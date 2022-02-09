@@ -58,4 +58,4 @@ Each time you `commit` changes to your repository locally the precommit workflow
 In the above, a couple of the hooks failed (spell checking and fixing file ends). In this case the hooks automatically fixed the errors so we can just `add` (stage) and `commit` the changes again:
 ![precommit pass](images/pre-commit_pass.jpg)
 
-Precommit workflows failing will happen, the idea is that the hooks catch any issues before the code is `push` online.
+Once all the hooks pass you'll be able to `push` your committed changes online. Precommit workflows failing will happen, the idea is that the hooks catch any issues before the code is `push` online.
