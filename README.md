@@ -51,3 +51,11 @@ The current trades statistics repository has been set up with an R precommit wor
 5. Run `precommit::use_precommit()` in R and the precommit workflow will be installed. This may take a few minutes the first time
     - Now you are good to go. You can add/remove hooks in the `.pre-commit-config.yaml` file
     - Note that we also have `.lintr` file that has some specific settings for the `lintr` hook
+
+Each time you `commit` changes to your repository locally the precommit workflow will be triggered and you'll see something like:
+![precommit fail](images/pre-commit_fail.jpg)
+
+In the above, a couple of the hooks failed (spell checking and fixing file ends). In this case the hooks automatically fixed the errors so we can just `add` (stage) and `commit` the changes again:
+![precommit pass](images/pre-commit_pass.jpg)
+
+Precommit workflows failing will happen, the idea is that the hooks catch any issues before the code is `push` online.
