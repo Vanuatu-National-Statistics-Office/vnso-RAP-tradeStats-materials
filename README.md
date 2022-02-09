@@ -37,4 +37,17 @@ To know more about International Merchandise Trade Statistics in Vanuatu. Click 
 
 ![The new Reproducible Analytical Pipeline](images/NewPipeline.png)
 
+## pre-commit workflow installation
 
+The python programming language has leveraged [git's hook functionality](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) to create a [pre-commit](https://pre-commit.com/) library. It's a library that allows us to select particular hooks (tasks) that will be triggered every time we `commit` changes to our repository locally. The R [precommit](https://lorenzwalthert.github.io/precommit/index.html) package was created to help R users have the same functionality. There are many [python](https://pre-commit.com/hooks.html) and [R](https://lorenzwalthert.github.io/precommit/articles/available-hooks.html) that are tailored to these languages.
+
+The current trades statistics repository has been set up with an R precommit workflow, to install it follow these steps:
+
+1. Clone the repository to your local computer if you haven't already - see [help documentation for this](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
+2. Open up R (either in the terminal or RStudio) and install the precommit package with: `install.packages("precommit")`
+3. Check python 3 is installed on your computer by running `python --version` in the terminal
+    - If it isn't see [installation instructions](https://realpython.com/installing-python/)
+4. Set the working directory in R to your repository location
+5. Run `precommit::use_precommit()` in R and the precommit workflow will be installed. This may take a few minutes the first time
+    - Now you are good to go. You can add/remove hooks in the `.pre-commit-config.yaml` file
+    - Note that we also have `.lintr` file that has some specific settings for the `lintr` hook

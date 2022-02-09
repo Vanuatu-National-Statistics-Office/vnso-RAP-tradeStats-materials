@@ -28,6 +28,7 @@ repos:
           .*\.sh|
           .*\.RData
           .*\.lintr
+          .*\.png
           )$
     -   id: lintr
     -   id: readme-rmd-rendered
