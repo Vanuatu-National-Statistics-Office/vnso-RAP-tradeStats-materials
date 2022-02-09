@@ -26,9 +26,10 @@ repos:
           .*\.rds|
           .*\.Rds|
           .*\.sh|
-          .*\.RData
-          .*\.lintr
-          .*\.png
+          .*\.RData|
+          .*\.lintr|
+          .*\.png|
+          .*\.jpg|
           )$
     -   id: lintr
     -   id: readme-rmd-rendered
