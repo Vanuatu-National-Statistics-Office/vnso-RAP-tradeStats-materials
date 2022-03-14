@@ -24,8 +24,11 @@ openDataFolder <- file.path(repository, "data", "open")
 outputsFolder <- file.path(repository, "outputs")
 
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_30-11-21.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-12-21.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+
+tradeExportImportFile <- file.path(secureDataFolder, "exports-imports_historical_14.03.22.csv")
+historicalTrade <- read.csv(tradeExportImportFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
 # Get date from input file
 fileNameParts <- unlist(strsplit(tradeStatsFile, "_"))
@@ -181,7 +184,7 @@ outputDataFile <- file.path(
   paste("OUT_PROC_ASY_ProcessedRawData_", fileDate, ".csv")
 )
 write.csv(processedTradeStats, outputDataFile)
-
+-
 # Note progress final
 
 cat(paste0("Finished processing and cleaning latest month's data into:\n\t", outputDataFile, "\n"))
