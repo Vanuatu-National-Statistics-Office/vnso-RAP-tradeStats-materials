@@ -27,10 +27,7 @@ outputsFolder <- file.path(repository, "outputs")
 tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-12-21.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
-tradeExportImportFile <- file.path(secureDataFolder, "exports-imports_historical_14.03.22.csv")
-historicalTrade <- read.csv(tradeExportImportFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
-
-# Get date from input file
+# Get date from input file 
 fileNameParts <- unlist(strsplit(tradeStatsFile, "_"))
 fileDate <- unlist(strsplit(fileNameParts[length(fileNameParts)], "\\."))[1]
 
