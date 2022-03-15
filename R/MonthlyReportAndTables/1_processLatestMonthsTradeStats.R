@@ -175,11 +175,20 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 # Make copy of latest month's processed data
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
+# Create new column catgorising export, re-export and import
+tradeMerchandiseFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MerchandiseTradeClassifications_15-03-22.csv")
+tradeMerchandiseClass <- read.csv(tradeMerchandiseFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+importSubstitutionMerged <- merge(processedTradeStats, tradeMerchandiseClass, by="CP4", all.x=TRUE)
+
+# Append processed data to historical data
+
+
 # Create csv of last months processed data
 outputDataFile <- file.path(
   secureDataFolder, 
-  paste("OUT_PROC_ASY_ProcessedRawData_", fileDate, ".csv")
+  paste("OUT_PROC_ASY_ProcessedRawData_",fileDate,".csv")
 )
+
 write.csv(processedTradeStats, outputDataFile)
 -
 # Note progress final
