@@ -6,6 +6,7 @@ rm(list = ls())
 # Load the required libraries
 library(dplyr) # Manipulating data
 library(stringr) # common string operations
+library(tidyverse) # Manipulating data
 
 # Note where VNSO code/data is on current computer
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "..", "..")
@@ -178,10 +179,21 @@ processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 # Create new column catgorising export, re-export and import
 tradeMerchandiseFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MerchandiseTradeClassifications_15-03-22.csv")
 tradeMerchandiseClass <- read.csv(tradeMerchandiseFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
-importSubstitutionMerged <- merge(processedTradeStats, tradeMerchandiseClass, by="CP4", all.x=TRUE)
+tradeMerchandiseMerged <- merge(processedTradeStats, tradeMerchandiseClass, by="CP4", all.x=TRUE)
 
 # Append processed data to historical data
+historicalTradeStatsFile <- file.path(secureDataFolder, "exports-imports_historical_14.03.22.csv")
+historicalTradeStats <- read.csv(historicalTradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) 
 
+historicalTradeStatsAdapted<- historicalTradeStats %>% #convert all data to same type for data to be appended
+  mutate_all(as.character)
+tradeMerchandiseMergedAdapted<- tradeMerchandiseMerged %>%
+  mutate_all(as.character)
+
+historicalDataUpdated<- bind_rows(historicalTradeStatsAdapted, tradeMerchandiseMergedAdapted, id= NULL)
+
+historicalDataFile <- file.path(secureDataFolder, paste("OUT_PROC_ASY_ProcessedHistoricalData_",fileDate,".csv"))
+write.csv(historicalDataUpdated, historicalDataFile)
 
 # Create csv of last months processed data
 outputDataFile <- file.path(

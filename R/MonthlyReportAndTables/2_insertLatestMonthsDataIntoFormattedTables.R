@@ -710,26 +710,6 @@ tradeAgreementValues <- data.frame("Fiji Exports"=fijiExports, "Fiji Imports"=fi
                                    "Papa New Guinea Imports"=papaNewGuineaImports, "Papa New Guinea Balance"=papaNewGuineaBalance, "Solomon Island Exports"=solomonIslandExports, "Solomon Island Exports"=solomonIslandImports, 
                                    "Solomon Island Balance"=solomonIslandBalance)
 
-
-# Extract the balance of trade data and extract sub tables
-balanceOfTradeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="1_BalanceOfTrade", nColumns=7, startRow=5)
-
-# Update the sub tables for the balance of trade data
-balanceOfTradeSubTables <- updateSubTablesByTime(balanceOfTradeSubTables, month, year, tradeBalance/1000000)
-
-# Editing the final formatted tables
-if(is.null(balanceOfTradeSubTables) == FALSE){
-  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="1_BalanceOfTrade", subTables=balanceOfTradeSubTables, nRowsInHeader=5,
-                                                          loadAndSave=FALSE, finalWorkbook=finalWorkbook)
-}
-
-# Print progress
-cat("Finished formatting Table 1: Balance of Trade.\n")
-
-
-
-
-
 # Write the MSG trade stats values from current month into table (note that no historic data in Table 11 - so all values are overwritten)
 #openxlsx::writeData(finalWorkbook, sheet="11_TradeAg", startCol=2, startRow=3, x=templateMSGTable, colNames=FALSE)
 
@@ -927,7 +907,7 @@ subCategoryValue <- subCommodities %>%
 #### Finish ####
 
 # Save the changes to the excel file
-updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-21_WORKING.xlsx")
+updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-12-21_WORKING.xlsx")
 openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
 # Print progress for finish
