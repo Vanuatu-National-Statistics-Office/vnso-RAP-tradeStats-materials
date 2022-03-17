@@ -18,7 +18,7 @@ month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formatted tables
-finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-10-21_WORKING.xlsx")
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-21_WORKING.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
@@ -43,14 +43,14 @@ tradeBalance <- data.frame("Export"=exports, "Re-Export"=reExports, "Total Expor
 ## Formatting the table ##
 
 # Extract the balance of trade data and extract sub tables
-balanceOfTradeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="1_BOT", nColumns=7, startRow=5)
+balanceOfTradeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="1_BalanceOfTrade", nColumns=7, startRow=5)
 
 # Update the sub tables for the balance of trade data
 balanceOfTradeSubTables <- updateSubTablesByTime(balanceOfTradeSubTables, month, year, tradeBalance/1000000)
 
 # Editing the final formatted tables
 if(is.null(balanceOfTradeSubTables) == FALSE){
-  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="1_BOT", subTables=balanceOfTradeSubTables, nRowsInHeader=5,
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="1_BalanceOfTrade", subTables=balanceOfTradeSubTables, nRowsInHeader=5,
                                          loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
@@ -95,14 +95,14 @@ importsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColum
 
 ## Formatting the table ##
 # Extract the  sub tables from the formatted excel table
-importsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="2_M", startRow=7, nColumns=25)
+importsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="2_ImportsByHS", startRow=7, nColumns=25)
 
 # Update the sub tables
 importsByHSCodeSubTables <- updateSubTablesByTime(importsByHSCodeSubTables, month, year, importsByHS/1000000)
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(importsByHSCodeSubTables) == FALSE){
-  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="2_M", subTables=importsByHSCodeSubTables, nRowsInHeader=7,
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="2_ImportsByHS", subTables=importsByHSCodeSubTables, nRowsInHeader=7,
                                          loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
@@ -147,14 +147,14 @@ exportsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColum
 
 ## Formatting the table ##
 # Extract the  sub tables from the formatted excel table
-exportsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="3_DX", startRow=7, nColumns=25)
+exportsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="3_ExportsByHS", startRow=7, nColumns=25)
 
 # Update the sub tables
 exportsByHSCodeSubTables <- updateSubTablesByTime(exportsByHSCodeSubTables, month, year, exportsByHS/1000000)
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(exportsByHSCodeSubTables) == FALSE){
-  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="3_DX", subTables=exportsByHSCodeSubTables, nRowsInHeader=7,
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="3_ExportsByHS", subTables=exportsByHSCodeSubTables, nRowsInHeader=7,
                                          loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
@@ -199,14 +199,14 @@ reExportsByHS <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryCol
 
 ## Formatting the table ##
 # Extract the  sub tables from the formatted excel table
-reExportsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="4_ReX", startRow=7, nColumns=25)
+reExportsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="4_ReExportsByHS", startRow=7, nColumns=25)
 
 # Update the sub tables
 reExportsByHSCodeSubTables <- updateSubTablesByTime(reExportsByHSCodeSubTables, month, year, reExportsByHS/1000000)
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(reExportsByHSCodeSubTables) == FALSE){
-  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="4_ReX", subTables=reExportsByHSCodeSubTables, nRowsInHeader=7,
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="4_ReExportsByHS", subTables=reExportsByHSCodeSubTables, nRowsInHeader=7,
                                          loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
@@ -221,14 +221,14 @@ totalExportsByHS <- exportsByHS + reExportsByHS
 
 ## Formatting the table ##
 # Extract the  sub tables from the formatted excel table
-totalExportsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="5_TX", startRow=7, nColumns=25)
+totalExportsByHSCodeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="5_TotalExportsByHS", startRow=7, nColumns=25)
 
 # Update the sub tables
 totalExportsByHSCodeSubTables <- updateSubTablesByTime(totalExportsByHSCodeSubTables, month, year, totalExportsByHS/1000000)
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(totalExportsByHSCodeSubTables) == FALSE){
-  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="5_TX", subTables=totalExportsByHSCodeSubTables, nRowsInHeader=7,
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="5_TotalExportsByHS", subTables=totalExportsByHSCodeSubTables, nRowsInHeader=7,
                                          loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
@@ -287,7 +287,7 @@ overallTotal <- sum(c(as.numeric(totalPrincipleExports[1, ]), as.numeric(totalPr
 latestPrincipleExports <- c(NA, as.numeric(totalPrincipleExports[1, ]), NA, NA, as.numeric(totalPrincipleReExports[1, ]), NA, overallTotal)
 
 # Extract the table from the formatted excel sheet
-principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrinX", rows=5:31, skipEmptyRows=FALSE)
+principleExportsTable <- read.xlsx(finalWorkbookFileName, sheet="6_PrincipalExports", rows=5:31, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 principleExportsTable <- removeEmptyColumnsAtEnd(principleExportsTable)
@@ -312,7 +312,7 @@ principleExportsTable <- updateTableByCommodity(principleExportsTable, month, ye
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleExportsTable) == FALSE){
-  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="6_PrinX", table=principleExportsTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="6_PrincipalExports", table=principleExportsTable, year=year,
                                                 tableNumber="6", tableName="PRINCIPLE EXPORTS", boldRows=c(6,22,24,29,31), nRowsInNotes=4,
                                                 numericColumns=2:ncol(principleExportsTable),
                                                 loadAndSave=FALSE, finalWorkbook=finalWorkbook)
@@ -386,7 +386,7 @@ totalPrincipleImports <- buildRawSummaryTable(processedTradeStats, codesCP4, cat
 
 ## Formatting the table ##
 # Extract the table from the formatted excel sheet
-principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrinM", rows=5:53, skipEmptyRows=FALSE)
+principleImportsTable <- read.xlsx(finalWorkbookFileName, sheet="7_PrincipalImports", rows=5:53, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 principleImportsTable <- removeEmptyColumnsAtEnd(principleImportsTable)
@@ -404,7 +404,7 @@ principleImportsTable <- updateTableByCommodity(principleImportsTable, month, ye
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(principleImportsTable) == FALSE){
-  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrinM", table=principleImportsTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="7_PrincipalImports", table=principleImportsTable, year=year,
                                                 tableNumber="7", tableName="PRINCIPLE IMPORTS", boldRows=c(53), nRowsInNotes=2,
                                                 numericColumns=2:ncol(principleImportsTable),
                                                 loadAndSave=FALSE, finalWorkbook=finalWorkbook)
@@ -500,7 +500,7 @@ majorPartnerCountryStatistics[seq(from=2, by=3, length.out=length(totalPartnerCo
 majorPartnerCountryStatistics[seq(from=3, by=3, length.out=length(balanceOfTradeByMajorPartnerCountries))] <- as.numeric(balanceOfTradeByMajorPartnerCountries)
 
 # Extract the table from the formatted excel sheet
-balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BOT_PC", rows=5:71, skipEmptyRows=FALSE)
+balanceOfTradeMajorTable <- read.xlsx(finalWorkbookFileName, sheet="8_BalanceOfTradePartnerCountry", rows=5:71, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 balanceOfTradeMajorTable <- removeEmptyColumnsAtEnd(balanceOfTradeMajorTable)
@@ -512,7 +512,7 @@ balanceOfTradeMajorTable <- updateTableByCommodity(balanceOfTradeMajorTable, mon
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(balanceOfTradeMajorTable) == FALSE){
-  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="8_BOT_PC", table=balanceOfTradeMajorTable, year=year, 
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="8_BalanceOfTradePartnerCountry", table=balanceOfTradeMajorTable, year=year, 
                                                 tableNumber="8", tableName="BALANCE OF TRADE BY MAJOR PARTNER COUNTRIES", 
                                                 boldRows=c(69, 70, 71), nRowsInNotes=2,
                                                 numericColumns=3:ncol(balanceOfTradeMajorTable),
@@ -541,7 +541,6 @@ columnCategories <- list(
 
 # Build the table
 totalPartnerRegionExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
-
 
 # Calculate the Imports by Region
 
@@ -586,7 +585,7 @@ majorRegionStatistics[seq(from=3, by=3, length.out=length(balanceOfTradeByRegion
 majorRegionStatistics <- c(majorRegionStatistics, NA, as.numeric(pictsExports), as.numeric(pictsImports), as.numeric(pictsBalance))
 
 # Extract the table from the formatted excel sheet
-balanceOfTradeRegionsTable <- read.xlsx(finalWorkbookFileName, sheet="9_Trade_Reg", rows=5:30, skipEmptyRows=FALSE)
+balanceOfTradeRegionsTable <- read.xlsx(finalWorkbookFileName, sheet="9_BalanceOfTradeRegion", rows=5:30, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 balanceOfTradeRegionsTable <- removeEmptyColumnsAtEnd(balanceOfTradeRegionsTable)
@@ -598,7 +597,7 @@ balanceOfTradeRegionsTable <- updateTableByCommodity(balanceOfTradeRegionsTable,
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(balanceOfTradeRegionsTable) == FALSE){
-  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="9_Trade_Reg", table=balanceOfTradeRegionsTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="9_BalanceOfTradeRegion", table=balanceOfTradeRegionsTable, year=year,
                                                 tableNumber="9", tableName="TRADE BY REGION", 
                                                 boldRows=c(24, 25, 26), nRowsInNotes=2,
                                                 numericColumns=3:ncol(balanceOfTradeRegionsTable),
@@ -655,62 +654,81 @@ tradeByModeOfTransport <- data.frame(rbind(as.numeric(totalTransportExports), as
 colnames(tradeByModeOfTransport) <- c(unlist(columnCategories), "Total")
 
 # Extract the  sub tables from the formatted excel table
-tradeByModeOfTransportSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="10_Trade_Trspt", startRow=8, nColumns=8, numericColumns=3:8)
+tradeByModeOfTransportSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="10_TradeByModeTransport", startRow=8, nColumns=8, numericColumns=3:8)
 
 # Update the sub tables
 tradeByModeOfTransportSubTables <- updateSubTablesByTime(tradeByModeOfTransportSubTables, month, year, tradeByModeOfTransport/1000000, monthColumn="Year")
 
 # Insert updated sub tables back into excel formatted table
 if(is.null(tradeByModeOfTransportSubTables) == FALSE){
-  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="10_Trade_Trspt", subTables=tradeByModeOfTransportSubTables, 
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="10_TradeByModeTransport", subTables=tradeByModeOfTransportSubTables, 
                                          nRowsInHeader=8, loadAndSave=FALSE, finalWorkbook=finalWorkbook)
 }
 
 # Print progress
 cat("Finished formatting Table 10: Trade by Mode of Transport.\n")
 
-#### !!WORK IN PROGRESS!! Table 11: Trade by Trade Agreement ####
+#### Table 11: Trade by Trade Agreement ####
 
 ## Getting latest statistics ##
 
 # Get the trade stats for the imports aligned to the MSG agreement
-tradeStatsForMSGImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
+tradeStatsMSGImports <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
 
-# Get the trade stats for the exports aligned to the MSG agreement
-msgAgreementCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
-msgAgreementCommoditiesExclude <- read.csv(msgAgreementCommoditiesExcludeFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
-msgAgreementCommoditiesExclude$HS.Code_6<- sapply(msgAgreementCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
-msgAgreementCommoditiesExcludeMerged <- merge(processedTradeStats, msgAgreementCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
-tradeStatsForAllMSGCountryExports <- msgAgreementCommoditiesExcludeMerged[msgAgreementCommoditiesExcludeMerged$CP4 == 1000 & msgAgreementCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
-tradeStatsForMSGExports <- tradeStatsForAllMSGCountryExports[is.na(tradeStatsForAllMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
+# Merge the processed data with the MSG agreement classifications
+msgExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
+msgExclude <- read.csv(msgExcludeFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
+msgExclude$HS.Code_6<- sapply(msgExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
+msgExcludeMerged <- merge(processedTradeStats, msgExclude, by="HS.Code_6", all.x=TRUE)
 
-# Order data for exports and imports (statistical value) by combined classifications 
-exportMSGOrderedValue<- tradeStatsForMSGExports[order(-tradeStatsForMSGExports$Stat..Value), ]
-importMSGOrderedValue<- tradeStatsForMSGImports[order(-tradeStatsForMSGImports$Stat..Value), ]
+# Create data frame of exports aligned to MSG agreement
+msgCountryExports <- msgExcludeMerged[msgExcludeMerged$CP4 == 1000 & msgExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
+tradeStatsForMSGExports <- msgCountryExports[is.na(msgCountryExports$Not.Included.in.MSG) == TRUE, ]
 
 # Group statistical values of exports by classifications 
-groupedExportsMSGValue<- exportMSGOrderedValue %>%
+groupedExportsMSGValue<- tradeStatsForMSGExports %>%
   group_by(EXPORT.COUNTRY) %>%
   summarise(total = sum(Stat..Value))
 
 # Group statistical values of imports by classifications 
-groupedImportsMSGValue<- importMSGOrderedValue %>%
+groupedImportsMSGValue<- tradeStatsMSGImports %>%
   group_by(IMPORT.COUNTRY) %>%
   summarise(total = sum(Stat..Value))
 
 # Insert values into table
-tradeAgreementBalance <- data.frame("Fiji Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "FIJI", "total"], na.rm=TRUE)),
-                                    "Fiji Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "FIJI", "total"], na.rm=TRUE)),
-                                    "Fiji Balance"= sum(tradeAgreementExports$Fiji.Exports - tradeAgreementImports$Fiji.Imports),
-                                    "Papa New Guinea Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "PAPUA NEW GUINEA", "total"], na.rm=TRUE)),
-                                    "Papa New Guinea Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "PAPUA NEW GUINEA", "total"], na.rm=TRUE)),
-                                    "Papa New Guinea Balance"= sum(tradeAgreementExports$Papa.New.Guinea.Exports - tradeAgreementImports$Papa.New.Guinea.Imports),
-                                    "Solomon Island Exports"= (sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "SOLOMON ISLANDS", "total"], na.rm=TRUE)),
-                                    "Solomon Island Imports"= (sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "SOLOMON ISLANDS", "total"], na.rm=TRUE)),
-                                    "Solomon Island Balance"= sum(tradeAgreementExports$Solomon.Island.Exports - tradeAgreementImports$Solomon.Island.Imports))
-                                    
+fijiExports<- sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "FIJI", "total"], na.rm=TRUE)
+fijiImports<- sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "FIJI", "total"], na.rm=TRUE)
+fijiBalance<- fijiExports - fijiImports
+papaNewGuineaExports<- sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "PAPUA NEW GUINEA", "total"], na.rm=TRUE)
+papaNewGuineaImports<- sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "PAPUA NEW GUINEA", "total"], na.rm=TRUE)
+papaNewGuineaBalance<- papaNewGuineaExports - papaNewGuineaImports
+solomonIslandExports<- sum(groupedExportsMSGValue[groupedExportsMSGValue$EXPORT.COUNTRY == "SOLOMON ISLANDS", "total"], na.rm=TRUE)
+solomonIslandImports<- sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.COUNTRY == "SOLOMON ISLANDS", "total"], na.rm=TRUE)
+solomonIslandBalance<- solomonIslandExports - solomonIslandImports
 
-## Formatting the table ##
+tradeAgreementValues <- data.frame("Fiji Exports"=fijiExports, "Fiji Imports"=fijiImports, "Fiji Balance"=fijiBalance, "Papa New Guinea Exports"=papaNewGuineaExports, 
+                                   "Papa New Guinea Imports"=papaNewGuineaImports, "Papa New Guinea Balance"=papaNewGuineaBalance, "Solomon Island Exports"=solomonIslandExports, "Solomon Island Exports"=solomonIslandImports, 
+                                   "Solomon Island Balance"=solomonIslandBalance)
+
+
+# Extract the balance of trade data and extract sub tables
+balanceOfTradeSubTables <- extractSubTablesFromFormattedTableByTime(finalWorkbookFileName, sheet="1_BalanceOfTrade", nColumns=7, startRow=5)
+
+# Update the sub tables for the balance of trade data
+balanceOfTradeSubTables <- updateSubTablesByTime(balanceOfTradeSubTables, month, year, tradeBalance/1000000)
+
+# Editing the final formatted tables
+if(is.null(balanceOfTradeSubTables) == FALSE){
+  finalWorkbook <- insertUpdatedSubTablesAsFormattedTable(finalWorkbookFileName, sheet="1_BalanceOfTrade", subTables=balanceOfTradeSubTables, nRowsInHeader=5,
+                                                          loadAndSave=FALSE, finalWorkbook=finalWorkbook)
+}
+
+# Print progress
+cat("Finished formatting Table 1: Balance of Trade.\n")
+
+
+
+
 
 # Write the MSG trade stats values from current month into table (note that no historic data in Table 11 - so all values are overwritten)
 #openxlsx::writeData(finalWorkbook, sheet="11_TradeAg", startCol=2, startRow=3, x=templateMSGTable, colNames=FALSE)
@@ -746,7 +764,7 @@ totalExportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, catego
 
 ## Formatting the table ##
 # Extract the table from the formatted excel sheet
-totalExportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="12_X_SITC", rows=5:16, skipEmptyRows=FALSE)
+totalExportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="12_ExportsbySITC", rows=5:16, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 totalExportsbySITCTable <- removeEmptyColumnsAtEnd(totalExportsbySITCTable)
@@ -758,7 +776,7 @@ totalExportsbySITCTable <- updateTableByCommodity(totalExportsbySITCTable, month
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(totalExportsbySITCTable) == FALSE){
-  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="12_X_SITC", table=totalExportsbySITCTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="12_ExportsbySITC", table=totalExportsbySITCTable, year=year,
                                                 tableNumber="12", tableName="EXPORTS BY SITC", boldRows=c(16), nRowsInNotes=3,
                                                 numericColumns=3:ncol(totalExportsbySITCTable),
                                                 loadAndSave=FALSE, finalWorkbook=finalWorkbook)
@@ -795,7 +813,7 @@ totalImportsbySITC <- buildRawSummaryTable(processedTradeStats, codesCP4, catego
 
 ## Formatting the table ##
 # Extract the table from the formatted excel sheet
-totalImportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="13_M_SITC", rows=5:16, skipEmptyRows=FALSE)
+totalImportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="13_ImportsBySITC", rows=5:16, skipEmptyRows=FALSE)
 
 # Remove empty columns at end
 totalImportsbySITCTable <- removeEmptyColumnsAtEnd(totalImportsbySITCTable)
@@ -807,7 +825,7 @@ totalImportsbySITCTable <- updateTableByCommodity(totalImportsbySITCTable, month
 
 # Insert the updated table back into the formatted excel sheet
 if(is.null(totalImportsbySITCTable) == FALSE){
-  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="13_M_SITC", table=totalImportsbySITCTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="13_ImportsBySITC", table=totalImportsbySITCTable, year=year,
                                                 tableNumber="13", tableName="IMPORTS BY SITC", boldRows=c(16), nRowsInNotes=2,
                                                 numericColumns=3:ncol(totalImportsbySITCTable),
                                                 loadAndSave=FALSE, finalWorkbook=finalWorkbook)
@@ -854,6 +872,57 @@ becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categ
 
 ## Formatting the table ##
 
+
+#### Table 15: Imports of Dietary Risk Factors for Noncommunicable Diseases ####
+
+# Create subset of imports
+importsOnly <- processedTradeStats[processedTradeStats$CP4 %in% c(4000, 4071, 7100), ]
+
+# Merge unhealthy imports with the processed data-set
+ncdFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
+ncdProducts <- read.csv(ncdFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
+ncdProducts$HS.Code <- sapply(ncdProducts$HS.Code, FUN=padWithZeros, "HS")
+mergedNCDs<- merge(importsOnly, ncdProducts, by="HS.Code", all.x = TRUE)
+
+# Create data-frame for all unhealthy imports for current month
+unhealthlyCommodities <- mergedNCDs[is.na(mergedNCDs$Unhealthy.Focus.Food.Category) == FALSE, ]
+
+# Calculate value of Food Sub-Category for current month
+foodSubCategoryValue <- unhealthlyCommodities %>%
+  group_by(Unhealthy.Focus.Food.Category, Food.sub.category, Product, Year, Month) %>%
+  summarise(total = sum(Stat..Value), .groups = "drop") 
+
+#### Table 16: Imports Targeted by the Department of Agriculture and Rural Development ####
+
+# Merge DARD imports with the processed data-set
+dardFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
+dardProducts <- read.csv(dardFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
+dardProducts$HS.Code <- sapply(dardProducts$HS.Code, FUN=padWithZeros, "HS")
+mergedDARD<- merge(importsOnly, dardProducts, by="HS.Code", all.x = TRUE) 
+
+# Create data-frame for all unhealthy imports for current month
+dardCommodities <- mergedDARD[is.na(mergedDARD$Import.Substitution) == FALSE, ]
+
+# Calculate value of Food Sub-Category for current month
+dardCategoryValue <- dardCommodities %>%
+  group_by(Import.Substitution, Year, Month) %>%
+  summarise(total = sum(Stat..Value), .groups = "drop") 
+
+#### Table 17: Imports that can Potentially be Produced Domestically ####
+
+# Merge Substitute imports with the processed data-set
+subFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
+subProducts <- read.csv(subFile, header=TRUE, na.strings=c("","NA", "NULL", "null"))
+subProducts$HS.Code <- sapply(subProducts$HS.Code, FUN=padWithZeros, "HS")
+mergedSub<- merge(importsOnly, subProducts, by="HS.Code", all.x = TRUE) # this isn't working properly jumping from 9877 obs to 10059
+
+# Create data-frame for all unhealthy imports for current month
+subCommodities <- mergedSub[is.na(mergedSub$Livestock.Substitution) == FALSE, ]
+
+# Calculate value of Food Sub-Category for current month
+subCategoryValue <- subCommodities %>%
+  group_by(Livestock.Substitution, Year, Month) %>%
+  summarise(total = sum(Stat..Value), .groups = "drop") 
 
 #### Finish ####
 

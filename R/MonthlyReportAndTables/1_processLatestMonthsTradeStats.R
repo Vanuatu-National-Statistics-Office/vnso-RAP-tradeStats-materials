@@ -152,7 +152,7 @@ missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
 
 # Write missing codes table to file
-write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-09-21.csv"))
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-12-21.csv"))
 
 
 # Print progress
