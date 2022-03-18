@@ -63,10 +63,10 @@ tradeStatsNoDup$Stat..Value <- as.numeric(gsub(",", "", tradeStatsNoDup$Stat..Va
 tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, format = "%d/%m/%Y")
 #tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, tryFormats = c("%Y-%m-%d", "%Y/%m/%d"), optional = FALSE)
 
-# Convert SITC to character
-tradeStatsNoDup$SITC <- sapply(tradeStatsNoDup$SITC, FUN=padWithZeros, "SITC")
+# Covert SITC to character
+tradeStatsNoDup$SITC <- as.character(tradeStatsNoDup$SITC)
 
-# Convert HS.Code to character
+# Pad HS.Code to 8 digits
 tradeStatsNoDup$HS.Code <- sapply(tradeStatsNoDup$HS.Code, FUN=padWithZeros, "HS")
 
 # Exclude banknotes and coins from exports

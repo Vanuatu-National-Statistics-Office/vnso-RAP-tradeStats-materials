@@ -54,86 +54,62 @@ xAxisText <- list(
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_30-09-21.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-12-21.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
+processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
 
 # Get the current month and year of data
 currentMonth <- unique(processedTradeStats$Month)
 currentYear <- unique(processedTradeStats$Year)
 
-# Load import substitution table
+# Load DARD Classifications table
 importSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
 importSubstitution <- read.csv(importSubstitutionFile)
+importSubstitution$HS.Code <- sapply(importSubstitution$HS.Code, FUN=padWithZeros, "HS")
 
 # Load the Melanesian Spearhead Group (MSG) classifications table
 msgCommoditiesExcludeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MSGClassifications_31-01-20.csv")
 msgCommoditiesExclude <- read.csv(msgCommoditiesExcludeFile)
+msgCommoditiesExclude$HS.Code_6<- sapply(msgCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
 
-# Read in the Gross Domestic Product data
-grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
-timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
-
-# Read in the classification table for processed & raw Commodities (coconut, kava, cocoa and coffee)
-processedRawCommoditiesFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawCommodityClassifications_31-01-20.csv")
-processedRawCommodities <- read.csv(processedRawCommoditiesFile)
-
-# Read in the data from the baseline data (2016) for Department of Agricltiure and Rual Development (DARD)
-baselineDARDImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDTargettedImportsMonthlyValue_31-12-16.csv")
-baselineDARDImports <- read.csv(baselineDARDImportsFile)
-
-# Read in the data from the baseline data (2016) for Melanesian Spearhead Group (MSG)
-baselineMSGExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_TradeAgreementExportMonthlyValue_31-12-16.csv")
-baselineMSGExports <- read.csv(baselineMSGExportsFile)
-
-# Read in baseline trades data (2016)
-baselineBalanceTradeFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorPartnerCountryExportsMonthlyValue_31-12-16.csv")
-baselineBalanceTrade <- read.csv(baselineBalanceTradeFile)
-
-# Read in the data from the baseline data (2016) for processed data??
-baselineProcessedRawFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawExportMonthlyValue_31-12-16.csv")
-baselineProcessedRaw <- read.csv(baselineProcessedRawFile)
-
-# Read in the data from the baseline data (2016) for production exports
-baselineProductionExportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MajorExportsMonthlyValue_31-12-16.csv")
-baselineProductionExports <- read.csv(baselineProductionExportsFile)
-
-# Read in the data for monthly major exports
+# Read in the data for monthly major exports values
 majorMonthlyExportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyExportCalculations_31-12-20.csv")
 majorMonthlyExports <- read.csv(majorMonthlyExportsFile, 
                                 colClasses = c("factor", "character", "numeric", "numeric",
                                                "numeric", "numeric", "numeric"))
 colnames(majorMonthlyExports)[1] <- "Year"
 
-# Read in the data for monthly major imports
+# Read in the data for monthly major imports values
 majorMonthlyImportsFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_MajorMonthlyImportCalculations_31-12-20.csv")
 majorMonthlyImports <- read.csv(majorMonthlyImportsFile)
 colnames(majorMonthlyImports)[1] <- "Year"
 
-# Read in the data from the open folder of the repository 
-productsRelatedHealthFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
+# Load the NCD classifications table
+productsRelatedHealthFile <- file.path(openDataFolder,"OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
 productsRelatedHealth <- read.csv(productsRelatedHealthFile)
+productsRelatedHealth$HS.Code <- sapply(productsRelatedHealth$HS.Code, FUN=padWithZeros, "HS")
 
-# Read in the data for monthly unhealthy imports 
+# Read in the data for NCD monthly unhealthy imports values
 monthlyUnhealthyImportsFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesMonthlyValue_01-01-20.csv")
 monthlyUnhealthyImports<- read.csv(monthlyUnhealthyImportsFile)
 
-# Read in historic trades data summary
-historicalImportsFile <- file.path(secureDataFolder, "imports_history_summary.csv")
-historicalImports<- read.csv(historicalImportsFile)
-historicalExportsFile <- file.path(secureDataFolder, "exports_history_summary.csv")
-historicalExports<- read.csv(historicalExportsFile)
-
-# Read in the imports substitution (chicken, fish) classification table
+# Load the imports substitution (chicken, fish) classification table
 importsSubstitutionChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_FishChickenImportSubClassifications_31-01-20.csv")
 importsSubstitutionChickenFish <- read.csv(importsSubstitutionChickenFishFile)
+importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
 
-# Read in the imports substitution (chicken, fish) monthly value table
+# Read in the imports substitution (chicken, fish) monthly values
 monthlyValuenChickenFishFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ChickenFishMonthlyValue_01-01-20.csv")
 monthlyValuenChickenFish <- read.csv(monthlyValuenChickenFishFile)
 
-# Read in the imports substitution (DARD) classification table
-importsSubstitutionFile <- file.path(openDataFolder, "OPN_FINAL_ASY_DARDImportSubClassifications_31-01-20.csv")
-importsSubstitution<- read.csv(importsSubstitutionFile)
+# Read in the Gross Domestic Product values 
+grossDomesticProductFile <- file.path(openDataFolder, "OPN_FINAL_VNSO_GDPAnnualCalculations_31-12-18.csv")
+timeSeriesGrossDomesticProduct <- read.csv(grossDomesticProductFile)
+
+# Read in the classification table for processed & raw Commodities (coconut, kava, cocoa and coffee)
+processedRawCommoditiesFile <- file.path(openDataFolder, "OPN_FINAL_ASY_ProcessedRawCommodityClassifications_31-01-20.csv")
+processedRawCommodities <- read.csv(processedRawCommoditiesFile)
+processedRawCommodities$HS.Code <- sapply(processedRawCommodities$HS.Code, FUN=padWithZeros, "HS")
 
 ```
 
@@ -147,20 +123,24 @@ importsSubstitution<- read.csv(importsSubstitutionFile)
 ## Proxy calculated: Value of imports of food and products targeted by DARD
 
 # Merge DARD targeted import substitution classifications 
-importSubstitution$HS.Code<- sapply(importSubstitution$HS.Code, FUN=padWithZeros, "HS")
-processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
 importSubstitutionMerged <- merge(processedTradeStats, importSubstitution, by="HS.Code", all.x=TRUE)
 
-# Calculate value of all imports that are targeted by DARD
+# Create subset of imports that are targeted by DARD
 importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000, 4071, 7100), ]
 importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Import.Substitution) == FALSE, ]
-write.csv(importSubstitutionDataFrame, "DARD.csv")
 
+# Information to be inserted as text into the report for DARD
+dardValue <- importSubstitutionDataFrame %>%
+  group_by(Import.Substitution) %>%
+  summarise(total = sum(Stat..Value), .groups = "drop") 
+
+# Calculate NSDP indicator
 estimateENV1.3.1<- sum(importSubstitutionDataFrame$Stat..Value)
 indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
 
 # Insert values into table
 ENV1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"= indicatorENV1.3.1)
+
 
 ## ECO 1.5.2 Trade by trade agreement (value)
 ## Proxy calculated: value of all international trade registered under a trade agreement- only imports registered, exports estimated (all exports aligned to MSG agreement included)
@@ -170,13 +150,16 @@ importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FA
 importTradeAgreementValue<- sum(importTradeAgreement$Stat..Value)
 
 # Merge commodities to be excluded from MSG Trade Agreement
-msgCommoditiesExclude$HS.Code_6<- sapply(msgCommoditiesExclude$HS.Code_6, FUN=padWithZeros, "HS", 6)
 msgCommoditiesExcludeMerged <- merge(processedTradeStats, msgCommoditiesExclude, by="HS.Code_6", all.x=TRUE)
 
 # Calculate value of all exports that are destined to countries that have signed the MSG trade agreement
 allMSGCountryExports <- msgCommoditiesExcludeMerged[msgCommoditiesExcludeMerged$CP4 == 1000 & msgCommoditiesExcludeMerged$EXPORT.COUNTRY %in% c("FIJI", "PAPUA NEW GUINEA", "SOLOMON ISLANDS"), ]
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
 exportTradeAgreementValue<- sum(exportTradeAgreement$Stat..Value)
+
+# Information to be inserted as text into the report for MSG
+msgExportsImports<- data.frame("MSG Exports"= exportTradeAgreementValue, "MSG Imports"= importTradeAgreementValue)
+msgExports<- (msgExportsImports/1000000)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
 estimateECO1.5.2<- importTradeAgreementValue + exportTradeAgreementValue
@@ -297,6 +280,9 @@ columnCategories <- list(
 # Build the table
 majorExportCommodities <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
+# Information to be inserted as text into the report for major exports
+aggregatedExportCommodities<- (majorExportCommodities/1000000)
+
 # Proxy indicator for NSDP ECO 1.7.1
 estimateECO1.7.1<- majorExportCommodities$Total
 indicatorECO1.7.1<- ((majorExportCommodities$Total)/1000000)
@@ -306,14 +292,13 @@ ECO1.7.1 <- data.frame("Level of production of major commodities to include Coco
 ## ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports
 
 # Merge raw and processed commodity classifications with cleaned data
-processedRawCommodities$HS.Code <- sapply(processedRawCommodities$HS.Code, FUN=padWithZeros, "HS")
 processedRawCommoditiesMerged<- merge(processedTradeStats, processedRawCommodities, by="HS.Code", all.x=TRUE)
 
 # Create data-frame for all raw and processed export commodities for current month
 processedRawCommoditiesFiltered <- processedRawCommoditiesMerged[is.na(processedRawCommoditiesMerged$Source) == FALSE, ]
 processedRawCommoditiesExported<- processedRawCommoditiesFiltered[processedRawCommoditiesFiltered$CP4 %in% c(1000), ]
 
-# Calculate ratio of processed to raw commodities 
+# Calculate ratio of processed to raw commodities (Information to be inserted as text into the report for processed commodities)
 processedToRawDataFrame<- processedRawCommoditiesExported %>%
   group_by(Export.Type) %>%
   summarise(total = sum(Stat..Value), .groups = "drop")
@@ -327,66 +312,6 @@ processedRawProportion<- (processed/raw)
 indicatorECO4.3.2<- round(processedRawProportion$total, digits = 2)
 ECO4.3.2<- data.frame("Ratio of Processed Export Commodities"= indicatorECO4.3.2)
 
-```
-
-
-```{r NSDP targets}
-
-### Calculating Progress Against the NSDP Indicator Targets
-
-## ENV 1.3.1 Total annual volume of imports of food and products targeted by DARD as those that can be produced domestically (including ‘value-added products), Target to be decided after baseline established (baseline taken from 2016) 
-
-# Calculate value of DARD targeted imports for current month from baseline year
-baselineDARDImportsCurrentMonth <- sum(baselineDARDImports[baselineDARDImports$Month == "January", "Total.VT"], na.rm= TRUE)
-
-# Calculate ENV 1.3.1 Value of imports of food and products targeted by DARD,  
-targetValueENV1.3.1<- ((estimateENV1.3.1 - baselineDARDImportsCurrentMonth)/baselineDARDImportsCurrentMonth)*100 # needs to be 15% to meet Target
-
-## ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15%
-
-# Calculate value of Trade Agreements for current month from baseline year 
-baselineExportsTradeAgreementCurrentMonth <- sum(baselineMSGExports[baselineMSGExports$Month == "January", "Total.VT"], na.rm= TRUE)
-
-# Calculate ECO 1.5.2 Trade by trade agreement (value), Target 2020 exports increase by 15% 
-targetValueECO1.5.2<- ((estimateECO1.5.2 - baselineExportsTradeAgreementCurrentMonth)/baselineExportsTradeAgreementCurrentMonth)*100 # needs to be 15% to meet Target
-
-## Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
-
-# Calculate current monthly value
-baselineMajorPartnerCountryExportValue<- sum(baselineBalanceTrade[baselineBalanceTrade$Month == "January", "Total.VT" ], na.rm= TRUE)
-
-
-# Calculate ECO 1.5.3 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
-targetValueECO1.5.3<- ((estimateECO1.5.3 - baselineMajorPartnerCountryExportValue)/baselineMajorPartnerCountryExportValue)*100 # needs to reach 20% Target
-
-# ECO 1.6.2, proxy calculated: Total estimated value of trade agreement as proportion of GDP, 2030 increase by 15%
-
-# Calculate value of Trade Agreements of GDP for baseline year for current month
-baselineTradeAgreementCurrentMonth <- sum(baselineMSGExports[baselineMSGExports$Month == "January", "Total.VT"], na.rm= TRUE)
-baselineGDP2016<- timeSeriesGrossDomesticProduct[timeSeriesGrossDomesticProduct$Year == "2016", "Value" ]
-baselineECO1.6.2Value<- (baselineTradeAgreementCurrentMonth/baselineGDP2016)*100
-
-# Calculate ECO 1.6.2 Total estimated value of trade agreement as proportion of GDP, Target sets an increase by 15% by 2030
-targetECO1.6.2Value<- ((tradeAgreementGDPProportion - baselineECO1.6.2Value)/baselineECO1.6.2Value)*100 # needs to be 15% to meet Target
-
-# ECO 1.7.1 Calculate Target: level of production of major commodities to include cocoa and copra- 2030 increase 10-15% of the proportion
-
-# Calculate current monthly value
-baselineMajorProductionExports <- sum(baselineProductionExports[baselineProductionExports$Month == "January", "Total.VT"], na.rm= TRUE)
-
-# Calculate ECO 1.7.1 Balance of Trade by major partner countries, Target 2020 exports increase by 20%
-targetECO1.7.1Value<- ((estimateECO1.7.1 - baselineMajorProductionExports)/baselineMajorProductionExports)*100 # needs to reach 20% Target
-
-## ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports, Target by 2020 increase 15%
-
-# Calculate current monthly value
-historicalProcessedRaw<- baselineProcessedRaw[baselineProcessedRaw$Month == "January", ]
-historicProcessed<- historicalProcessedRaw[1, 3]
-historicRaw<- historicalProcessedRaw[2,3]
-baselineProcessedRawValue<- (historicProcessed/historicRaw)
-
-# Calculate ECO 4.3.2, Target by 2020 increase 15%
-targetECO4.3.2Value<- ((processedRawProportion[1,1] - baselineProcessedRawValue)/baselineProcessedRawValue)*100 # needs to reach 20% Target
 ```
 
 
@@ -416,26 +341,8 @@ nsdpIndicators <- data.frame(
   ),check.names=FALSE, stringsAsFactors=FALSE)
 
 
-#"Targets 2030"=c("Target TBD after baseline established",
-                  # "By 2020, exports increase by 15%",
-                  # "By 2020, exports increase by 20%",
-                  # "By 2030 increase by 15%",
-                  # "By 2030 increase 10-15% of the proportion",
-                  # "By 2020 increase 15%"),
- # "Target (% Change)"=c(
- #   targetValueENV1.3.1,
- #   targetValueECO1.5.2,
- #  targetValueECO1.5.3,
- #   targetECO1.6.2Value,
- #   targetECO1.7.1Value,
- #   targetECO4.3.2Value), 
- # check.names=FALSE, stringsAsFactors=FALSE)
-
 # Round the indicator values
 nsdpIndicators$`Indicator Value` <- round(nsdpIndicators$`Indicator Value`, digits = 2)
-
-# Round the target percentages
-#nsdpIndicators$`Target (% Change)` <- round(nsdpIndicators$`Target (% Change)`, digits = 2)
 
 # Initiailise a flextable object for NSDP table
 indicatorsTable <- flextable(nsdpIndicators)
@@ -549,6 +456,7 @@ colnames(balanceOfTradeByMajorPartnerCountries) <- sapply(colnames(balanceOfTrad
                                                           })
 balanceOfTradeByMajorPartnerCountries <- data.frame("Country" = colnames(balanceOfTradeByMajorPartnerCountries),
                                                     "Balance_of_trade" = as.numeric(balanceOfTradeByMajorPartnerCountries[1, ]))
+
 
 # Get the polygons for the world
 world <- rnaturalearth::ne_countries(type = "countries", scale = "medium", returnclass = "sf")
