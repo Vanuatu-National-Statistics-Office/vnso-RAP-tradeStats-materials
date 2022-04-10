@@ -1,5 +1,11 @@
 #### Preparation ####
 
+processedTradeStatsFile <- file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-03-22.csv")
+processedTradeStats <- read.csv(processedTradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
+processedTradeStats$HS.Code_6<- sapply(processedTradeStats$HS.Code_6, FUN=padWithZeros, "HS", 6)
+processedTradeStats$HS.Code_2<- sapply(processedTradeStats$HS.Code_2, FUN=padWithZeros, "HS", 2)
+
 # Load the required libraries
 library(openxlsx) # Reading and writing excel formatted data
 
@@ -13,12 +19,13 @@ if(exists("repository") == FALSE || exists("secureDataFolder") == FALSE ||
 outputsFolder <- file.path(repository, "outputs")
 
 # Note current year and month of data
+processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 date <- max(processedTradeStats$Reg..Date, na.rm=TRUE)
 month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formatted tables
-finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-21_WORKING.xlsx")
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_28-02-22_WORKING.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
@@ -707,8 +714,10 @@ solomonIslandImports<- sum(groupedImportsMSGValue[groupedImportsMSGValue$IMPORT.
 solomonIslandBalance<- solomonIslandExports - solomonIslandImports
 
 tradeAgreementValues <- data.frame("Fiji Exports"=fijiExports, "Fiji Imports"=fijiImports, "Fiji Balance"=fijiBalance, "Papa New Guinea Exports"=papaNewGuineaExports, 
-                                   "Papa New Guinea Imports"=papaNewGuineaImports, "Papa New Guinea Balance"=papaNewGuineaBalance, "Solomon Island Exports"=solomonIslandExports, "Solomon Island Exports"=solomonIslandImports, 
+                                   "Papa New Guinea Imports"=papaNewGuineaImports, "Papa New Guinea Balance"=papaNewGuineaBalance, "Solomon Island Exports"=solomonIslandExports, "Solomon Island Imports"=solomonIslandImports, 
                                    "Solomon Island Balance"=solomonIslandBalance)
+
+write.csv(tradeAgreementValues, "tradeAgreementValues.csv")
 
 # Write the MSG trade stats values from current month into table (note that no historic data in Table 11 - so all values are overwritten)
 #openxlsx::writeData(finalWorkbook, sheet="11_TradeAg", startCol=2, startRow=3, x=templateMSGTable, colNames=FALSE)
@@ -872,6 +881,9 @@ foodSubCategoryValue <- unhealthlyCommodities %>%
   group_by(Unhealthy.Focus.Food.Category, Food.sub.category, Product, Year, Month) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") 
 
+write.csv(foodSubCategoryValue, "foodSubCategoryValue.csv")
+
+
 #### Table 16: Imports Targeted by the Department of Agriculture and Rural Development ####
 
 # Merge DARD imports with the processed data-set
@@ -887,6 +899,9 @@ dardCommodities <- mergedDARD[is.na(mergedDARD$Import.Substitution) == FALSE, ]
 dardCategoryValue <- dardCommodities %>%
   group_by(Import.Substitution, Year, Month) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") 
+
+write.csv(dardCategoryValue, "dardCategoryValue.csv")
+
 
 #### Table 17: Imports that can Potentially be Produced Domestically ####
 
@@ -904,10 +919,13 @@ subCategoryValue <- subCommodities %>%
   group_by(Livestock.Substitution, Year, Month) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") 
 
+write.csv(subCategoryValue, "subCategoryValue.csv")
+
+
 #### Finish ####
 
 # Save the changes to the excel file
-updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-12-21_WORKING.xlsx")
+updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-03-22_WORKING.xlsx")
 openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
 # Print progress for finish
