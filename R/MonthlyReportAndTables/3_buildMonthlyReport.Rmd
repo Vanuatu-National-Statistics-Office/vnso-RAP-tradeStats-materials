@@ -573,6 +573,7 @@ ggplot(pacificCountryTotalsLong, aes(x=Country, y= (Value/1000000),  fill=Type))
 ```
 Total Trade Balance of Pacific Islands excluding Melanesia, Australia and New Zealand is VT 245.30 million. This was driven by exports of Kava to Kiribati (VT 245.30 million), and imports of Wood from Samoa (VT 0.01 million), and Used Clothing from Tonga (VT 0.00 million).  
 
+
 ```{r trade balance of new emerging markets, fig.height=2, eval= FALSE}
 
 # Add column to tell us whether each row is import or export
