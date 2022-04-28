@@ -6,6 +6,7 @@ rm(list = ls())
 # Load the required libraries
 library(dplyr) # Manipulating data
 library(stringr) # common string operations
+library(tidyverse) # Manipulating data
 
 # Note where VNSO code/data is on current computer
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "..", "..")
@@ -24,7 +25,7 @@ openDataFolder <- file.path(repository, "data", "open")
 outputsFolder <- file.path(repository, "outputs")
 
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-12-21.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-03-22.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
 # Get date from input file 
@@ -62,10 +63,10 @@ tradeStatsNoDup$Stat..Value <- as.numeric(gsub(",", "", tradeStatsNoDup$Stat..Va
 tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, format = "%d/%m/%Y")
 #tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, tryFormats = c("%Y-%m-%d", "%Y/%m/%d"), optional = FALSE)
 
-# Convert SITC to character
-tradeStatsNoDup$SITC <- sapply(tradeStatsNoDup$SITC, FUN=padWithZeros, "SITC")
+# Covert SITC to character
+tradeStatsNoDup$SITC <- as.character(tradeStatsNoDup$SITC)
 
-# Convert HS.Code to character
+# Pad HS.Code to 8 digits
 tradeStatsNoDup$HS.Code <- sapply(tradeStatsNoDup$HS.Code, FUN=padWithZeros, "HS")
 
 # Exclude banknotes and coins from exports
@@ -152,7 +153,7 @@ missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
 
 # Write missing codes table to file
-write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-09-21.csv"))
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-01-22.csv"))
 
 
 # Print progress
@@ -175,11 +176,33 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 # Make copy of latest month's processed data
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
+write.csv(processedTradeStats, "processedTradeStats.csv")
+
+# Create new column catgorising export, re-export and import
+tradeMerchandiseFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MerchandiseTradeClassifications_15-03-22.csv")
+tradeMerchandiseClass <- read.csv(tradeMerchandiseFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+tradeMerchandiseMerged <- merge(processedTradeStats, tradeMerchandiseClass, by="CP4", all.x=TRUE)
+
+# Append processed data to historical data
+historicalTradeStatsFile <- file.path(secureDataFolder, "exports-imports_historical_14.03.22.csv")
+historicalTradeStats <- read.csv(historicalTradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) 
+
+historicalTradeStatsAdapted<- historicalTradeStats %>% #convert all data to same type for data to be appended
+  mutate_all(as.character)
+tradeMerchandiseMergedAdapted<- tradeMerchandiseMerged %>%
+  mutate_all(as.character)
+
+historicalDataUpdated<- bind_rows(historicalTradeStatsAdapted, tradeMerchandiseMergedAdapted, id= NULL)
+
+historicalDataFile <- file.path(secureDataFolder, paste("OUT_PROC_ASY_ProcessedHistoricalData_",fileDate,".csv"))
+write.csv(historicalDataUpdated, historicalDataFile)
+
 # Create csv of last months processed data
 outputDataFile <- file.path(
   secureDataFolder, 
-  paste("OUT_PROC_ASY_ProcessedRawData_", fileDate, ".csv")
+  paste("OUT_PROC_ASY_ProcessedRawData_",fileDate,".csv")
 )
+
 write.csv(processedTradeStats, outputDataFile)
 -
 # Note progress final
