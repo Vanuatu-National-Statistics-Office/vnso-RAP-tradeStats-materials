@@ -5,6 +5,7 @@ output:
     reference_docx: styles_reference.docx
 ---
 
+
 ```{r setup, include=FALSE}
 # Set echo=FALSE as default for code cells
 knitr::opts_chunk$set(echo = FALSE, 
@@ -966,7 +967,7 @@ foodSubCategoryHistoricalMonthlyValue <- monthlyUnhealthyImports %>%
 # Join current month data-frame to historical data
 foodSubCategoryHistoricalMonthlyValue$Month<- as.character(foodSubCategoryHistoricalMonthlyValue$Month)
 historalAndCurrentMonthFood <- rbind(foodSubCategoryHistoricalMonthlyValue, foodSubCategoryValue)
-subsetHistoralAndCurrentMonthFood<- historalAndCurrentMonthFood[historalAndCurrentMonthFood$Food.sub.category %in% c("Bakery products", "Confectionary", "Cordial", "Noodles", "Canned Meats"), ]
+subsetHistoralAndCurrentMonthFood<- historalAndCurrentMonthFood[historalAndCurrentMonthFood$Food.sub.category %in% c("Bakery products", "Confectionary", "Cordial", "Noodles", "Processed Meats"), ]
 
 # Note X axis tick breaks
 x_ticks <- seq(from = min(subsetHistoralAndCurrentMonthFood$Year, na.rm = TRUE),

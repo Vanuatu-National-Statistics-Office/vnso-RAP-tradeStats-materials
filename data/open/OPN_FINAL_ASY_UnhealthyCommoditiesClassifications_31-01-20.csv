@@ -13,47 +13,17 @@ Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold c
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16022000
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16023100
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16023200
+Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16023900
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16024100
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16024900
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16025000
+Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16025010
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16025090
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16029000
+Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029010
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16029020
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16029030
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16029090
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16010000
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16021000
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16022000
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16023100
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16023200
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16023900
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16024100
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16024900
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16025010
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16025090
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029010
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029020
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029030
-Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029090
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20091200
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20091900
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20093900
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20097900
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20098100
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20098900
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20099000
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,21069000
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,22029900
-Energy-dense beverages,Soft Drinks,Sugar-sweetened,22019000
-Energy-dense beverages,Soft Drinks,Sugar-sweetened,22021000
-Energy-dense beverages,Soft Drinks,Sugar-sweetened,22029000
-Energy-dense beverages,Soft Drinks,Sugar-sweetened,22029100
-Energy-dense beverages,Soft Drinks,Sugar-sweetened,22029900
-Energy-dense beverages,Electrolyte drinks,Sports drinks,22019000
-Energy-dense beverages,Electrolyte drinks,Sports drinks,22021000
-Energy-dense beverages,Electrolyte drinks,Sports drinks,20091200
-Energy-dense beverages,Electrolyte drinks,Sports drinks,20098900
-Energy-dense beverages,Electrolyte drinks,Sports drinks,22029900
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17011100
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17011200
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17011300
@@ -66,15 +36,6 @@ Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17022000
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17024000
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17026000
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17029000
-Savoury ready to eat snacks,Crisps and snacks,"Snack packs, corn chips, potato chips, other (dried peas etc)",19030000
-Savoury ready to eat snacks,Crisps and snacks,"Snack packs, corn chips, potato chips, other (dried peas etc)",19041000
-Savoury ready to eat snacks,Crisps and snacks,"Snack packs, corn chips, potato chips, other (dried peas etc)",19042000
-Savoury ready to eat snacks,Crisps and snacks,"Snack packs, corn chips, potato chips, other (dried peas etc)",19049000
-Savoury ready to eat snacks,Noodles,"Instant, flavoured",19021900
-Savoury ready to eat snacks,Noodles,"Instant, flavoured",19022000
-Savoury ready to eat snacks,Noodles,"Instant, flavoured",19023000
-Savoury ready to eat snacks,Noodles,"Instant, flavoured",19041000
-Savoury ready to eat snacks,Noodles,"Instant, flavoured",19049000
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",17041000
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",17049000
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18010000
@@ -82,16 +43,19 @@ Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Ch
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18040000
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18050000
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18061000
-Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18062000
+Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",18062000
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18062010
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18063100
 Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18063200
-Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18069000
-Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18069090
-Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",19041000
-Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",19049000
-Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",18062000
 Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",18069000
+Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18069090
+Savoury ready to eat snacks,Noodles,"Instant, flavoured",19021900
+Savoury ready to eat snacks,Noodles,"Instant, flavoured",19022000
+Savoury ready to eat snacks,Noodles,"Instant, flavoured",19023000
+Savoury ready to eat snacks,Crisps and snacks,"Snack packs, corn chips, potato chips, other (dried peas etc)",19030000
+Savoury ready to eat snacks,Noodles,"Instant, flavoured",19041000
+Savoury ready to eat snacks,Crisps and snacks,"Snack packs, corn chips, potato chips, other (dried peas etc)",19042000
+Savoury ready to eat snacks,Noodles,"Instant, flavoured",19049000
 Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",19051000
 Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",19052000
 Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",19053000
@@ -99,3 +63,16 @@ Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",19053100
 Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",19053200
 Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",19054000
 Sweet snacks,Bakery products,"Sweet biscuits, Cakes and pastries",19059000
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20091200
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20091900
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20093900
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20097900
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20098100
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20098900
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20099000
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,21069000
+Energy-dense beverages,Soft Drinks,Sugar-sweetened,22019000
+Energy-dense beverages,Soft Drinks,Sugar-sweetened,22021000
+Energy-dense beverages,Soft Drinks,Sugar-sweetened,22029000
+Energy-dense beverages,Soft Drinks,Sugar-sweetened,22029100
+Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,22029900
