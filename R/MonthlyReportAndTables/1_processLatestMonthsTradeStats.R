@@ -25,7 +25,7 @@ openDataFolder <- file.path(repository, "data", "open")
 outputsFolder <- file.path(repository, "outputs")
 
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_30-04-22.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-03-22.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
 # Get date from input file 
@@ -33,8 +33,8 @@ fileNameParts <- unlist(strsplit(tradeStatsFile, "_"))
 fileDate <- unlist(strsplit(fileNameParts[length(fileNameParts)], "\\."))[1]
 
 # Load the summary statistics for the historic IMPORTS and EXPORTS data
-historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
-historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
+#historicImportsSummaryStats <- read.csv(file.path(secureDataFolder, "imports_HS_summaryStats_02-10-20.csv"))
+#historicExportsSummaryStats <- read.csv(file.path(secureDataFolder, "exports_HS_summaryStats_02-10-20.csv"))
 
 #### Clean and process the latest month's data ####
 
@@ -64,7 +64,7 @@ tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, format = "%d/%m/
 #tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, tryFormats = c("%Y-%m-%d", "%Y/%m/%d"), optional = FALSE)
 
 # Covert SITC to character
-tradeStatsNoDup$SITC <- as.character(tradeStatsNoDup$SITC)
+tradeStatsNoDup$SITC <- sapply(tradeStatsNoDup$SITC, FUN=padWithZeros, "SITC")
 
 # Pad HS.Code to 8 digits
 tradeStatsNoDup$HS.Code <- sapply(tradeStatsNoDup$HS.Code, FUN=padWithZeros, "HS")
@@ -176,27 +176,6 @@ cat("Finished checking whether commodity values fall outside of expectations bas
 # Make copy of latest month's processed data
 processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 
-write.csv(processedTradeStats, "processedTradeStats.csv")
-
-# Create new column catgorising export, re-export and import
-tradeMerchandiseFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MerchandiseTradeClassifications_15-03-22.csv")
-tradeMerchandiseClass <- read.csv(tradeMerchandiseFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
-tradeMerchandiseMerged <- merge(processedTradeStats, tradeMerchandiseClass, by="CP4", all.x=TRUE)
-
-# Append processed data to historical data
-historicalTradeStatsFile <- file.path(secureDataFolder, "exports-imports_historical_14.03.22.csv")
-historicalTradeStats <- read.csv(historicalTradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) 
-
-historicalTradeStatsAdapted<- historicalTradeStats %>% #convert all data to same type for data to be appended
-  mutate_all(as.character)
-tradeMerchandiseMergedAdapted<- tradeMerchandiseMerged %>%
-  mutate_all(as.character)
-
-historicalDataUpdated<- bind_rows(historicalTradeStatsAdapted, tradeMerchandiseMergedAdapted, id= NULL)
-
-historicalDataFile <- file.path(secureDataFolder, paste("OUT_PROC_ASY_ProcessedHistoricalData_",fileDate,".csv"))
-write.csv(historicalDataUpdated, historicalDataFile)
-
 # Create csv of last months processed data
 outputDataFile <- file.path(
   secureDataFolder, 
@@ -205,6 +184,27 @@ outputDataFile <- file.path(
 
 write.csv(processedTradeStats, outputDataFile)
 -
+
+
+# Create new column catgorising export, re-export and import
+#tradeMerchandiseFile <- file.path(openDataFolder, "OPN_FINAL_ASY_MerchandiseTradeClassifications_15-03-22.csv")
+#tradeMerchandiseClass <- read.csv(tradeMerchandiseFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+#tradeMerchandiseMerged <- merge(processedTradeStats, tradeMerchandiseClass, by="CP4", all.x=TRUE)
+
+# Append processed data to historical data
+#historicalTradeStatsFile <- file.path(secureDataFolder, "exports-imports_historical_14.03.22.csv")
+#historicalTradeStats <- read.csv(historicalTradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) 
+
+#historicalTradeStatsAdapted<- historicalTradeStats %>% #convert all data to same type for data to be appended
+  #mutate_all(as.character)
+#tradeMerchandiseMergedAdapted<- tradeMerchandiseMerged %>%
+  #mutate_all(as.character)
+
+#historicalDataUpdated<- bind_rows(historicalTradeStatsAdapted, tradeMerchandiseMergedAdapted, id= NULL)
+
+#historicalDataFile <- file.path(secureDataFolder, paste("OUT_PROC_ASY_ProcessedHistoricalData_",fileDate,".csv"))
+#write.csv(historicalDataUpdated, historicalDataFile)
+
 # Note progress final
 
-cat(paste0("Finished processing and cleaning latest month's data into:\n\t", outputDataFile, "\n"))
+#cat(paste0("Finished processing and cleaning latest month's data into:\n\t", outputDataFile, "\n"))

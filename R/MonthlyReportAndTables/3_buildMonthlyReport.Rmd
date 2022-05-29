@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = FALSE,
                       dpi = 600)
 ```
 
+
 ```{r preparation, include = FALSE}
 # Load the required libraries
 library(knitr) # Creating documents
@@ -55,7 +56,7 @@ xAxisText <- list(
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-12-21.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-03-22.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
 
