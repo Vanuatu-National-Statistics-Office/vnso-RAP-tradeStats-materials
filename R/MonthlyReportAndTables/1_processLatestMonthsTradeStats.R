@@ -63,7 +63,7 @@ tradeStatsNoDup$Stat..Value <- as.numeric(gsub(",", "", tradeStatsNoDup$Stat..Va
 tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, format = "%d/%m/%Y")
 #tradeStatsNoDup$Reg..Date <- as.Date(tradeStatsNoDup$Reg..Date, tryFormats = c("%Y-%m-%d", "%Y/%m/%d"), optional = FALSE)
 
-# Covert SITC to character
+# Pad SITC to 6 digits
 tradeStatsNoDup$SITC <- sapply(tradeStatsNoDup$SITC, FUN=padWithZeros, "SITC")
 
 # Pad HS.Code to 8 digits
