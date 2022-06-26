@@ -42,7 +42,7 @@ secureDataFolder <- file.path(repository, "data", "secure")
 source(file.path(repository, "R", "functions.R"))
 
 # Some general ggplot settings
-plotTextSize <- 9
+plotTextSize <- 7
 xAxisText <- list(
   "angle" = 35,
   "size" = plotTextSize,

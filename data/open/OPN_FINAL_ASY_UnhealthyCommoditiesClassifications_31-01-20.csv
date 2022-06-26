@@ -9,21 +9,21 @@ Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold c
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",2101900
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",2109900
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16010000
-Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16021000
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16022000
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16023100
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16023200
 Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16023900
+Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16021000
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16024100
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16024900
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16025000
 Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16025010
-Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16025090
+Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16025090
 Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16029000
 Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029010
-Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16029020
-Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16029030
-Fatty Meat Products ,Processed Meats,"Sausage, ham, bacon, salami, jerky, cold cuts, chicken nuggets, patties",16029090
+Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029020
+Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029030
+Fatty Meat Products ,Canned Meats,"Corned mutton, corned beef, spam, canned chicken, ham, turkey, etc",16029090
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17011100
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17011200
 Sugar and other Caloric Sweeteners,Sugar,Natural cane and refined sugar,17011300
@@ -71,8 +71,10 @@ Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20098100
 Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20098900
 Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,20099000
 Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,21069000
-Energy-dense beverages,Soft Drinks,Sugar-sweetened,22019000
-Energy-dense beverages,Soft Drinks,Sugar-sweetened,22021000
 Energy-dense beverages,Soft Drinks,Sugar-sweetened,22029000
 Energy-dense beverages,Soft Drinks,Sugar-sweetened,22029100
-Energy-dense beverages,Cordial,Cordial/Concentrate/Powder,22029900
+Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18062000
+Sweet snacks,Confectionary,"Chocolate and sweets (chocolate and sugar based), Chewing gum",18069000
+Energy-dense beverages,Electrolyte drinks,Sports drinks,22019000
+Energy-dense beverages,Electrolyte drinks,Sports drinks,22021000
+Energy-dense beverages,Electrolyte drinks,Sports drinks,22029900

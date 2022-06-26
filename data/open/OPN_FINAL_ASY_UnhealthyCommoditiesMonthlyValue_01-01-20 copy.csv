@@ -1,4 +1,604 @@
 Year,Month,Food.sub.category,total
+2011,April,Bakery products,45181683
+2011,April,Canned Meats,16525655
+2011,April,Confectionary,22034752
+2011,April,Cordial,4756934
+2011,April,Crisps and snacks,11896460
+2011,April,Electrolyte drinks,12132053
+2011,April,Noodles,16825908
+2011,April,Processed Meats,14790292
+2011,April,Soft Drinks,12741603
+2011,April,Sugar,10318710
+2011,August,Bakery products,61244391
+2011,August,Canned Meats,25332537
+2011,August,Confectionary,27934851
+2011,August,Cordial,12052699
+2011,August,Crisps and snacks,10108030
+2011,August,Electrolyte drinks,21135765
+2011,August,Noodles,31377022
+2011,August,Processed Meats,24574195
+2011,August,Soft Drinks,22302129
+2011,August,Sugar,17484177
+2011,December,Bakery products,66556642
+2011,December,Canned Meats,41544527
+2011,December,Confectionary,51855570
+2011,December,Cordial,26485328
+2011,December,Crisps and snacks,18516268
+2011,December,Electrolyte drinks,21111266
+2011,December,Noodles,31546100
+2011,December,Processed Meats,40612711
+2011,December,Soft Drinks,20133845
+2011,December,Sugar,18054872
+2011,February,Bakery products,24428367
+2011,February,Canned Meats,5010160
+2011,February,Confectionary,16722664
+2011,February,Cordial,10688064
+2011,February,Crisps and snacks,11719600
+2011,February,Electrolyte drinks,14476510
+2011,February,Noodles,14126433
+2011,February,Processed Meats,4953389
+2011,February,Soft Drinks,13945932
+2011,February,Sugar,17826228
+2011,January,Bakery products,41360048
+2011,January,Canned Meats,34675849
+2011,January,Confectionary,11969715
+2011,January,Cordial,8648079
+2011,January,Crisps and snacks,6338850
+2011,January,Electrolyte drinks,25694684
+2011,January,Noodles,15517378
+2011,January,Processed Meats,31458767
+2011,January,Soft Drinks,25696915
+2011,January,Sugar,22104421
+2011,July,Bakery products,24188885
+2011,July,Canned Meats,13622604
+2011,July,Confectionary,21482702
+2011,July,Cordial,12437214
+2011,July,Crisps and snacks,11358900
+2011,July,Electrolyte drinks,24185281
+2011,July,Noodles,19615315
+2011,July,Processed Meats,13370001
+2011,July,Soft Drinks,24697603
+2011,July,Sugar,15873567
+2011,June,Bakery products,70091865
+2011,June,Canned Meats,27594053
+2011,June,Confectionary,38567000
+2011,June,Cordial,9559613
+2011,June,Crisps and snacks,18535430
+2011,June,Electrolyte drinks,21386587
+2011,June,Noodles,25494077
+2011,June,Processed Meats,26943526
+2011,June,Soft Drinks,22984702
+2011,June,Sugar,5674196
+2011,March,Bakery products,40721378
+2011,March,Canned Meats,22019950
+2011,March,Confectionary,28872643
+2011,March,Cordial,9039606
+2011,March,Crisps and snacks,13945610
+2011,March,Electrolyte drinks,5625222
+2011,March,Noodles,24855055
+2011,March,Processed Meats,21911669
+2011,March,Soft Drinks,5676918
+2011,March,Sugar,12652650
+2011,May,Bakery products,40968625
+2011,May,Canned Meats,36979795
+2011,May,Confectionary,22315429
+2011,May,Cordial,10744168
+2011,May,Crisps and snacks,2508877
+2011,May,Electrolyte drinks,11061172
+2011,May,Noodles,6924294
+2011,May,Processed Meats,36697834
+2011,May,Soft Drinks,12161907
+2011,May,Sugar,21952819
+2011,November,Bakery products,52750846
+2011,November,Canned Meats,26297065
+2011,November,Confectionary,29682960
+2011,November,Cordial,11604534
+2011,November,Crisps and snacks,13117821
+2011,November,Electrolyte drinks,39732246
+2011,November,Noodles,25422522
+2011,November,Processed Meats,26258929
+2011,November,Soft Drinks,39360541
+2011,November,Sugar,20026923
+2011,October,Bakery products,51974745
+2011,October,Canned Meats,17818852
+2011,October,Confectionary,18047788
+2011,October,Cordial,9714124
+2011,October,Crisps and snacks,10901434
+2011,October,Electrolyte drinks,9174575
+2011,October,Noodles,18584348
+2011,October,Processed Meats,17742645
+2011,October,Soft Drinks,9289989
+2011,October,Sugar,12222787
+2011,September,Bakery products,39847881
+2011,September,Canned Meats,20378558
+2011,September,Confectionary,34156213
+2011,September,Cordial,9909603
+2011,September,Crisps and snacks,11968508
+2011,September,Electrolyte drinks,4051867
+2011,September,Noodles,19525098
+2011,September,Processed Meats,20256364
+2011,September,Soft Drinks,4589625
+2011,September,Sugar,23088358
+2012,April,Bakery products,25700567
+2012,April,Canned Meats,12563006
+2012,April,Confectionary,20608262
+2012,April,Cordial,5054851
+2012,April,Crisps and snacks,4510124
+2012,April,Electrolyte drinks,17726285
+2012,April,Noodles,9834422
+2012,April,Processed Meats,12554202
+2012,April,Soft Drinks,17616450
+2012,April,Sugar,11177179
+2012,August,Bakery products,69934371
+2012,August,Canned Meats,43996364
+2012,August,Confectionary,36315083
+2012,August,Cordial,14979904
+2012,August,Crisps and snacks,16718076
+2012,August,Electrolyte drinks,13905914
+2012,August,Noodles,29384875
+2012,August,Processed Meats,43657871
+2012,August,Soft Drinks,13927394
+2012,August,Sugar,23874547
+2012,December,Bakery products,38792486
+2012,December,Canned Meats,6360400
+2012,December,Confectionary,32738520
+2012,December,Cordial,14274556
+2012,December,Crisps and snacks,12469009
+2012,December,Electrolyte drinks,33186742
+2012,December,Noodles,28030498
+2012,December,Processed Meats,6279448
+2012,December,Soft Drinks,33124888
+2012,December,Sugar,15280530
+2012,February,Bakery products,39426241
+2012,February,Canned Meats,4767484
+2012,February,Confectionary,23949379
+2012,February,Cordial,6670893
+2012,February,Crisps and snacks,7858084
+2012,February,Electrolyte drinks,3612005
+2012,February,Noodles,13240777
+2012,February,Processed Meats,4586403
+2012,February,Soft Drinks,3619247
+2012,February,Sugar,5613294
+2012,January,Bakery products,44562426
+2012,January,Canned Meats,13075274
+2012,January,Confectionary,28341845
+2012,January,Cordial,7100527
+2012,January,Crisps and snacks,14151733
+2012,January,Electrolyte drinks,38214777
+2012,January,Noodles,26119105
+2012,January,Processed Meats,13028370
+2012,January,Soft Drinks,38238756
+2012,January,Sugar,12935196
+2012,July,Bakery products,33815624
+2012,July,Canned Meats,40996041
+2012,July,Confectionary,18288536
+2012,July,Cordial,6201797
+2012,July,Crisps and snacks,10732272
+2012,July,Electrolyte drinks,18527529
+2012,July,Noodles,25910458
+2012,July,Processed Meats,40979682
+2012,July,Soft Drinks,18632975
+2012,July,Sugar,14208946
+2012,June,Bakery products,25284938
+2012,June,Canned Meats,1275705
+2012,June,Confectionary,23590108
+2012,June,Cordial,10794820
+2012,June,Crisps and snacks,6295952
+2012,June,Electrolyte drinks,13853696
+2012,June,Noodles,16939528
+2012,June,Processed Meats,1233633
+2012,June,Soft Drinks,14400667
+2012,June,Sugar,18647150
+2012,March,Bakery products,53803011
+2012,March,Canned Meats,27501103
+2012,March,Confectionary,27735173
+2012,March,Cordial,8619982
+2012,March,Crisps and snacks,10935090
+2012,March,Electrolyte drinks,14425685
+2012,March,Noodles,24228561
+2012,March,Processed Meats,27484430
+2012,March,Soft Drinks,14399567
+2012,March,Sugar,6222461
+2012,May,Bakery products,71424244
+2012,May,Canned Meats,25627374
+2012,May,Confectionary,33231670
+2012,May,Cordial,12314109
+2012,May,Crisps and snacks,14119966
+2012,May,Electrolyte drinks,15206450
+2012,May,Noodles,28577029
+2012,May,Processed Meats,25460092
+2012,May,Soft Drinks,15851963
+2012,May,Sugar,7468468
+2012,November,Bakery products,44426782
+2012,November,Canned Meats,42263299
+2012,November,Confectionary,38075465
+2012,November,Cordial,10678424
+2012,November,Crisps and snacks,15865189
+2012,November,Electrolyte drinks,18768834
+2012,November,Noodles,26407284
+2012,November,Processed Meats,42067246
+2012,November,Soft Drinks,18281458
+2012,November,Sugar,3017572
+2012,October,Bakery products,53224615
+2012,October,Canned Meats,16956345
+2012,October,Confectionary,20014129
+2012,October,Cordial,7129197
+2012,October,Crisps and snacks,6311227
+2012,October,Electrolyte drinks,22866646
+2012,October,Noodles,11377780
+2012,October,Processed Meats,16951342
+2012,October,Soft Drinks,23289584
+2012,October,Sugar,12545760
+2012,September,Bakery products,51824358
+2012,September,Canned Meats,2954764
+2012,September,Confectionary,29990941
+2012,September,Cordial,9923094
+2012,September,Crisps and snacks,17153873
+2012,September,Electrolyte drinks,7138236
+2012,September,Noodles,29559224
+2012,September,Processed Meats,2913142
+2012,September,Soft Drinks,6900701
+2012,September,Sugar,6151884
+2013,April,Bakery products,54690227
+2013,April,Canned Meats,5433994
+2013,April,Confectionary,48106813
+2013,April,Cordial,13631715
+2013,April,Crisps and snacks,23251385
+2013,April,Electrolyte drinks,47284069
+2013,April,Noodles,30071489
+2013,April,Processed Meats,5261259
+2013,April,Soft Drinks,46738990
+2013,April,Sugar,21566995
+2013,August,Bakery products,88698811
+2013,August,Canned Meats,26682438
+2013,August,Confectionary,31438040
+2013,August,Cordial,16924292
+2013,August,Crisps and snacks,16527741
+2013,August,Electrolyte drinks,26218963
+2013,August,Noodles,27511685
+2013,August,Processed Meats,26588369
+2013,August,Soft Drinks,26260431
+2013,August,Sugar,5565789
+2013,December,Bakery products,66729145
+2013,December,Canned Meats,21956043
+2013,December,Confectionary,34863527
+2013,December,Cordial,10571034
+2013,December,Crisps and snacks,10617802
+2013,December,Electrolyte drinks,46675077
+2013,December,Noodles,26593296
+2013,December,Processed Meats,21799493
+2013,December,Soft Drinks,46382776
+2013,December,Sugar,13111654
+2013,February,Bakery products,60262979
+2013,February,Canned Meats,18259491
+2013,February,Confectionary,31443162
+2013,February,Cordial,8585626
+2013,February,Crisps and snacks,9862630
+2013,February,Electrolyte drinks,12493021
+2013,February,Noodles,26493840
+2013,February,Processed Meats,18095454
+2013,February,Soft Drinks,12099288
+2013,February,Sugar,8484304
+2013,January,Bakery products,100272791
+2013,January,Canned Meats,63474905
+2013,January,Confectionary,34367523
+2013,January,Cordial,11885730
+2013,January,Crisps and snacks,15841215
+2013,January,Electrolyte drinks,22546889
+2013,January,Noodles,33991081
+2013,January,Processed Meats,63287906
+2013,January,Soft Drinks,22740495
+2013,January,Sugar,24882145
+2013,July,Bakery products,19150243
+2013,July,Canned Meats,5830420
+2013,July,Confectionary,29344970
+2013,July,Cordial,16247382
+2013,July,Crisps and snacks,14384426
+2013,July,Electrolyte drinks,19189681
+2013,July,Noodles,23154227
+2013,July,Processed Meats,5731272
+2013,July,Soft Drinks,19867205
+2013,July,Sugar,23820167
+2013,June,Bakery products,35694085
+2013,June,Canned Meats,28257184
+2013,June,Confectionary,25747713
+2013,June,Cordial,12795665
+2013,June,Crisps and snacks,8122096
+2013,June,Electrolyte drinks,24411534
+2013,June,Noodles,16550986
+2013,June,Processed Meats,16438172
+2013,June,Soft Drinks,24517213
+2013,June,Sugar,9193514
+2013,March,Bakery products,30227481
+2013,March,Canned Meats,13855868
+2013,March,Confectionary,30473458
+2013,March,Cordial,11314839
+2013,March,Crisps and snacks,14564583
+2013,March,Electrolyte drinks,13611145
+2013,March,Noodles,26252657
+2013,March,Processed Meats,13770518
+2013,March,Soft Drinks,14219334
+2013,March,Sugar,14447235
+2013,May,Bakery products,48540969
+2013,May,Canned Meats,15427856
+2013,May,Confectionary,22624647
+2013,May,Cordial,7664979
+2013,May,Crisps and snacks,11003376
+2013,May,Electrolyte drinks,8638474
+2013,May,Noodles,20029695
+2013,May,Processed Meats,15337100
+2013,May,Soft Drinks,8616418
+2013,May,Sugar,14054052
+2013,November,Bakery products,100290291
+2013,November,Canned Meats,24330494
+2013,November,Confectionary,39142349
+2013,November,Cordial,16752181
+2013,November,Crisps and snacks,17777067
+2013,November,Electrolyte drinks,19364573
+2013,November,Noodles,26369942
+2013,November,Processed Meats,24045441
+2013,November,Soft Drinks,19408463
+2013,November,Sugar,8871900
+2013,October,Bakery products,75631684
+2013,October,Canned Meats,24361238
+2013,October,Confectionary,26988785
+2013,October,Cordial,10777588
+2013,October,Crisps and snacks,15927362
+2013,October,Electrolyte drinks,14301575
+2013,October,Noodles,29919531
+2013,October,Processed Meats,24144779
+2013,October,Soft Drinks,15175746
+2013,October,Sugar,15980567
+2013,September,Bakery products,26616546
+2013,September,Canned Meats,3118776
+2013,September,Confectionary,16583038
+2013,September,Cordial,8501295
+2013,September,Crisps and snacks,7803941
+2013,September,Electrolyte drinks,10092188
+2013,September,Noodles,18450225
+2013,September,Processed Meats,3002002
+2013,September,Soft Drinks,10377604
+2013,September,Sugar,5292321
+2014,April,Bakery products,36239540
+2014,April,Canned Meats,11986720
+2014,April,Confectionary,21936749
+2014,April,Cordial,3445632
+2014,April,Crisps and snacks,3636009
+2014,April,Electrolyte drinks,22399445
+2014,April,Noodles,16565359
+2014,April,Processed Meats,11986720
+2014,April,Soft Drinks,23096799
+2014,April,Sugar,9230212
+2014,August,Bakery products,42574171
+2014,August,Canned Meats,32044519
+2014,August,Confectionary,30652909
+2014,August,Cordial,8316803
+2014,August,Crisps and snacks,16450677
+2014,August,Electrolyte drinks,22465018
+2014,August,Noodles,26339394
+2014,August,Processed Meats,31973502
+2014,August,Soft Drinks,22126286
+2014,August,Sugar,12302137
+2014,December,Bakery products,70818556
+2014,December,Canned Meats,33808156
+2014,December,Confectionary,45048597
+2014,December,Cordial,13839499
+2014,December,Crisps and snacks,13742497
+2014,December,Electrolyte drinks,45532501
+2014,December,Noodles,28873408
+2014,December,Processed Meats,27934869
+2014,December,Soft Drinks,45080668
+2014,December,Sugar,33489988
+2014,February,Bakery products,49712935
+2014,February,Canned Meats,6578031
+2014,February,Confectionary,22204153
+2014,February,Cordial,5948950
+2014,February,Crisps and snacks,7914305
+2014,February,Electrolyte drinks,16341031
+2014,February,Noodles,17466900
+2014,February,Processed Meats,6508909
+2014,February,Soft Drinks,16555621
+2014,February,Sugar,6466189
+2014,January,Bakery products,33138076
+2014,January,Canned Meats,44491727
+2014,January,Confectionary,10364184
+2014,January,Cordial,3825092
+2014,January,Crisps and snacks,6758114
+2014,January,Electrolyte drinks,11344164
+2014,January,Noodles,18847596
+2014,January,Processed Meats,44461580
+2014,January,Soft Drinks,11497431
+2014,January,Sugar,10346619
+2014,July,Bakery products,80828628
+2014,July,Canned Meats,34086311
+2014,July,Confectionary,30973345
+2014,July,Cordial,7311753
+2014,July,Crisps and snacks,13411617
+2014,July,Electrolyte drinks,9995239
+2014,July,Noodles,23119494
+2014,July,Processed Meats,22294259
+2014,July,Soft Drinks,9930217
+2014,July,Sugar,11655518
+2014,June,Bakery products,51698432
+2014,June,Canned Meats,14686984
+2014,June,Confectionary,20552457
+2014,June,Cordial,7771532
+2014,June,Crisps and snacks,9372212
+2014,June,Electrolyte drinks,24212968
+2014,June,Noodles,26474780
+2014,June,Processed Meats,14345542
+2014,June,Soft Drinks,24222580
+2014,June,Sugar,12363956
+2014,March,Bakery products,22461919
+2014,March,Canned Meats,15744512
+2014,March,Confectionary,30284250
+2014,March,Cordial,10419482
+2014,March,Crisps and snacks,7539922
+2014,March,Electrolyte drinks,23470718
+2014,March,Noodles,12574669
+2014,March,Processed Meats,4779169
+2014,March,Soft Drinks,23624201
+2014,March,Sugar,10339940
+2014,May,Bakery products,43877378
+2014,May,Canned Meats,13809528
+2014,May,Confectionary,23235412
+2014,May,Cordial,8242628
+2014,May,Crisps and snacks,9920820
+2014,May,Electrolyte drinks,22955582
+2014,May,Noodles,26983798
+2014,May,Processed Meats,13755938
+2014,May,Soft Drinks,22563752
+2014,May,Sugar,5123427
+2014,November,Bakery products,79828722
+2014,November,Canned Meats,35478745
+2014,November,Confectionary,26902595
+2014,November,Cordial,12337548
+2014,November,Crisps and snacks,16543817
+2014,November,Electrolyte drinks,33158841
+2014,November,Noodles,36700870
+2014,November,Processed Meats,35423594
+2014,November,Soft Drinks,33760990
+2014,November,Sugar,16003661
+2014,October,Bakery products,29969902
+2014,October,Canned Meats,3024484
+2014,October,Confectionary,21581679
+2014,October,Cordial,15737417
+2014,October,Crisps and snacks,9595293
+2014,October,Electrolyte drinks,18729950
+2014,October,Noodles,20808744
+2014,October,Processed Meats,2929209
+2014,October,Soft Drinks,17512967
+2014,October,Sugar,13102607
+2014,September,Bakery products,70656509
+2014,September,Canned Meats,47948491
+2014,September,Confectionary,35027410
+2014,September,Cordial,11712511
+2014,September,Crisps and snacks,14853020
+2014,September,Electrolyte drinks,23662375
+2014,September,Noodles,17778012
+2014,September,Processed Meats,35289670
+2014,September,Soft Drinks,23722889
+2014,September,Sugar,10326495
+2015,April,Bakery products,91430297
+2015,April,Canned Meats,21711002
+2015,April,Confectionary,32098837
+2015,April,Cordial,22201636
+2015,April,Crisps and snacks,11757235
+2015,April,Electrolyte drinks,14343679
+2015,April,Noodles,44372159
+2015,April,Processed Meats,8847428
+2015,April,Soft Drinks,14907851
+2015,April,Sugar,13367307
+2015,August,Bakery products,64081480
+2015,August,Canned Meats,32893851
+2015,August,Confectionary,36833157
+2015,August,Cordial,13082294
+2015,August,Crisps and snacks,10128228
+2015,August,Electrolyte drinks,21172426
+2015,August,Noodles,25012058
+2015,August,Processed Meats,32227960
+2015,August,Soft Drinks,23385044
+2015,August,Sugar,10897422
+2015,December,Bakery products,73397337
+2015,December,Canned Meats,28140674
+2015,December,Confectionary,61478894
+2015,December,Cordial,27716252
+2015,December,Crisps and snacks,15595992
+2015,December,Electrolyte drinks,47863277
+2015,December,Noodles,26767417
+2015,December,Processed Meats,27221687
+2015,December,Soft Drinks,45066756
+2015,December,Sugar,11413131
+2015,February,Bakery products,47362264
+2015,February,Canned Meats,35841016
+2015,February,Confectionary,19584344
+2015,February,Cordial,13394166
+2015,February,Crisps and snacks,5130148
+2015,February,Electrolyte drinks,30653042
+2015,February,Noodles,18377210
+2015,February,Processed Meats,26301727
+2015,February,Soft Drinks,30423878
+2015,February,Sugar,16431337
+2015,January,Bakery products,32888171
+2015,January,Canned Meats,5767636
+2015,January,Confectionary,14278247
+2015,January,Cordial,11202813
+2015,January,Crisps and snacks,4322898
+2015,January,Electrolyte drinks,11637180
+2015,January,Noodles,16973766
+2015,January,Processed Meats,5511977
+2015,January,Soft Drinks,11913965
+2015,January,Sugar,11517926
+2015,July,Bakery products,43263478
+2015,July,Canned Meats,43151866
+2015,July,Confectionary,32584134
+2015,July,Cordial,20003431
+2015,July,Crisps and snacks,10798250
+2015,July,Electrolyte drinks,8590095
+2015,July,Noodles,27874134
+2015,July,Processed Meats,41631698
+2015,July,Soft Drinks,3208406
+2015,July,Sugar,10439531
+2015,June,Bakery products,68862018
+2015,June,Canned Meats,26994268
+2015,June,Confectionary,37152088
+2015,June,Cordial,17542951
+2015,June,Crisps and snacks,18390180
+2015,June,Electrolyte drinks,33235551
+2015,June,Noodles,31656115
+2015,June,Processed Meats,16167487
+2015,June,Soft Drinks,31045174
+2015,June,Sugar,13927979
+2015,March,Bakery products,57472563
+2015,March,Canned Meats,17243268
+2015,March,Confectionary,38630857
+2015,March,Cordial,18377887
+2015,March,Crisps and snacks,14662824
+2015,March,Electrolyte drinks,17119356
+2015,March,Noodles,41862175
+2015,March,Processed Meats,5971761
+2015,March,Soft Drinks,17760199
+2015,March,Sugar,2164758
+2015,May,Bakery products,51806321
+2015,May,Canned Meats,5027451
+2015,May,Confectionary,18235063
+2015,May,Cordial,15287224
+2015,May,Crisps and snacks,4259566
+2015,May,Electrolyte drinks,22932365
+2015,May,Noodles,18432294
+2015,May,Processed Meats,5006898
+2015,May,Soft Drinks,22039479
+2015,May,Sugar,6998312
+2015,November,Bakery products,82645332
+2015,November,Canned Meats,15017755
+2015,November,Confectionary,52158204
+2015,November,Cordial,22095546
+2015,November,Crisps and snacks,20846127
+2015,November,Electrolyte drinks,18415753
+2015,November,Noodles,35512229
+2015,November,Processed Meats,14675144
+2015,November,Soft Drinks,16935034
+2015,November,Sugar,9286312
+2015,October,Bakery products,91110688
+2015,October,Canned Meats,29431150
+2015,October,Confectionary,46955804
+2015,October,Cordial,18745913
+2015,October,Crisps and snacks,16266603
+2015,October,Electrolyte drinks,9740424
+2015,October,Noodles,36648574
+2015,October,Processed Meats,20952616
+2015,October,Soft Drinks,8400812
+2015,October,Sugar,14655081
+2015,September,Bakery products,42516452
+2015,September,Canned Meats,5435145
+2015,September,Confectionary,27121711
+2015,September,Cordial,24518583
+2015,September,Crisps and snacks,12527559
+2015,September,Electrolyte drinks,11335811
+2015,September,Noodles,18615967
+2015,September,Processed Meats,5215620
+2015,September,Soft Drinks,9794408
+2015,September,Sugar,10141946
 2016,April,Bakery products,80656046
 2016,April,Canned Meats,3362423
 2016,April,Confectionary,40628862
