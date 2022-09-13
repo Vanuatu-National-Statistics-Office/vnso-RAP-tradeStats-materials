@@ -25,7 +25,7 @@ openDataFolder <- file.path(repository, "data", "open")
 outputsFolder <- file.path(repository, "outputs")
 
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-03-22.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-07-22.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
 # Get date from input file 
@@ -153,7 +153,7 @@ missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
 
 # Write missing codes table to file
-write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-01-22.csv"))
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_30-06-22.csv"))
 
 
 # Print progress

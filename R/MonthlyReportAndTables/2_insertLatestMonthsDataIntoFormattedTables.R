@@ -25,7 +25,7 @@ month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formatted tables
-finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_28-02-22_WORKING.xlsx")
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-06-22_WORKING.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
@@ -925,7 +925,7 @@ write.csv(subCategoryValue, "subCategoryValue.csv")
 #### Finish ####
 
 # Save the changes to the excel file
-updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-03-22_WORKING.xlsx")
+updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-07-22_WORKING.xlsx")
 openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
 # Print progress for finish
