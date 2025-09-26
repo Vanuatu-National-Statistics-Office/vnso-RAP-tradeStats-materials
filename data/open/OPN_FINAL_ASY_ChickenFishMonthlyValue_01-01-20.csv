@@ -1,146 +1,4 @@
-Year,Month,Livestock.Substitution,total
-2016,April,Canned Mackerel,22523176
-2016,April,Canned Tunas,27171071
-2016,April,Chicken,67462596
-2016,April,Chicken Eggs,8003789
-2016,August,Canned Mackerel,19748270
-2016,August,Canned Tunas,15106920
-2016,August,Chicken,66042702
-2016,August,Chicken Eggs,7133657
-2016,December,Canned Mackerel,5223071
-2016,December,Canned Tunas,41671056
-2016,December,Chicken,42471487
-2016,December,Chicken Eggs,3162967
-2016,February,Canned Mackerel,9052589
-2016,February,Canned Tunas,26424395
-2016,February,Chicken,37033922
-2016,January,Canned Mackerel,3161838
-2016,January,Canned Tunas,22969515
-2016,January,Chicken,44443865
-2016,January,Chicken Eggs,4602198
-2016,July,Canned Mackerel,36682383
-2016,July,Canned Tunas,33658651
-2016,July,Chicken,115733585
-2016,July,Chicken Eggs,8753940
-2016,June,Canned Mackerel,17462857
-2016,June,Canned Tunas,29918716
-2016,June,Chicken,63044646
-2016,June,Chicken Eggs,5349439
-2016,March,Canned Mackerel,108441
-2016,March,Canned Tunas,26922709
-2016,March,Chicken,30202488
-2016,May,Canned Mackerel,737415
-2016,May,Canned Tunas,6184605
-2016,May,Chicken,38358078
-2016,May,Chicken Eggs,5821637
-2016,November,Canned Mackerel,35422540
-2016,November,Canned Tunas,18894190
-2016,November,Chicken,65743441
-2016,November,Chicken Eggs,6496762
-2016,October,Canned Mackerel,17543828
-2016,October,Canned Tunas,22279003
-2016,October,Chicken,81272177
-2016,October,Chicken Eggs,8862435
-2016,September,Canned Mackerel,8089690
-2016,September,Canned Tunas,37513843
-2016,September,Chicken,57932567
-2016,September,Chicken Eggs,9323878
-2017,April,Canned Mackerel,13262021
-2017,April,Canned Tunas,54298387
-2017,April,Chicken,73930864
-2017,April,Chicken Eggs,2450478
-2017,August,Canned Mackerel,19685613
-2017,August,Canned Tunas,41808788
-2017,August,Chicken,74288654.05
-2017,August,Chicken Eggs,9069560
-2017,December,Canned Mackerel,9800019
-2017,December,Canned Tunas,38756787
-2017,December,Chicken,92888817
-2017,December,Chicken Eggs,5426008
-2017,February,Canned Mackerel,5998510
-2017,February,Canned Tunas,45985656
-2017,February,Chicken,69212348
-2017,February,Chicken Eggs,2912054
-2017,January,Canned Mackerel,2100491
-2017,January,Canned Tunas,8643583
-2017,January,Chicken,42029014
-2017,January,Chicken Eggs,2415380
-2017,July,Canned Mackerel,5048376
-2017,July,Canned Tunas,44569835
-2017,July,Chicken,80074244.69
-2017,July,Chicken Eggs,4944133
-2017,June,Canned Mackerel,8427473
-2017,June,Canned Tunas,32274116
-2017,June,Chicken,67802547
-2017,June,Chicken Eggs,2429159
-2017,March,Canned Mackerel,22576363
-2017,March,Canned Tunas,30716264
-2017,March,Chicken,73525013
-2017,March,Chicken Eggs,3371675
-2017,May,Canned Mackerel,28000401
-2017,May,Canned Tunas,27607886
-2017,May,Chicken,58841391
-2017,May,Chicken Eggs,10469881
-2017,November,Canned Mackerel,17776166
-2017,November,Canned Tunas,30698872
-2017,November,Chicken,71075891
-2017,November,Chicken Eggs,11109924
-2017,October,Canned Mackerel,27999910
-2017,October,Canned Tunas,39963989
-2017,October,Chicken,94923488
-2017,October,Chicken Eggs,12171111
-2017,September,Canned Mackerel,12921018
-2017,September,Canned Tunas,41950335.89
-2017,September,Chicken,60425563
-2017,September,Chicken Eggs,4867839
-2018,April,Canned Mackerel,3941403
-2018,April,Canned Tunas,17451129
-2018,April,Chicken,56644245
-2018,April,Chicken Eggs,4329704
-2018,August,Canned Mackerel,22502857
-2018,August,Canned Tunas,38684736
-2018,August,Chicken,81408435
-2018,August,Chicken Eggs,7476453
-2018,December,Canned Mackerel,33974436
-2018,December,Canned Tunas,63102181
-2018,December,Chicken,68071250
-2018,December,Chicken Eggs,7857875
-2018,February,Canned Mackerel,10844993
-2018,February,Canned Tunas,40425307
-2018,February,Chicken,45893012
-2018,February,Chicken Eggs,2111290
-2018,January,Canned Mackerel,3463612
-2018,January,Canned Tunas,6317024
-2018,January,Chicken,61497154
-2018,January,Chicken Eggs,4221685
-2018,July,Canned Mackerel,3354110
-2018,July,Canned Tunas,79666133
-2018,July,Chicken,94720754
-2018,July,Chicken Eggs,12105699
-2018,June,Canned Mackerel,11219758
-2018,June,Canned Tunas,18763604
-2018,June,Chicken,84560570
-2018,June,Chicken Eggs,4995166
-2018,March,Canned Mackerel,22131599
-2018,March,Canned Tunas,12230176
-2018,March,Chicken,82036274
-2018,March,Chicken Eggs,3026882
-2018,May,Canned Mackerel,26757823
-2018,May,Canned Tunas,87196043
-2018,May,Chicken,76499036
-2018,May,Chicken Eggs,4031274
-2018,November,Canned Mackerel,2120896
-2018,November,Canned Tunas,42456714
-2018,November,Chicken,102629444
-2018,November,Chicken Eggs,8410065
-2018,October,Canned Mackerel,18039176
-2018,October,Canned Tunas,56493620
-2018,October,Chicken,97150930
-2018,October,Chicken Eggs,7546852
-2018,September,Canned Mackerel,35053058
-2018,September,Canned Tunas,49381270
-2018,September,Chicken,119483703
-2018,September,Chicken Eggs,11504753
+Year,Month,Livestock.Substitution, total 
 2019,April,Canned Mackerel,11631773
 2019,April,Canned Tunas,24970083
 2019,April,Chicken,105028252
@@ -269,3 +127,147 @@ Year,Month,Livestock.Substitution,total
 2021,May,Canned Tunas,37614774
 2021,May,Chicken,68940719
 2021,May,Chicken Eggs,4503674
+2021,November,Canned Mackerel,42605005
+2021,November,Canned Tunas,15578051
+2021,November,Chicken,109497263
+2021,November,Chicken Eggs,1546602
+2021,October,Canned Mackerel,3793198
+2021,October,Canned Tunas,34856793
+2021,October,Chicken,23563553
+2021,October,Chicken Eggs,450326
+2021,September,Canned Mackerel,22122149
+2021,September,Canned Tunas,41548449
+2021,September,Chicken,78061734
+2021,September,Chicken Eggs,10430232
+2021,December,Canned Mackerel,36107362
+2021,December,Canned Tunas,38665896
+2021,December,Chicken,148520188
+2021,December,Chicken Eggs,9580466
+2022,April,Canned Mackerel,10458019
+2022,April,Canned Tunas,67934266
+2022,April,Chicken,12860592
+2022,April,Chicken Eggs,0
+2022,August,Canned Mackerel,22149457
+2022,August,Canned Tunas,35558552
+2022,August,Chicken,17034924
+2022,August,Chicken Eggs,747415
+2022,February,Canned Mackerel,29651992
+2022,February,Canned Tunas,21392158
+2022,February,Chicken,78622289
+2022,February,Chicken Eggs,0
+2022,January,Canned Mackerel,4348375
+2022,January,Canned Tunas,63012394
+2022,January,Chicken,36679290
+2022,January,Chicken Eggs,0
+2022,July,Canned Mackerel,12915557
+2022,July,Canned Tunas,31812203
+2022,July,Chicken,90131088
+2022,July,Chicken Eggs,5303016
+2022,June,Canned Mackerel,19582431
+2022,June,Canned Tunas,53938127
+2022,June,Chicken,42397457
+2022,June,Chicken Eggs,0
+2022,March,Canned Mackerel,6107447
+2022,March,Canned Tunas,9153608
+2022,March,Chicken,49915872
+2022,March,Chicken Eggs,5632334
+2022,May,Canned Mackerel,13895306
+2022,May,Canned Tunas,30218422
+2022,May,Chicken,35307194
+2022,May,Chicken Eggs,1305926
+2022,September,Canned Mackerel,27880000
+2022,September,Canned Tunas,40800000
+2022,September,Chicken,59130000
+2022,September,Chicken Eggs,2380000
+2023,January,Canned Mackerel,8433110
+2023,January,Canned Tunas,80179212
+2023,January,Chicken,48297780
+2023,January,Chicken Eggs,5979686
+2023,February,Canned Mackerel,4173725
+2023,February,Canned Tunas,33030443
+2023,February,Chicken,56224962
+2023,February,Chicken Eggs,0
+2023,March,Canned Mackerel,14295144
+2023,March,Canned Tunas,17427183
+2023,March,Chicken,46703395
+2023,March,Chicken Eggs,5227440
+2023,April,Canned Mackerel,47457013
+2023,April,Canned Tunas,88109002
+2023,April,Chicken,17315296
+2023,April,Chicken Eggs,3123575
+2023,May,Canned Mackerel,35484460
+2023,May,Canned Tunas,103553459
+2023,May,Chicken,49335397
+2023,May,Chicken Eggs,927053
+2023,June,Canned Mackerel,45063298
+2023,June,Canned Tunas,73868264
+2023,June,Chicken,53204863
+2023,June,Chicken Eggs,0
+2023,July,Canned Mackerel,3529394
+2023,July,Canned Tunas,50107798
+2023,July,Chicken,50236420
+2023,July,Chicken Eggs,30240923
+2023,August,Canned Mackerel,4706065
+2023,August,Canned Tunas,140710690
+2023,August,Chicken,134643627
+2023,August,Chicken Eggs,15952920
+2023,September,Canned Mackerel,25274592
+2023,September,Canned Tunas,44220462
+2023,September,Chicken,147731707
+2023,September,Chicken Eggs,17207847
+2023,October,Canned Mackerel,26255723
+2023,October,Canned Tunas,15278944
+2023,October,Chicken,80822600
+2023,October,Chicken Eggs,18812556
+2023,November,Canned Mackerel,16778418
+2023,November,Canned Tunas,95590943
+2023,November,Chicken,52722574
+2023,November,Chicken Eggs,11248700
+2023,December,Canned Mackerel,19988709
+2023,December,Canned Tunas,91807457
+2023,December,Chicken,170044068
+2023,December,Chicken Eggs,22716190
+2024,January,Canned Mackerel,29486447
+2024,January,Canned Tunas,21828964
+2024,January,Chicken,206568801
+2024,January,Chicken Eggs,28288355
+2024,February,Canned Mackerel,4028479
+2024,February,Canned Tunas,50764231
+2024,February,Chicken,98518777
+2024,February,Chicken Eggs,17897751
+2024,March,Canned Mackerel,21762270
+2024,March,Canned Tunas,38040640
+2024,March,Chicken,61818144
+2024,March,Chicken Eggs,11560144
+2024,April,Canned Mackerel,19077076
+2024,April,Canned Tunas,73676146
+2024,April,Chicken,53512655
+2024,April,Chicken Eggs,19261824
+2024,May,Canned Mackerel,7000000
+2024,May,Canned Tunas,45306594
+2024,May,Chicken,52797594
+2024,May,Chicken Eggs,14052468
+2024,June,Canned Mackerel,9284359
+2024,June,Canned Tunas,66066477
+2024,June,Chicken,72693496
+2024,June,Chicken Eggs,3708158
+2024,July,Canned Mackerel,27129903
+2024,July,Canned Tunas,61564335
+2024,July,Chicken,66182770
+2024,July,Chicken Eggs,14582041
+2024,August,Canned Mackerel,3215431
+2024,August,Canned Tunas,35639691
+2024,August,Chicken,36731275
+2024,August,Chicken Eggs,7176148
+2024,September,Canned Mackerel,7497942
+2024,September,Canned Tunas,8837568
+2024,September,Chicken,15496173
+2024,September,Chicken Eggs,7961126
+2024,October,Canned Mackerel,3215431
+2024,October,Canned Tunas,35639691
+2024,October,Chicken,36731275
+2024,October,Chicken Eggs,7176148
+2024,November,Canned Mackerel,19291262
+2024,November,Canned Tunas,29207583
+2024,November,Chicken,122179093
+2024,November,Chicken Eggs,18297977

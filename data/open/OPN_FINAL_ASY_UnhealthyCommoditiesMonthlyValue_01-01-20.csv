@@ -1,364 +1,4 @@
 Year,Month,Food.sub.category,total
-2016,April,Bakery products,80656046
-2016,April,Canned Meats,3362423
-2016,April,Confectionary,40628862
-2016,April,Cordial,13420721
-2016,April,Crisps and snacks,17902661
-2016,April,Electrolyte drinks,28807227
-2016,April,Noodles,42321220
-2016,April,Processed Meats,1436337
-2016,April,Soft Drinks,26777360
-2016,April,Sugar,5234158
-2016,August,Bakery products,87425998
-2016,August,Canned Meats,28109067
-2016,August,Confectionary,32834786
-2016,August,Cordial,11466830
-2016,August,Crisps and snacks,15607294
-2016,August,Electrolyte drinks,13774579
-2016,August,Noodles,32651431
-2016,August,Processed Meats,27815040
-2016,August,Soft Drinks,12611504
-2016,August,Sugar,27759545
-2016,December,Bakery products,53209236
-2016,December,Canned Meats,16142503
-2016,December,Confectionary,36406290
-2016,December,Cordial,17902046
-2016,December,Crisps and snacks,16683308
-2016,December,Electrolyte drinks,20802259
-2016,December,Noodles,27902705
-2016,December,Processed Meats,6004527
-2016,December,Soft Drinks,19499081
-2016,December,Sugar,24738149
-2016,February,Bakery products,43429930
-2016,February,Canned Meats,2723873
-2016,February,Confectionary,25693850
-2016,February,Cordial,16402228
-2016,February,Crisps and snacks,5544211
-2016,February,Electrolyte drinks,13906057
-2016,February,Noodles,25030333
-2016,February,Processed Meats,2465655
-2016,February,Soft Drinks,9931476
-2016,February,Sugar,5344479
-2016,January,Bakery products,62539996
-2016,January,Canned Meats,27845207
-2016,January,Confectionary,31091270
-2016,January,Cordial,13841863
-2016,January,Crisps and snacks,9941690
-2016,January,Electrolyte drinks,16391581
-2016,January,Noodles,18156051
-2016,January,Processed Meats,27211278
-2016,January,Soft Drinks,14561857
-2016,January,Sugar,5629921
-2016,July,Bakery products,61717626
-2016,July,Canned Meats,6658633
-2016,July,Confectionary,37981623
-2016,July,Cordial,15588863
-2016,July,Crisps and snacks,19620572
-2016,July,Electrolyte drinks,18589903
-2016,July,Noodles,38853290
-2016,July,Processed Meats,6363703
-2016,July,Soft Drinks,17163765
-2016,July,Sugar,17747496
-2016,June,Bakery products,73044471
-2016,June,Canned Meats,27269269
-2016,June,Confectionary,20200035
-2016,June,Cordial,21167089
-2016,June,Crisps and snacks,6753613
-2016,June,Electrolyte drinks,9098541
-2016,June,Noodles,19522719
-2016,June,Processed Meats,16252841
-2016,June,Soft Drinks,5755727
-2016,June,Sugar,21415881
-2016,March,Bakery products,57094718
-2016,March,Canned Meats,34782776
-2016,March,Confectionary,8369582
-2016,March,Cordial,10682715
-2016,March,Crisps and snacks,3167561
-2016,March,Electrolyte drinks,11184455
-2016,March,Noodles,8397088
-2016,March,Processed Meats,34590806
-2016,March,Soft Drinks,9952419
-2016,March,Sugar,2975832
-2016,May,Bakery products,42560614
-2016,May,Canned Meats,23266635
-2016,May,Confectionary,14681624
-2016,May,Cordial,13248137
-2016,May,Crisps and snacks,8555757
-2016,May,Electrolyte drinks,13709783
-2016,May,Noodles,20040993
-2016,May,Processed Meats,14657362
-2016,May,Soft Drinks,12762984
-2016,May,Sugar,3557415
-2016,November,Bakery products,141693072
-2016,November,Canned Meats,37892186
-2016,November,Confectionary,51493643
-2016,November,Cordial,19062952
-2016,November,Crisps and snacks,23988775
-2016,November,Electrolyte drinks,67028083
-2016,November,Noodles,52575485
-2016,November,Processed Meats,37583995
-2016,November,Soft Drinks,63591933
-2016,November,Sugar,22977248
-2016,October,Bakery products,70380623
-2016,October,Canned Meats,8179337
-2016,October,Confectionary,29923189
-2016,October,Cordial,20901429
-2016,October,Crisps and snacks,13730009
-2016,October,Electrolyte drinks,7197533
-2016,October,Noodles,27966690
-2016,October,Processed Meats,7310910
-2016,October,Soft Drinks,5540111
-2016,October,Sugar,10104000
-2016,September,Bakery products,53648696
-2016,September,Canned Meats,14074569
-2016,September,Confectionary,26345304
-2016,September,Cordial,16567367
-2016,September,Crisps and snacks,9033165
-2016,September,Electrolyte drinks,16352185
-2016,September,Noodles,21488962
-2016,September,Processed Meats,14032021
-2016,September,Soft Drinks,14464960
-2016,September,Sugar,35291396
-2017,April,Bakery products,44834940
-2017,April,Canned Meats,24950566
-2017,April,Confectionary,34215658
-2017,April,Cordial,11685338
-2017,April,Crisps and snacks,9476631
-2017,April,Electrolyte drinks,14952737
-2017,April,Noodles,18241015
-2017,April,Processed Meats,17255914
-2017,April,Soft Drinks,14279488
-2017,April,Sugar,4392543
-2017,August,Bakery products,117565229.8
-2017,August,Canned Meats,22819301.12
-2017,August,Confectionary,34609315
-2017,August,Cordial,28697801.02
-2017,August,Crisps and snacks,14678170
-2017,August,Electrolyte drinks,15374219
-2017,August,Noodles,44254256.58
-2017,August,Processed Meats,22794613.12
-2017,August,Soft Drinks,13653231
-2017,August,Sugar,21880776
-2017,December,Bakery products,90618979
-2017,December,Canned Meats,32817578
-2017,December,Confectionary,30760061
-2017,December,Cordial,21004170
-2017,December,Crisps and snacks,9027614
-2017,December,Electrolyte drinks,31694759
-2017,December,Noodles,25527927
-2017,December,Processed Meats,31970129
-2017,December,Soft Drinks,27871255
-2017,December,Sugar,10052784
-2017,February,Bakery products,44547017
-2017,February,Canned Meats,12838723
-2017,February,Confectionary,29785906
-2017,February,Cordial,16345285
-2017,February,Crisps and snacks,10847196
-2017,February,Electrolyte drinks,27304933
-2017,February,Noodles,19798972
-2017,February,Processed Meats,2152142
-2017,February,Soft Drinks,22372797
-2017,February,Sugar,20196577
-2017,January,Bakery products,36831323
-2017,January,Canned Meats,13177588
-2017,January,Confectionary,28470538
-2017,January,Cordial,8732980
-2017,January,Crisps and snacks,2531178
-2017,January,Electrolyte drinks,37994442
-2017,January,Noodles,6416820
-2017,January,Processed Meats,11731905
-2017,January,Soft Drinks,33836740
-2017,January,Sugar,7661715
-2017,July,Bakery products,61613554.41
-2017,July,Canned Meats,30093635.56
-2017,July,Confectionary,36661992.02
-2017,July,Cordial,9636193.59
-2017,July,Crisps and snacks,13145985
-2017,July,Electrolyte drinks,6418094
-2017,July,Noodles,30122853
-2017,July,Processed Meats,29876316.56
-2017,July,Soft Drinks,5941199
-2017,July,Sugar,8308431.14
-2017,June,Bakery products,86253575
-2017,June,Canned Meats,16533329
-2017,June,Confectionary,27929006
-2017,June,Cordial,18976660
-2017,June,Crisps and snacks,10529516
-2017,June,Electrolyte drinks,27680409
-2017,June,Noodles,22895775
-2017,June,Processed Meats,16108400
-2017,June,Soft Drinks,25279463
-2017,June,Sugar,29182110
-2017,March,Bakery products,73229205
-2017,March,Canned Meats,27008164
-2017,March,Confectionary,32748875
-2017,March,Cordial,27462390
-2017,March,Crisps and snacks,11690683
-2017,March,Electrolyte drinks,84129474
-2017,March,Noodles,41608463
-2017,March,Processed Meats,26876611
-2017,March,Soft Drinks,71970224
-2017,March,Sugar,11285272
-2017,May,Bakery products,64641398
-2017,May,Canned Meats,27893228
-2017,May,Confectionary,27070328
-2017,May,Cordial,17239128
-2017,May,Crisps and snacks,10550789
-2017,May,Electrolyte drinks,27821894
-2017,May,Noodles,33592030
-2017,May,Processed Meats,26415333
-2017,May,Soft Drinks,24878115
-2017,May,Sugar,19222049
-2017,November,Bakery products,92778030
-2017,November,Canned Meats,50606952
-2017,November,Confectionary,52422386
-2017,November,Cordial,18688939
-2017,November,Crisps and snacks,29973235
-2017,November,Electrolyte drinks,15404379
-2017,November,Noodles,43641381
-2017,November,Processed Meats,38502282
-2017,November,Soft Drinks,15177086
-2017,November,Sugar,27294432
-2017,October,Bakery products,111466176
-2017,October,Canned Meats,38325846
-2017,October,Confectionary,66313057
-2017,October,Cordial,26043112
-2017,October,Crisps and snacks,16395390
-2017,October,Electrolyte drinks,5869136
-2017,October,Noodles,47355714
-2017,October,Processed Meats,38289600
-2017,October,Soft Drinks,1735890
-2017,October,Sugar,15880960
-2017,September,Bakery products,65171841.75
-2017,September,Canned Meats,28331652
-2017,September,Confectionary,43143482.72
-2017,September,Cordial,15791959.19
-2017,September,Crisps and snacks,16105043
-2017,September,Electrolyte drinks,7332717
-2017,September,Noodles,33230457.84
-2017,September,Processed Meats,27542734
-2017,September,Soft Drinks,4273666
-2017,September,Sugar,15526330.23
-2018,April,Bakery products,63378268
-2018,April,Canned Meats,10468968
-2018,April,Confectionary,15726829
-2018,April,Cordial,10864583
-2018,April,Crisps and snacks,5397149
-2018,April,Electrolyte drinks,6861195
-2018,April,Noodles,17416199
-2018,April,Processed Meats,10452244
-2018,April,Soft Drinks,6199284
-2018,April,Sugar,9031250
-2018,August,Bakery products,42258602
-2018,August,Canned Meats,37156820
-2018,August,Confectionary,29361586
-2018,August,Cordial,11621169
-2018,August,Crisps and snacks,11308341
-2018,August,Electrolyte drinks,8584400
-2018,August,Noodles,18697649
-2018,August,Processed Meats,28674590
-2018,August,Soft Drinks,7391855
-2018,August,Sugar,11670472
-2018,December,Bakery products,113605546
-2018,December,Canned Meats,51381384
-2018,December,Confectionary,65964610
-2018,December,Cordial,17428981
-2018,December,Crisps and snacks,29138084
-2018,December,Electrolyte drinks,13115519
-2018,December,Noodles,54444759
-2018,December,Processed Meats,31053165
-2018,December,Soft Drinks,11716472
-2018,December,Sugar,13473516
-2018,February,Bakery products,26915800
-2018,February,Canned Meats,13533916
-2018,February,Confectionary,26183556
-2018,February,Cordial,16378693
-2018,February,Crisps and snacks,12001608
-2018,February,Electrolyte drinks,14464767
-2018,February,Noodles,23057944
-2018,February,Processed Meats,13509338
-2018,February,Soft Drinks,11493415
-2018,February,Sugar,17004845
-2018,January,Bakery products,43245302
-2018,January,Canned Meats,7416431
-2018,January,Confectionary,9743607
-2018,January,Cordial,10689278
-2018,January,Crisps and snacks,5178933
-2018,January,Electrolyte drinks,29082325
-2018,January,Noodles,10235263
-2018,January,Processed Meats,3957662
-2018,January,Soft Drinks,26642839
-2018,January,Sugar,3597430
-2018,July,Bakery products,87395602
-2018,July,Canned Meats,32229044
-2018,July,Confectionary,43775853
-2018,July,Cordial,17060395
-2018,July,Crisps and snacks,22677643
-2018,July,Electrolyte drinks,23287774
-2018,July,Noodles,39282679
-2018,July,Processed Meats,30946894
-2018,July,Soft Drinks,21890444
-2018,July,Sugar,18495289
-2018,June,Bakery products,49986343
-2018,June,Canned Meats,23616985
-2018,June,Confectionary,26539609
-2018,June,Cordial,16740959
-2018,June,Crisps and snacks,10638313
-2018,June,Electrolyte drinks,8451321
-2018,June,Noodles,25164263
-2018,June,Processed Meats,23569092
-2018,June,Soft Drinks,5615732
-2018,June,Sugar,20587127
-2018,March,Bakery products,66272690
-2018,March,Canned Meats,16043277
-2018,March,Confectionary,40608010
-2018,March,Cordial,13114767
-2018,March,Crisps and snacks,12212372
-2018,March,Electrolyte drinks,21118794
-2018,March,Noodles,30823249
-2018,March,Processed Meats,16035422
-2018,March,Soft Drinks,18258130
-2018,March,Sugar,6899439
-2018,May,Bakery products,71623279
-2018,May,Canned Meats,24104432
-2018,May,Confectionary,53872182
-2018,May,Cordial,24632709
-2018,May,Crisps and snacks,18670423
-2018,May,Electrolyte drinks,26534878
-2018,May,Noodles,43729811
-2018,May,Processed Meats,23462476
-2018,May,Soft Drinks,24595123
-2018,May,Sugar,36566911
-2018,November,Bakery products,52456038
-2018,November,Canned Meats,29702753
-2018,November,Confectionary,32386013
-2018,November,Cordial,15874701
-2018,November,Crisps and snacks,4229093
-2018,November,Electrolyte drinks,22906634
-2018,November,Noodles,23374112
-2018,November,Processed Meats,23914514
-2018,November,Soft Drinks,19237422
-2018,November,Sugar,24833136
-2018,October,Bakery products,75963746
-2018,October,Canned Meats,45025003
-2018,October,Confectionary,53192345
-2018,October,Cordial,20066857
-2018,October,Crisps and snacks,24921869
-2018,October,Electrolyte drinks,15244708
-2018,October,Noodles,48131507
-2018,October,Processed Meats,44142134
-2018,October,Soft Drinks,13790337
-2018,October,Sugar,19071102
-2018,September,Bakery products,108406336
-2018,September,Canned Meats,36621033
-2018,September,Confectionary,40240959
-2018,September,Cordial,19126354
-2018,September,Crisps and snacks,14238741
-2018,September,Electrolyte drinks,19026489
-2018,September,Noodles,36048279
-2018,September,Processed Meats,36489422
-2018,September,Soft Drinks,17289457
-2018,September,Sugar,15978341
 2019,April,Bakery products,102033542
 2019,April,Canned Meats,41655572
 2019,April,Confectionary,17840093
@@ -679,3 +319,361 @@ Year,Month,Food.sub.category,total
 2021,May,Processed Meats,28499503
 2021,May,Soft Drinks,9852174
 2021,May,Sugar,21507800
+2021,September,Bakery products,83862120
+2021,September,Canned Meats,54051063
+2021,September,Confectionary,43048715
+2021,September,Cordial,24260422
+2021,September,Crisps and snacks,19707486
+2021,September,Electrolyte drinks,22684654
+2021,September,Noodles,57623844
+2021,September,Processed Meats,47587367
+2021,September,Soft Drinks,18532274
+2021,September,Sugar,24742600
+2021,October,Bakery products,18366938
+2021,October,Canned Meats,3058712
+2021,October,Confectionary,9324381
+2021,October,Cordial,11963820
+2021,October,Crisps and snacks,2438093
+2021,October,Electrolyte drinks,6443751
+2021,October,Noodles,8514025
+2021,October,Processed Meats,7728079
+2021,October,Soft Drinks,89826
+2021,October,Sugar,15896833
+2021,November,Bakery products,133977757
+2021,November,Canned Meats,62724632
+2021,November,Confectionary,36091719
+2021,November,Cordial,22202210
+2021,November,Crisps and snacks,9583300
+2021,November,Electrolyte drinks,30732249
+2021,November,Noodles,33145451
+2021,November,Processed Meats,52935627
+2021,November,Soft Drinks,24132083
+2021,November,Sugar,32687047
+2021,December,Bakery products,171624191
+2021,December,Canned Meats,115739880
+2021,December,Confectionary,68655683
+2021,December,Cordial,19739079
+2021,December,Crisps and snacks,33102216
+2021,December,Electrolyte drinks,27830627
+2021,December,Noodles,99947848
+2021,December,Processed Meats,79401975
+2021,December,Soft Drinks,26328280
+2021,December,Sugar,41053933
+2022,January,Bakery products,20396632
+2022,January,Canned Meats,10248643
+2022,January,Confectionary,13687232
+2022,January,Cordial,8972021
+2022,January,Crisps and snacks,413295
+2022,January,Electrolyte drinks,302176
+2022,January,Noodles,1762836
+2022,January,Processed Meats,22505124
+2022,January,Soft Drinks,274062
+2022,January,Sugar,2502243
+2022,February,Bakery products,92968910
+2022,February,Canned Meats,34241608
+2022,February,Confectionary,14739400
+2022,February,Cordial,10563955
+2022,February,Crisps and snacks,788875
+2022,February,Electrolyte drinks,24445756
+2022,February,Noodles,3183222
+2022,February,Processed Meats,61187338
+2022,February,Soft Drinks,24428142
+2022,February,Sugar,21927517
+2022,March,Bakery products,62184862
+2022,March,Canned Meats,11145699
+2022,March,Confectionary,32967540
+2022,March,Cordial,18728546
+2022,March,Crisps and snacks,392301
+2022,March,Electrolyte drinks,11039544
+2022,March,Noodles,3959507
+2022,March,Processed Meats,31280650
+2022,March,Soft Drinks,11039544
+2022,March,Sugar,12360605
+2022,April,Bakery products,25841699
+2022,April,Canned Meats,25764367
+2022,April,Confectionary,15702535
+2022,April,Cordial,9762977
+2022,April,Crisps and snacks,0
+2022,April,Electrolyte drinks,146821
+2022,April,Noodles,2867332
+2022,April,Processed Meats,10337150
+2022,April,Soft Drinks,49864
+2022,April,Sugar,27266439
+2022,May,Bakery products,78200817
+2022,May,Canned Meats,28877037
+2022,May,Confectionary,21287790
+2022,May,Cordial,33834842
+2022,May,Crisps and snacks,25788
+2022,May,Electrolyte drinks,1482785
+2022,May,Noodles,2074507
+2022,May,Processed Meats,18895483
+2022,May,Soft Drinks,0
+2022,May,Sugar,13758784
+2022,June,Bakery products,98879981
+2022,June,Canned Meats,42061138
+2022,June,Confectionary,23981758
+2022,June,Cordial,8179362
+2022,June,Crisps and snacks,4431
+2022,June,Electrolyte drinks,16368408
+2022,June,Noodles,1176049
+2022,June,Processed Meats,22458604
+2022,June,Soft Drinks,0
+2022,June,Sugar,6797707
+2022,July,Bakery products,104683397
+2022,July,Canned Meats,31570465
+2022,July,Confectionary,36529001
+2022,July,Cordial,22334710
+2022,July,Crisps and snacks,36849
+2022,July,Electrolyte drinks,21703087
+2022,July,Noodles,2982998
+2022,July,Processed Meats,41425177
+2022,July,Soft Drinks,0
+2022,July,Sugar,16243323
+2022,August,Bakery products,78675875
+2022,August,Canned Meats,14580000
+2022,August,Confectionary,46000000
+2022,August,Cordial,14010000
+2022,August,Crisps and snacks,2483
+2022,August,Electrolyte drinks,0
+2022,August,Noodles,2288484
+2022,August,Processed Meats,46219627
+2022,August,Soft Drinks,10480000
+2022,August,Sugar,18452897
+2022,September,Bakery products,95780000
+2022,September,Canned Meats,1600000
+2022,September,Confectionary,28230000
+2022,September,Cordial,9790000
+2022,September,Crisps and snacks,0
+2022,September,Electrolyte drinks,19740000
+2022,September,Noodles,3160000
+2022,September,Processed Meats,31990000
+2022,September,Soft Drinks,0
+2022,September,Sugar,23140000
+2023,January,Bakery products,87185644
+2023,January,Canned Meats,1665641
+2023,January,Confectionary,34025197
+2023,January,Cordial,23169193
+2023,January,Crisps and snacks,5011
+2023,January,Electrolyte drinks,0
+2023,January,Noodles,951947
+2023,January,Processed Meats,20666065
+2023,January,Soft Drinks,10387604
+2023,January,Sugar,31728632
+2023,February,Bakery products,42021891
+2023,February,Canned Meats,71195
+2023,February,Confectionary,8409002
+2023,February,Cordial,17673063
+2023,February,Crisps and snacks,0
+2023,February,Electrolyte drinks,0
+2023,February,Noodles,1118114
+2023,February,Processed Meats,28455661
+2023,February,Soft Drinks,24129634
+2023,February,Sugar,7661197
+2023,March,Bakery products,67626296
+2023,March,Canned Meats,39188710
+2023,March,Confectionary,28022514
+2023,March,Cordial,13649091
+2023,March,Crisps and snacks,5666
+2023,March,Electrolyte drinks,0
+2023,March,Noodles,5650354
+2023,March,Processed Meats,45049345
+2023,March,Soft Drinks,18754903
+2023,March,Sugar,2783177
+2023,April,Bakery products,134097742
+2023,April,Canned Meats,28407489
+2023,April,Confectionary,17591319
+2023,April,Cordial,41139280
+2023,April,Crisps and snacks,130890
+2023,April,Electrolyte drinks,0
+2023,April,Noodles,2790215
+2023,April,Processed Meats,18697991
+2023,April,Soft Drinks,1918242
+2023,April,Sugar,29961873
+2023,May,Bakery products,110035013
+2023,May,Canned Meats,30316482
+2023,May,Confectionary,13721068
+2023,May,Cordial,42076220
+2023,May,Crisps and snacks,0
+2023,May,Electrolyte drinks,0
+2023,May,Noodles,486720
+2023,May,Processed Meats,27322081
+2023,May,Soft Drinks,2424401
+2023,May,Sugar,21015700
+2023,June,Bakery products,98312060
+2023,June,Canned Meats,38343271
+2023,June,Confectionary,14958694
+2023,June,Cordial,43163821
+2023,June,Crisps and snacks,0
+2023,June,Electrolyte drinks,0
+2023,June,Noodles,2296429
+2023,June,Processed Meats,29225205
+2023,June,Soft Drinks,1415970
+2023,June,Sugar,30751875
+2023,July,Bakery products,96934041
+2023,July,Canned Meats,31484221
+2023,July,Confectionary,26526513
+2023,July,Cordial,26099833
+2023,July,Crisps and snacks,0
+2023,July,Electrolyte drinks,0
+2023,July,Noodles,769091
+2023,July,Processed Meats,27760514
+2023,July,Soft Drinks,10310900
+2023,July,Sugar,37335461
+2023,August,Bakery products,122408008
+2023,August,Canned Meats,31987734
+2023,August,Confectionary,42714085
+2023,August,Cordial,26807502
+2023,August,Crisps and snacks,19420
+2023,August,Electrolyte drinks,21930005
+2023,August,Noodles,5290665
+2023,August,Processed Meats,84304037
+2023,August,Soft Drinks,106991
+2023,August,Sugar,25325424
+2023,September,Bakery products,68116764
+2023,September,Canned Meats,42072683
+2023,September,Confectionary,33337512
+2023,September,Cordial,36018804
+2023,September,Crisps and snacks,0
+2023,September,Electrolyte drinks,7426731
+2023,September,Noodles,2188455
+2023,September,Processed Meats,59681625
+2023,September,Soft Drinks,191660
+2023,September,Sugar,16383352
+2023,October,Bakery products,78027745
+2023,October,Canned Meats,7637463
+2023,October,Confectionary,38875880
+2023,October,Cordial,24519454
+2023,October,Crisps and snacks,486
+2023,October,Electrolyte drinks,12895385
+2023,October,Noodles,1877034
+2023,October,Processed Meats,38043684
+2023,October,Soft Drinks,44619
+2023,October,Sugar,36717169
+2023,November,Bakery products,103485925
+2023,November,Canned Meats,46094949
+2023,November,Confectionary,52282012
+2023,November,Cordial,27247151
+2023,November,Crisps and snacks,14294
+2023,November,Electrolyte drinks,4696591
+2023,November,Noodles,2701191
+2023,November,Processed Meats,43862022
+2023,November,Soft Drinks,15956
+2023,November,Sugar,47412172
+2023,December,Bakery products,143289098
+2023,December,Canned Meats,65367599
+2023,December,Confectionary,40940216
+2023,December,Cordial,35261635
+2023,December,Crisps and snacks,8341
+2023,December,Electrolyte drinks,28499288
+2023,December,Noodles,3662658
+2023,December,Processed Meats,89407872
+2023,December,Soft Drinks,51481
+2023,December,Sugar,24150452
+2024,January,Bakery products,108173930
+2024,January,Canned Meats,118561175
+2024,January,Confectionary,18798317
+2024,January,Cordial,31649753
+2024,January,Crisps and snacks,1180
+2024,January,Electrolyte drinks,15846483
+2024,January,Noodles,2082471
+2024,January,Processed Meats,79793675
+2024,January,Soft Drinks,31897
+2024,January,Sugar,22926008
+2024,February,Bakery products,53321659
+2024,February,Canned Meats,503019
+2024,February,Confectionary,25998082
+2024,February,Cordial,11992059
+2024,February,Crisps and snacks,30527
+2024,February,Electrolyte drinks,6995258
+2024,February,Noodles,3547210
+2024,February,Processed Meats,67317894
+2024,February,Soft Drinks,0
+2024,February,Sugar,12792847
+2024,March,Bakery products,111143789
+2024,March,Canned Meats,1672808
+2024,March,Confectionary,56151961
+2024,March,Cordial,19461243
+2024,March,Crisps and snacks,0
+2024,March,Electrolyte drinks,38912477
+2024,March,Noodles,5413497
+2024,March,Processed Meats,45109855
+2024,March,Soft Drinks,45078
+2024,March,Sugar,25314222
+2024,April,Bakery products,109428697
+2024,April,Canned Meats,45833633
+2024,April,Confectionary,31276271
+2024,April,Cordial,32937464
+2024,April,Crisps and snacks,0
+2024,April,Electrolyte drinks,3366264
+2024,April,Noodles,861973
+2024,April,Processed Meats,25160462
+2024,April,Soft Drinks,35446
+2024,April,Sugar,20136901
+2024,May,Bakery products,63336961
+2024,May,Canned Meats,20667380
+2024,May,Confectionary,21723486
+2024,May,Cordial,26110459
+2024,May,Crisps and snacks,0
+2024,May,Electrolyte drinks,7647879
+2024,May,Noodles,0
+2024,May,Processed Meats,28701535
+2024,May,Soft Drinks,19591
+2024,May,Sugar,8025329
+2024,June,Bakery products,54516011
+2024,June,Canned Meats,26857
+2024,June,Confectionary,12213520
+2024,June,Cordial,12451593
+2024,June,Crisps and snacks,0
+2024,June,Electrolyte drinks,14135313
+2024,June,Noodles,846397
+2024,June,Processed Meats,24171747
+2024,June,Soft Drinks,295643
+2024,June,Sugar,26664608
+2024,July,Bakery products,105415347
+2024,July,Canned Meats,59042281
+2024,July,Confectionary,30998247
+2024,July,Cordial,40493867
+2024,July,Crisps and snacks,14248
+2024,July,Electrolyte drinks,5336589
+2024,July,Noodles,3941586
+2024,July,Processed Meats,38061682
+2024,July,Soft Drinks,0
+2024,July,Sugar,30153165
+2024,August,Bakery products,76703974
+2024,August,Canned Meats,7227954
+2024,August,Confectionary,36979625
+2024,August,Cordial,19368700
+2024,August,Crisps and snacks,10109
+2024,August,Electrolyte drinks,9439718
+2024,August,Noodles,1026299
+2024,August,Processed Meats,25827953
+2024,August,Soft Drinks,122535
+2024,August,Sugar,33366809
+2024,September,Bakery products,52354270
+2024,September,Canned Meats,4045046
+2024,September,Confectionary,17358684
+2024,September,Cordial,13228093
+2024,September,Crisps and snacks,0
+2024,September,Electrolyte drinks,20990217
+2024,September,Noodles,3131504
+2024,September,Processed Meats,12378176
+2024,September,Soft Drinks,37195
+2024,September,Sugar,30675555
+2024,October,Bakery products,68750498
+2024,October,Canned Meats,44201552
+2024,October,Confectionary,30837042
+2024,October,Cordial,16337473
+2024,October,Crisps and snacks,0
+2024,October,Electrolyte drinks,6636185
+2024,October,Noodles,597492
+2024,October,Processed Meats,66105741
+2024,October,Soft Drinks,28461
+2024,October,Sugar,29092659
+2024,November,Cordial,22908972
+2024,November,Crisps and snacks,0
+2024,November,Electrolyte drinks,32929788
+2024,November,Noodles,4076243
+2024,November,Processed Meats,57557231
+2024,November,Soft Drinks,83834
+2024,November,Sugar,437695
+2024,,,
