@@ -25,7 +25,7 @@ openDataFolder <- file.path(repository, "data", "open")
 outputsFolder <- file.path(repository, "outputs")
 
 # Read in the raw trade data from secure folder of the repository 
-tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-03-22.csv")
+tradeStatsFile <- file.path(secureDataFolder, "SEC_PROC_ASY_RawDataAndReferenceTables_31-12-24.csv")
 tradeStats <- read.csv(tradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
 
 # Get date from input file 
@@ -72,10 +72,11 @@ tradeStatsNoDup$HS.Code <- sapply(tradeStatsNoDup$HS.Code, FUN=padWithZeros, "HS
 # Exclude banknotes and coins from exports
 tradeStatsNoBanknotes <- tradeStatsNoDup[tradeStatsNoDup$HS.Code != "49070010", ]
 tradeStatsNoCoins <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$HS.Code != "71189000", ]
+tradeStatsNoCoins <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$HS.Code != "71181000", ]
 
 # Create subset for Export and Import commodities 
 tradeStatsSubset <- tradeStatsNoCoins[tradeStatsNoCoins$Type %in% c("EX / 1","EX / 3", "IM / 4", "IM / 7", "PC / 4"), ]
-tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
+tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071, 4000, 7100), ]
 
 # Print progress
 cat("Finished initial cleaning and processing of data.\n")
@@ -146,14 +147,13 @@ classificationTables <- data.frame(
 )
 
 # Merge in each of the classification tables
-mergingOutputs <- mergeClassificationTablesIntoTradesData(tradeStats = tradeStatsCommodities,
-                                                          classificationTables = classificationTables)
+mergingOutputs <- mergeClassificationTablesIntoTradesData(tradeStats = tradeStatsCommodities, classificationTables = classificationTables)
 tradeStatsCommoditiesMergedWithClassifications <- mergingOutputs$tradeStatistics
 missingClassificationCodeInfo <- mergingOutputs$missingCodeInfo
 
 
 # Write missing codes table to file
-write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-01-22.csv"))
+write.csv(missingClassificationCodeInfo, file.path(outputsFolder, "OUT_PROC_ASY_missingClassifications_31-12-24.csv"))
 
 
 # Print progress
@@ -162,11 +162,11 @@ cat("Finished merging in classification tables.\n")
 #### Check if any statistical values fall outside of expected boundaries ####
 
 # Check the commodity values against expected values based on historic data
-commoditiesWithExpectations <- checkCommodityValues(tradeStatsCommoditiesMergedWithClassifications,  
-                                                    historicImportsSummaryStats, historicExportsSummaryStats,
-                                                    importCP4s=c(4000, 4071, 7100), exportCP4s=c(1000, 3071), useUnitValue=FALSE,
-                                                    columnsOfInterest = c("HS.Code", "Type", "Reg..Date", 
-                                                                          "CP4", "Itm..", "RawDataRowID"))
+#commoditiesWithExpectations <- checkCommodityValues(tradeStatsCommoditiesMergedWithClassifications,  
+                                                    #historicImportsSummaryStats, historicExportsSummaryStats,
+                                                    #importCP4s=c(4000,  7100), exportCP4s=c(1000, 3071), useUnitValue=FALSE,
+                                                    #columnsOfInterest = c("HS.Code", "Type", "Reg..Date", 
+                                                                          #"CP4", "Itm..", "RawDataRowID"))
 
 # Print progress
 cat("Finished checking whether commodity values fall outside of expectations based on historic data.\n")
@@ -179,11 +179,10 @@ processedTradeStats <- tradeStatsCommoditiesMergedWithClassifications
 # Create csv of last months processed data
 outputDataFile <- file.path(
   secureDataFolder, 
-  paste("OUT_PROC_ASY_ProcessedRawData_",fileDate,".csv")
+  paste0("OUT_PROC_ASY_ProcessedRawData_",fileDate,".csv")
 )
 
-write.csv(processedTradeStats, outputDataFile)
--
+write.csv(processedTradeStats, outputDataFile, row.names = FALSE)
 
 
 # Create new column catgorising export, re-export and import
@@ -192,7 +191,7 @@ write.csv(processedTradeStats, outputDataFile)
 #tradeMerchandiseMerged <- merge(processedTradeStats, tradeMerchandiseClass, by="CP4", all.x=TRUE)
 
 # Append processed data to historical data
-#historicalTradeStatsFile <- file.path(secureDataFolder, "exports-imports_historical_14.03.22.csv")
+historicalTradeStatsFile <- file.path(secureDataFolder, "Historical/exports-imports_historical_14.03.22.csv")
 #historicalTradeStats <- read.csv(historicalTradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) 
 
 #historicalTradeStatsAdapted<- historicalTradeStats %>% #convert all data to same type for data to be appended

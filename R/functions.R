@@ -410,6 +410,104 @@ updateTableByCommodity <- function(structuredTable, month, year, newStatistics, 
   return(structuredTable)
 }
 
+# Added function by Rara - dated 25/09/2025 
+
+updateTableByCommodity2 <- function(
+    structuredTable,
+    month,          # e.g. "January", "Feb", "Dec"
+    year,           # numeric or character (e.g. 2024 or "2024")
+    newStatistics,  # numeric vector or 1-row data.frame with one row per commodity
+    numericColumns = NULL  # columns (by name or index) that should be converted to numeric
+) {
+  # Ensure year is a character
+  year <- as.character(year)
+  
+  # Create a target column name that uniquely identifies month + year
+  mon3 <- substr(month, 1, 3)  # e.g. “Jan”, “Feb”, “Dec”
+  targetCol <- paste0(mon3, "_", year)
+  
+  # ---- 1. Duplicate check ----
+  if (targetCol %in% colnames(structuredTable)) {
+    warning("Data for this month/year (", targetCol, ") already exists in the table.")
+    return(structuredTable)
+  }
+  
+  # ---- 2. Convert newStatistics to numeric vector if needed ----
+  if (inherits(newStatistics, "data.frame")) {
+    if (nrow(newStatistics) != 1) {
+      stop("newStatistics as data.frame should have exactly one row.")
+    }
+    newStatistics <- as.numeric(newStatistics[1, , drop = TRUE])
+  }
+  # Ensure we have the right length
+  if (length(newStatistics) != nrow(structuredTable)) {
+    stop("Length of newStatistics (", length(newStatistics),
+         ") does not match number of rows in structuredTable (", nrow(structuredTable), ").")
+  }
+  
+  # ---- 3. Ensure numeric columns are numeric ----
+  if (!is.null(numericColumns)) {
+    for (col in numericColumns) {
+      # allow either index or name
+      structuredTable[[col]] <- as.numeric(as.character(structuredTable[[col]]))
+    }
+  }
+  
+  # ---- 4. Add the new month/year column ----
+  structuredTable[[targetCol]] <- newStatistics
+  
+  # ---- 5. If month is December, insert an annual total column ----
+  if (tolower(month) %in% tolower(c("December", "Dec"))) {
+    # We want to sum the 12 months for that year, if present, for each row.
+    # Identify the 12 month‑columns for this year:
+    mon3_all <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+    monthCols <- paste0(mon3_all, "_", year)
+    
+    # Among those, pick those that exist currently in the table
+    existingMonthCols <- intersect(monthCols, colnames(structuredTable))
+    # If fewer than 12 months, we still sum what exists (na.rm = TRUE),
+    # but we might warn if missing many months.
+    if (length(existingMonthCols) == 0) {
+      warning("No monthly columns found for year ", year, " to compute annual totals.")
+    }
+    
+    # Count NAs per row across those columns
+    naCounts <- apply(structuredTable[, existingMonthCols, drop = FALSE],
+                      MARGIN = 1,
+                      FUN = function(vals) sum(is.na(vals)))
+    # Compute row sums
+    annualSum <- rowSums(structuredTable[, existingMonthCols, drop = FALSE],
+                         na.rm = TRUE)
+    # If all months are NA (i.e. naCounts == length(existingMonthCols)),
+    # set the sum to NA too
+    allNA <- (naCounts == length(existingMonthCols))
+    annualSum[allNA] <- NA
+    
+    # Insert the annual sum column adjacent to the monthly block
+    # Find where that block starts and ends
+    firstMonColPos <- min(match(existingMonthCols, colnames(structuredTable)))
+    lastMonColPos  <- max(match(existingMonthCols, colnames(structuredTable)))
+    # We want annual column right after the last month
+    beforeCols <- structuredTable[, seq_len(lastMonColPos), drop = FALSE]
+    afterCols  <- structuredTable[, (lastMonColPos + 1):ncol(structuredTable), drop = FALSE]
+    
+    # Combine: before + annual + after
+    structuredTable <- cbind(
+      beforeCols,
+      Annual = annualSum,
+      afterCols
+    )
+    # Rename the “Annual” column to the year
+    colnames(structuredTable)[lastMonColPos + 1] <- year
+  }
+  
+  return(structuredTable)
+}
+
+
+
+
 #' Inserts updated sub tables back into formatted excel sheet
 #' 
 #' A function that inserts the updated Annual and Monthly statistics back into formatted Balance of Trade table 
@@ -623,6 +721,112 @@ insertUpdatedTableByCommodityAsFormattedTable <- function(fileName, sheet, table
     return(finalWorkbook)
   }
 }
+
+insertUpdatedTableByCommodityAsFormattedTable_b <- function(fileName, sheet, table, year, tableNumber, tableName, boldRows, 
+                                                            nRowsInNotes=4, numericColumns, loadAndSave=TRUE, finalWorkbook=NULL){
+  # --- Helper: safe merge (compatible with openxlsx on CRAN) ---
+  safeMerge <- function(wb, sheet, startRow, endRow, startCol, endCol){
+    # Try removing any existing merges in this block
+    try(
+      openxlsx::removeCellMerge(
+        wb, sheet, cols=startCol:endCol, rows=startRow:endRow
+      ),
+      silent = TRUE
+    )
+    # Apply merge
+    openxlsx::mergeCells(wb, sheet, cols=startCol:endCol, rows=startRow:endRow)
+  }
+  
+  # --- Main function logic ---
+  
+  colNames <- colnames(table)
+  nColumns <- length(colNames)
+  nRows <- nrow(table)
+  
+  januaryIndices <- which(grepl(colNames, pattern="Jan"))
+  
+  if(length(januaryIndices) == 0){
+    warning("No columns containing 'Jan' found in the table; setting lastAnnualColumn to max numeric column")
+    lastAnnualColumn <- max(numericColumns)
+    lastMonthyInYearIndices <- integer(0)
+    years <- numeric(0)
+  } else {
+    lastAnnualColumn <- januaryIndices[1] - 1
+    if(lastAnnualColumn < numericColumns[1]){
+      warning("lastAnnualColumn is less than first numeric column; adjusting to first numeric column")
+      lastAnnualColumn <- numericColumns[1]
+    }
+    lastMonthyInYearIndices <- ifelse(januaryIndices + 11 < nColumns, januaryIndices + 11, nColumns)
+    years <- as.numeric(year) - c((length(januaryIndices) - 1):0)
+  }
+  
+  for(column in numericColumns){
+    table[, column] <- as.numeric(table[, column])
+  }
+  
+  if(loadAndSave){
+    finalWorkbook <- openxlsx::loadWorkbook(fileName)
+  }
+  
+  # Clear previous content
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=1,
+                      x=matrix(NA, nrow=nRows+5, ncol=nColumns - numericColumns[1] + 1), colNames=FALSE)
+  openxlsx::removeCellMerge(finalWorkbook, sheet=sheet, cols=numericColumns[1]:nColumns, rows=1:(nRows+5))
+  
+  # Header row parsing
+  parsedColNames <- data.frame(matrix(nrow=1, ncol=nColumns))
+  parsedColNames[1, ] <- sapply(colNames, FUN=function(colName){
+    strsplit(colName, split="\\.")[[1]][1]
+  })
+  
+  if(lastAnnualColumn >= numericColumns[1]){
+    for(column in numericColumns[1]:lastAnnualColumn){
+      parsedColNames[, column] <- as.numeric(parsedColNames[, column])
+    }
+  }
+  
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=5,
+                      x=parsedColNames[, numericColumns], colNames=FALSE)
+  
+  # Main data
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=6, x=table, colNames=FALSE)
+  
+  # Table title + headers
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=1, startRow=1, x=paste0("Table ", tableNumber), colNames=FALSE)
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=1, x=tableName, colNames=FALSE)
+  safeMerge(finalWorkbook, sheet, 1, 1, numericColumns[1], nColumns)
+  
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=2, x="[VT Million]", colNames=FALSE)
+  safeMerge(finalWorkbook, sheet, 2, 2, numericColumns[1], nColumns)
+  
+  openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=numericColumns[1], startRow=3, x="ANNUALLY", colNames=FALSE)
+  if(lastAnnualColumn >= numericColumns[1]){
+    safeMerge(finalWorkbook, sheet, 3, 4, numericColumns[1], lastAnnualColumn)
+  }
+  
+  # MONTHLY section
+  if(length(januaryIndices) > 0){
+    openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=januaryIndices[1], startRow=3, x="MONTHLY", colNames=FALSE)
+    safeMerge(finalWorkbook, sheet, 3, 3, lastAnnualColumn + 1, nColumns)
+    for(index in seq_along(years)){
+      openxlsx::writeData(finalWorkbook, sheet=sheet, startCol=januaryIndices[index], startRow=4, x=years[index], colNames=FALSE)
+      safeMerge(finalWorkbook, sheet, 4, 4, januaryIndices[index], lastMonthyInYearIndices[index])
+    }
+  } else {
+    safeMerge(finalWorkbook, sheet, 3, 3, numericColumns[1], nColumns)
+  }
+  
+  # Save or return workbook
+  if(loadAndSave){
+    openxlsx::saveWorkbook(finalWorkbook, file=fileName, overwrite=TRUE)
+  } else {
+    return(finalWorkbook)
+  }
+}
+
+
+
+
 
 #' Extract the subset codes from the original 8 digit HS codes or 6 digit SITC codes
 #' 

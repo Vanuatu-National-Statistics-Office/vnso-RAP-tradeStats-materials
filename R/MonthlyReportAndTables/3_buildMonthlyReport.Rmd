@@ -56,7 +56,7 @@ xAxisText <- list(
 #TODO: Consider whether all these input files are necessary, could fewer files be read and these files generated internally?
 
 # Load the processed trade statistics for month of interest
-processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-03-22.csv"))
+processedTradeStats <- read.csv(file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-12-24.csv"))
 processedTradeStats$Reg..Date <- as.Date(processedTradeStats$Reg..Date, format = "%d/%m/%Y")
 processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
 
@@ -128,7 +128,7 @@ processedRawCommodities$HS.Code <- sapply(processedRawCommodities$HS.Code, FUN=p
 importSubstitutionMerged <- merge(processedTradeStats, importSubstitution, by="HS.Code", all.x=TRUE)
 
 # Create subset of imports that are targeted by DARD
-importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000, 4071, 7100), ]
+importOnlyDataFrame <- importSubstitutionMerged[importSubstitutionMerged$CP4 %in% c(4000,  7100), ]
 importSubstitutionDataFrame <- importOnlyDataFrame[is.na(importOnlyDataFrame$Import.Substitution) == FALSE, ]
 
 # Information to be inserted as text into the report for DARD
@@ -138,7 +138,7 @@ dardValue <- importSubstitutionDataFrame %>%
 
 # Calculate NSDP indicator
 estimateENV1.3.1<- sum(importSubstitutionDataFrame$Stat..Value)
-indicatorENV1.3.1<- (sum(importSubstitutionDataFrame$Stat..Value)/1000000)
+indicatorENV1.3.1<- round((sum(importSubstitutionDataFrame$Stat..Value)/1000000))
 
 # Insert values into table
 ENV1.3.1 <- data.frame("Value of imports of food and products targeted by DARD"= indicatorENV1.3.1)
@@ -165,7 +165,7 @@ msgExports<- (msgExportsImports/1000000)
 
 # Proxy indicator calculated for NSDP indicator ECO 1.5.2 by combining imports and proxy exports
 estimateECO1.5.2<- importTradeAgreementValue + exportTradeAgreementValue
-indicatorECO1.5.2<- ((importTradeAgreementValue + exportTradeAgreementValue)/1000000)
+indicatorECO1.5.2<- round(((importTradeAgreementValue + exportTradeAgreementValue)/1000000))
 
 # Insert values into table
 ECO1.5.2 <- data.frame("Trade by Trade Agreement Value"= indicatorECO1.5.2)
@@ -206,7 +206,7 @@ exportMajorPartnerCountry <- buildRawSummaryTable(processedTradeStats, codesCP4,
 totalMajorPartnerCountryExportValue<- exportMajorPartnerCountry$Total
 
 # Define the CP4 codes need for Imports table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "IMPORT.COUNTRY"
@@ -239,7 +239,7 @@ totalMajorPartnerCountryImportValue<- importMajorPartnerCountry$Total
 
 # Indicator calculated for NSDP indicator ECO 1.5.3 by subtracting total imports from exports 
 estimateECO1.5.3<- totalMajorPartnerCountryExportValue - totalMajorPartnerCountryImportValue
-indicatorECO1.5.3 <- ((totalMajorPartnerCountryExportValue - totalMajorPartnerCountryImportValue)/1000000)
+indicatorECO1.5.3 <- round(((totalMajorPartnerCountryExportValue - totalMajorPartnerCountryImportValue)/1000000))
 
 # Insert values into table
 ECO1.5.3 <- data.frame("Balance of Trade by Major Partner Countries"= indicatorECO1.5.3)
@@ -257,7 +257,7 @@ mostRecentGrossDomesticProduct <- timeSeriesGrossDomesticProduct[nrow(timeSeries
 tradeAgreementGDPProportion<- (estimateECO1.5.2/mostRecentGrossDomesticProduct)*100
 
 # Insert values into table as a percentage to 2 decimal places
-indicatorECO1.6.2<- round(tradeAgreementGDPProportion, digits = 2)
+indicatorECO1.6.2<- round(tradeAgreementGDPProportion)
 ECO1.6.2<- data.frame("Value of Trade Agreement as Proportion of GDP"= indicatorECO1.6.2)
 
 
@@ -287,7 +287,7 @@ aggregatedExportCommodities<- (majorExportCommodities/1000000)
 
 # Proxy indicator for NSDP ECO 1.7.1
 estimateECO1.7.1<- majorExportCommodities$Total
-indicatorECO1.7.1<- ((majorExportCommodities$Total)/1000000)
+indicatorECO1.7.1<- round(((majorExportCommodities$Total)/1000000))
 ECO1.7.1 <- data.frame("Level of production of major commodities to include Cocoa and Copra"= indicatorECO1.7.1)
 
 
@@ -311,7 +311,7 @@ raw<- processedToRawDataFrame[2,2]
 processedRawProportion<- (processed/raw)
 
 # Insert values into table as a percentage to 2 decimal places
-indicatorECO4.3.2<- round(processedRawProportion$total, digits = 2)
+indicatorECO4.3.2<- round(processedRawProportion$total)
 ECO4.3.2<- data.frame("Ratio of Processed Export Commodities"= indicatorECO4.3.2)
 
 ```
@@ -324,27 +324,24 @@ nsdpIndicators <- data.frame(
   "Policy Objectives"=c("ENV 1.3: Reduce reliance on food imports through import substitution for food products that can be produced domestically",
                         "ECO 1.5: Increase access to markets for Vanuatu exports",
                         "ECO 1.5: Increase access to markets for Vanuatu exports",
-                        "ECO 1.6: Require all new trade agreements to demonstrate tangible benefits in the national interest",
                         "ECO 1.7: Stimulate economic diversification to spread the benefits of growth and increase economic stability",
                         "ECO 4.3: Increase production and processing of niche commodities, and value addition to commodities in which Vanuatu enjoys a comparative advantage"),
   "SMART Indicators"=c("ENV 1.3.1 Total annual volume of imports of food and products targeted by DARD as those that can be produced domestically (including ‘value-added products)",
                        "ECO 1.5.2 Trade by trade agreement (value)",
                        "ECO 1.5.3 Balance of trade by major partner countries",
-                       "ECO 1.6.2 Total estimated value of trade agreement as proportion of GDP",
                        "ECO 1.7.1 Level of production of major commodities to include cocoa and copra",
                        "ECO 4.3.2 Ratio of processed export commodities (including coconut, kava, cocoa, coffee) to raw exports"),
   "Indicator Value"= c(
     indicatorENV1.3.1,
     indicatorECO1.5.2,
     indicatorECO1.5.3,
-    indicatorECO1.6.2,
     indicatorECO1.7.1,
     indicatorECO4.3.2
   ),check.names=FALSE, stringsAsFactors=FALSE)
 
 
 # Round the indicator values
-nsdpIndicators$`Indicator Value` <- round(nsdpIndicators$`Indicator Value`, digits = 2)
+nsdpIndicators$`Indicator Value` <- round(nsdpIndicators$`Indicator Value`)
 
 # Initiailise a flextable object for NSDP table
 indicatorsTable <- flextable(nsdpIndicators)
@@ -421,7 +418,7 @@ totalPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4
 
 # Calculate the Imports by Major Partner Countries
 # Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 # Define the categories used for each column
 categoryColumn <- "IMPORT.COUNTRY"
 columnCategories <- list(
@@ -511,12 +508,37 @@ columnCategories <- list(
 totalPacificCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4, categoryColumn, columnCategories)
 
 # Select top five Pacific Islands 
-orderedtotalPacificCountryExports <- head(sort(totalPacificCountryExports, decreasing= TRUE))
-top5PacificCountryExports<- orderedtotalPacificCountryExports %>% select(2:6)
+#orderedtotalPacificCountryExports <- head(sort(totalPacificCountryExports, decreasing= TRUE))
+#top5PacificCountryExports<- orderedtotalPacificCountryExports %>% select(2:6)
+
+# Convert the dataset to a long format to facilitate sorting
+data_long <- totalPacificCountryExports %>%
+  pivot_longer(
+    cols = -Total,
+    names_to = "Country",
+    values_to = "Exports"
+  )
+
+# Remove the 'Total' column
+data <- data_long %>%
+  select(-Total)
+
+# Remove rows where export values are 0
+data_long_2 <- data %>%
+  filter(Exports != 0)
+
+# Sort the data by Exports in descending order and select the top 5
+top_five_exports <- data_long_2 %>%
+  arrange(desc(Exports)) %>%
+  head(5)
+
+# Convert the top five data back to wide format
+top_five_wide <- top_five_exports %>%
+  pivot_wider(names_from = Country, values_from = Exports)
 
 ## Calculate imports 
 # Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "IMPORT.COUNTRY"
@@ -556,6 +578,7 @@ pacificCountryTotalsLong <- pacificCountryTotals %>%
   filter(Country != "Total" & Balance != "0") %>%
   pivot_longer(cols = c("Imports", "Exports", "Balance"), 
                names_to = "Type", values_to = "Value")
+write.csv(pacificCountryTotals, "pacificTradeBalance.csv")
 
 # Create a bar chart
 ggplot(pacificCountryTotalsLong, aes(x=Country, y= (Value/1000000),  fill=Type)) +
@@ -580,7 +603,7 @@ Total Trade Balance of Pacific Islands excluding Melanesia, Australia and New Ze
 
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
-  mutate(CommodityType = case_when(CP4 %in% c(4000, 4071, 7100) ~ "IMPORT",
+  mutate(CommodityType = case_when(CP4 %in% c(4000,  7100) ~ "IMPORT",
                                    CP4 %in% c(1000) ~ "EXPORT",
                                    CP4 %in% c(3071) ~ "REEXPORT"))
 
@@ -638,7 +661,7 @@ ggplot(data = tradeBalanceByCountryOther[c(1:5, (nRows-4):nRows), ],
 # Commodities (imports and exports) included in Trade Agreements 
 importTradeAgreement <- processedTradeStats[is.na(processedTradeStats$PRF) == FALSE & processedTradeStats$PRF %in% c("MSG"), ]
 exportTradeAgreement<- allMSGCountryExports[is.na(allMSGCountryExports$Not.Included.in.MSG) == TRUE, ]
-write.csv(exportTradeAgreement, "exportTrade.csv")
+write.csv(exportTradeAgreement, "tradeByTradeAgreement.csv")
 
 
 # Calculate exports by SITC to MSG countries
@@ -676,7 +699,7 @@ tradeByTradeAgreement <- tradeByTradeAgreement %>%
   adorn_totals("row", name = "Grand Total", fill = NA)
 
 # Divide by 1,000,000
-tradeByTradeAgreement[, -1] <- round(tradeByTradeAgreement[, -1] / 1000000, digits = 2)
+tradeByTradeAgreement[, -1] <- round(tradeByTradeAgreement[, -1] / 1000000)
 
 # Initiailise a flextable object for NSDP table
 tradeByTradeTable <- flextable(tradeByTradeAgreement)
@@ -779,7 +802,7 @@ The main country of destination for Beef was Papua New Guinea (VT 7.52 million).
 ```{r new major exports, fig.height=1.75}
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
-  mutate(CommodityType = case_when(CP4 %in% c(4000, 4071, 7100) ~ "IMPORT",
+  mutate(CommodityType = case_when(CP4 %in% c(4000,  7100) ~ "IMPORT",
                                    CP4 %in% c(1000) ~ "EXPORT",
                                    CP4 %in% c(3071) ~ "REEXPORT"))
 
@@ -804,6 +827,7 @@ orderedPrincipleExportType <- otherPrincipleExports %>%
 # Select only exports falling into the OTHER or NA category
 exportsOtherandNA <- orderedPrincipleExportType %>%
   filter(principleExportCategory %in% c("Other products", "NA")) 
+write.csv(exportsOtherandNA, "newMajorExports.csv", row.names = FALSE)
 
 # Plot the top five exports
 exportsOtherandNA %>%
@@ -833,7 +857,7 @@ majorImportsValue <- majorMonthlyImports %>%
   filter(Month == currentMonth)
 
 # Calculate value of commodities for current month
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 categoryColumn <- "Principle.Imports"
 columnCategories <- list(
   "Alcoholic.Drinks"=c("Alcoholic drinks"),
@@ -860,6 +884,7 @@ majorImportCommoditiesValues <- majorImportCommoditiesValues %>% select(-Total)
 majorImportCommoditiesValues$Year<- as.character(majorExportCommoditiesValues$Year)
 totalMajorImports<- rbind(majorImportsValue, majorImportCommoditiesValues)
 
+totalMajorImports$Petroleum.Oils.and.oils.obtained.from.bituminous.minerals <- as.numeric(totalMajorImports$Petroleum.Oils.and.oils.obtained.from.bituminous.minerals)
 # Convert the table to long format
 totalMajorImports <- totalMajorImports %>% 
   pivot_longer(cols = colnames(totalMajorImports)[-c(1, 2)])
@@ -894,7 +919,7 @@ The main country of origin for Alcoholic Drinks is France (VT 26.24 million). Th
 ```{r new major imports, fig.height = 1.8}
 # Add column to tell us whether each row is import or export
 processedTradeStats <- processedTradeStats %>%
-  mutate(CommodityType = case_when(CP4 %in% c(4000, 4071, 7100) ~ "IMPORT",
+  mutate(CommodityType = case_when(CP4 %in% c(4000,  7100) ~ "IMPORT",
                                    CP4 %in% c(1000) ~ "EXPORT",
                                    CP4 %in% c(3071) ~ "REEXPORT"))
 
@@ -917,6 +942,7 @@ orderedPrincipleImportType <- otherPrincipleImports %>%
 # Select only exports falling into the OTHER category
 importsOther <- orderedPrincipleImportType %>%
   filter(principleImportCategory %in% c("Other Imports"))
+write.csv(importsOther, "newMajorImports.csv", row.names = FALSE)
 
 # Plot the top five exports
 importsOther %>%
@@ -951,9 +977,9 @@ mergedProductsRelatedNCDs<- merge(processedTradeStats, productsRelatedHealth, by
 
 # Create data-frame for all unhealthy imports for current month
 unhealthlyCommodities <- mergedProductsRelatedNCDs[is.na(mergedProductsRelatedNCDs$Unhealthy.Focus.Food.Category) == FALSE, ]
-unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000, 4071, 7100), ]
+unhealthyImportCommodities<- unhealthlyCommodities[unhealthlyCommodities$CP4 %in% c(4000,  7100), ]
 
-write.csv(unhealthyImportCommodities, "unhealthy.csv")
+write.csv(unhealthyImportCommodities, "unhealthyImports.csv", row.names = FALSE)
 
 # Calculate value of Food Sub-Category for current month
 foodSubCategoryValue <- unhealthyImportCommodities %>%
@@ -1003,7 +1029,7 @@ Total value of Bakery Products is VT 63.79 million and are mainly imported from 
 importsSubstitutionChickenFish$HS.Code <- sapply(importsSubstitutionChickenFish$HS.Code, FUN=padWithZeros, "HS")
 mergedImportSubstitutions<- merge(processedTradeStats, importsSubstitutionChickenFish, by="HS.Code", all.x=TRUE) # this isn't working properly jumping from 9877 obs to 9878
 
-write.csv(mergedImportSubstitutions, "chicken.csv")
+write.csv(mergedImportSubstitutions, "importSubstitution.csv", row.names = FALSE)
 
 # Calculate value of import substitutions for current month
 chickenFishCategoryValue <- mergedImportSubstitutions %>%

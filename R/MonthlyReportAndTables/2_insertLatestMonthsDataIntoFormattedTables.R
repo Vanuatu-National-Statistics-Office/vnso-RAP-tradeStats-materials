@@ -1,10 +1,10 @@
 #### Preparation ####
 
-#processedTradeStatsFile <- file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-03-22.csv")
-#processedTradeStats <- read.csv(processedTradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
-#processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
-#processedTradeStats$HS.Code_6<- sapply(processedTradeStats$HS.Code_6, FUN=padWithZeros, "HS", 6)
-#processedTradeStats$HS.Code_2<- sapply(processedTradeStats$HS.Code_2, FUN=padWithZeros, "HS", 2)
+processedTradeStatsFile <- file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31-12-24.csv")
+processedTradeStats <- read.csv(processedTradeStatsFile, header=TRUE, na.strings=c("","NA", "NULL", "null")) #replace blank cells with missing values-NA
+processedTradeStats$HS.Code<- sapply(processedTradeStats$HS.Code, FUN=padWithZeros, "HS")
+processedTradeStats$HS.Code_6<- sapply(processedTradeStats$HS.Code_6, FUN=padWithZeros, "HS", 6)
+processedTradeStats$HS.Code_2<- sapply(processedTradeStats$HS.Code_2, FUN=padWithZeros, "HS", 2)
 
 # Load the required libraries
 library(openxlsx) # Reading and writing excel formatted data
@@ -25,7 +25,7 @@ month <- format(date, "%B")
 year <- format(date, "%Y")
 
 # Note the excel workbook containing the final formatted tables
-finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_28-02-22_WORKING.xlsx")
+finalWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_30-11-24_WORKING.xlsx")
 
 # Load the excel file
 finalWorkbook <- openxlsx::loadWorkbook(finalWorkbookFileName)
@@ -41,7 +41,7 @@ cat("Finished loading excel file with formatted tables.\n")
 exports <- sum(processedTradeStats[processedTradeStats$CP4 == 1000, "Stat..Value"], na.rm=TRUE) # Added na.rm in case NAs introduced at later date
 reExports <- sum(processedTradeStats[processedTradeStats$CP4 == 3071, "Stat..Value"], na.rm=TRUE)
 totalExports <- exports + reExports
-imports <- sum(processedTradeStats[processedTradeStats$CP4 %in% c(4000, 4071, 7100), "Stat..Value"], na.rm=TRUE)
+imports <- sum(processedTradeStats[processedTradeStats$CP4 %in% c(4000,  7100), "Stat..Value"], na.rm=TRUE)
 balance <- totalExports - imports
 
 # Insert values into table
@@ -68,7 +68,7 @@ cat("Finished formatting Table 1: Balance of Trade.\n")
 
 ## Getting latest statistics ##
 # Define the CP4 codes need for table (Imports)
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "HS.Code_2"
@@ -334,7 +334,7 @@ cat("Finished formatting Table 6: Principle Exports.\n")
 # Calculate the principle Imports 
 
 # Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "Principle.Imports"
@@ -459,7 +459,7 @@ totalPartnerCountryExports <- buildRawSummaryTable(processedTradeStats, codesCP4
 # Calculate the Imports by Major Partner Countries
 
 # Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "IMPORT.COUNTRY"
@@ -552,7 +552,7 @@ totalPartnerRegionExports <- buildRawSummaryTable(processedTradeStats, codesCP4,
 # Calculate the Imports by Region
 
 # Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "IMPORT.REGION"
@@ -638,7 +638,7 @@ totalTransportExports <- buildRawSummaryTable(processedTradeStats, codesCP4, cat
 
 # Calculate Import Trade by Mode of Transport
 # Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "Mode.of.Transport"
@@ -717,7 +717,7 @@ tradeAgreementValues <- data.frame("Fiji Exports"=fijiExports, "Fiji Imports"=fi
                                    "Papa New Guinea Imports"=papaNewGuineaImports, "Papa New Guinea Balance"=papaNewGuineaBalance, "Solomon Island Exports"=solomonIslandExports, "Solomon Island Imports"=solomonIslandImports, 
                                    "Solomon Island Balance"=solomonIslandBalance)
 
-write.csv(tradeAgreementValues, "tradeAgreementValues.csv")
+write.csv(tradeAgreementValues, "tradeByTradeAgreementValues.csv")
 
 # Write the MSG trade stats values from current month into table (note that no historic data in Table 11 - so all values are overwritten)
 #openxlsx::writeData(finalWorkbook, sheet="11_TradeAg", startCol=2, startRow=3, x=templateMSGTable, colNames=FALSE)
@@ -758,14 +758,18 @@ totalExportsbySITCTable <- read.xlsx(finalWorkbookFileName, sheet="12_ExportsbyS
 # Remove empty columns at end
 totalExportsbySITCTable <- removeEmptyColumnsAtEnd(totalExportsbySITCTable)
 
+colnames(totalExportsbySITCTable)[1] <- 'SITC_1'
+colnames(totalExportsbySITCTable)[2] <- 'SITC.description'
 # Add the latest month's statistics
 totalExportsbySITCTable <- updateTableByCommodity(totalExportsbySITCTable, month, year, 
                                                   newStatistics=totalExportsbySITC / 1000000, 
                                                   numericColumns=3:ncol(totalExportsbySITCTable))
 
+totalExportsbySITCTable[[1]] <- as.character(totalExportsbySITCTable[[1]])
+
 # Insert the updated table back into the formatted excel sheet
 if(is.null(totalExportsbySITCTable) == FALSE){
-  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable(finalWorkbookFileName, sheet="12_ExportsbySITC", table=totalExportsbySITCTable, year=year,
+  finalWorkbook <- insertUpdatedTableByCommodityAsFormattedTable_b(finalWorkbookFileName, sheet="12_ExportsbySITC", table=totalExportsbySITCTable, year=year,
                                                 tableNumber="12", tableName="EXPORTS BY SITC", boldRows=c(16), nRowsInNotes=3,
                                                 numericColumns=3:ncol(totalExportsbySITCTable),
                                                 loadAndSave=FALSE, finalWorkbook=finalWorkbook)
@@ -780,7 +784,7 @@ cat("Finished formatting Table 12: Exports by SITC.\n")
 # Calculate Exports by SITC 
 
 # Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "SITC_1"
@@ -829,7 +833,7 @@ cat("Finished formatting Table 13: Imports by SITC.\n")
 # Calculate Retained imports by BEC 
 
 # Define the CP4 codes need for table
-codesCP4 <- c(4000, 4071, 7100)
+codesCP4 <- c(4000,  7100)
 
 # Define the categories used for each column
 categoryColumn <- "BEC4"
@@ -865,7 +869,7 @@ becImportsDataFrame <- buildRawSummaryTable(processedTradeStats, codesCP4, categ
 #### Table 15: Imports of Dietary Risk Factors for Noncommunicable Diseases ####
 
 # Create subset of imports
-importsOnly <- processedTradeStats[processedTradeStats$CP4 %in% c(4000, 4071, 7100), ]
+importsOnly <- processedTradeStats[processedTradeStats$CP4 %in% c(4000,  7100), ]
 
 # Merge unhealthy imports with the processed data-set
 ncdFile <- file.path(openDataFolder, "OPN_FINAL_ASY_UnhealthyCommoditiesClassifications_31-01-20.csv")
@@ -881,7 +885,7 @@ foodSubCategoryValue <- unhealthlyCommodities %>%
   group_by(Unhealthy.Focus.Food.Category, Food.sub.category, Product, Year, Month) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") 
 
-write.csv(foodSubCategoryValue, "foodSubCategoryValue.csv")
+write.csv(foodSubCategoryValue, "dietaryRiskFactorsNCD.csv", row.names = FALSE)
 
 
 #### Table 16: Imports Targeted by the Department of Agriculture and Rural Development ####
@@ -900,7 +904,7 @@ dardCategoryValue <- dardCommodities %>%
   group_by(Import.Substitution, Year, Month) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") 
 
-write.csv(dardCategoryValue, "dardCategoryValue.csv")
+write.csv(dardCategoryValue, "dardValue.csv", row.names = FALSE)
 
 
 #### Table 17: Imports that can Potentially be Produced Domestically ####
@@ -919,13 +923,13 @@ subCategoryValue <- subCommodities %>%
   group_by(Livestock.Substitution, Year, Month) %>%
   summarise(total = sum(Stat..Value), .groups = "drop") 
 
-write.csv(subCategoryValue, "subCategoryValue.csv")
+write.csv(subCategoryValue, "importSubstitutionValue.csv")
 
 
 #### Finish ####
 
 # Save the changes to the excel file
-updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-03-22_WORKING.xlsx")
+updatedWorkbookFileName <- file.path(outputsFolder, "SEC_FINAL_MAN_FinalTradeStatisticsTables_31-12-25_WORKING.xlsx")
 openxlsx::saveWorkbook(finalWorkbook, file=updatedWorkbookFileName, overwrite=TRUE)
 
 # Print progress for finish
